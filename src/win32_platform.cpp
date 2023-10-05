@@ -50,8 +50,8 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 void Win32Platform::Initialize() {
     window.Initialize(800, 600);
     SetWindowLongPtrA(window.hwnd, GWLP_USERDATA, (LONG_PTR)this);
+    ShowWindow(window.hwnd, SW_SHOWNORMAL);
     running = true;
-
 }
 
 void Win32Platform::Terminate()  {

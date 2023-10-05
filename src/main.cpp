@@ -7,10 +7,6 @@ int main() {
     Platform *platform = PlatformSelector::Get();
     platform->Initialize();
 
-    HWND window = *((HWND *)platform->GetWindow()->GetOsWindow());
-
-    ShowWindow(window, SW_SHOWNORMAL);
-
     Input *input = platform->GetInput();
     
     while(platform->IsRunning()) {
