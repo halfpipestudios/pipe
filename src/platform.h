@@ -25,6 +25,7 @@ struct Platform {
     virtual void PollEvents() = 0;
     
     // NOTE: memory interface
+    virtual u64 GetPageSize() = 0;
     virtual void *MemoryReserve(u64 size) = 0;
     virtual void MemoryCommit(void *ptr, u64 size) = 0;
     virtual void *MemoryReserveAndCommit(u64 size) = 0;

@@ -104,7 +104,6 @@ void Win32Platform::FatalError() {
     PostQuitMessage(1);
 }
 
-
 void *Win32Platform::MemoryReserve(u64 size) {
     ASSERT((size & (GetPageSize() - 1)) == 0);
     void *result = VirtualAlloc(0, size, MEM_RESERVE, PAGE_READWRITE);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "platform_selector.h"
+#include "memory.h"
 
 Platform *gPlatform = nullptr;
 
@@ -8,35 +9,9 @@ int main() {
     
     gPlatform = PlatformSelector::Get();
     gPlatform->Initialize();
-
+    
     Input *input = gPlatform->GetInput();
     
-    u64 pageSize = 4096;
-
-    void *memory = gPlatform->MemoryReserve(pageSize*2);
-    gPlatform->MemoryCommit(memory, pageSize);
-    gPlatform->MemoryCommit((u8 *)memory+pageSize, pageSize);
-    
-    u32 *array = (u32 *)memory;
-    for(u32 i = 0; i < 10; ++i) {
-        array[i] = i;
-    }
-
-    for(u32 i = 0; i < 10; ++i) {
-        printf("i) %d\n", array[i]);
-    }
-
-    array = (u32 *)((u8 *)memory + pageSize);
-    for(u32 i = 0; i < 10; ++i) {
-        array[i] = i;
-    }
-
-    for(u32 i = 0; i < 10; ++i) {
-        printf("i) %d\n", array[i]);
-    }
-
-    gPlatform->MemoryRelease(memory, pageSize*2);
-
     while(gPlatform->IsRunning()) {
         gPlatform->PollEvents();
 

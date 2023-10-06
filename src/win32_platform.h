@@ -30,6 +30,7 @@ struct Win32Platform : public Platform {
     bool IsRunning() override;
 
     // NOTE: memory interface
+    u64 GetPageSize();
     void *MemoryReserve(u64 size);
     void MemoryCommit(void *ptr, u64 size);
     void *MemoryReserveAndCommit(u64 size);
@@ -42,7 +43,6 @@ struct Win32Platform : public Platform {
 
 private:
     SYSTEM_INFO systemInfo;
-    u64 GetPageSize();
     void FatalError();
 
 };
