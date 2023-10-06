@@ -1,4 +1,5 @@
 #include "win32_platform.h"
+#include <stdio.h>
 
 static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
@@ -52,11 +53,16 @@ void Win32Platform::Initialize() {
     SetWindowLongPtrA(window.hwnd, GWLP_USERDATA, (LONG_PTR)this);
     ShowWindow(window.hwnd, SW_SHOWNORMAL);
     running = true;
+    
+    GetSystemInfo(&systemInfo);
+    ASSERT(IS_POWER_OF_TWO(GetPageSize()));
 }
 
 void Win32Platform::Terminate()  {
     window.Terminate();
 }
+
+// NOTE: window interface 
 
 Window *Win32Platform::GetWindow() {
     return (Window *)&window;
@@ -81,6 +87,68 @@ void Win32Platform::PollEvents() {
     }
 }
 
+// NOTE: memory interface
+
+u64 Win32Platform::GetPageSize() {
+    return systemInfo.dwPageSize;
+}
+
+#define WIN32_ERROR_MESSAGE_MAX_SIZE 1024
+void Win32Platform::FatalError() {
+    char message[WIN32_ERROR_MESSAGE_MAX_SIZE];
+    DWORD error = GetLastError();
+    DWORD size = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS , 
+        0, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), message, WIN32_ERROR_MESSAGE_MAX_SIZE, 0);
+    // TODO: Log system here!!!!
+    printf("[Win32 platform]: FATAL ERROR! %s\n", message);
+    PostQuitMessage(1);
+}
+
+
+void *Win32Platform::MemoryReserve(u64 size) {
+    ASSERT((size & (GetPageSize() - 1)) == 0);
+    void *result = VirtualAlloc(0, size, MEM_RESERVE, PAGE_READWRITE);
+    if(result == 0) {
+        FatalError();
+    }
+    return result;
+}
+
+void Win32Platform::MemoryCommit(void *ptr, u64 size) {
+    ASSERT(((u64)ptr & (GetPageSize() - 1)) == 0);
+    ASSERT((size & (GetPageSize() - 1)) == 0);
+    void *result = VirtualAlloc(ptr, size, MEM_COMMIT, PAGE_READWRITE);
+    if(result == 0) {
+        FatalError();
+    }
+}
+
+void *Win32Platform::MemoryReserveAndCommit(u64 size) {
+    ASSERT((size & (GetPageSize() - 1)) == 0);
+    void *result = VirtualAlloc(0, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+    if(result == 0) {
+        FatalError();
+    }
+    return result;
+}
+
+void Win32Platform::MemoryDecommit(void *ptr, u64 size) {
+    ASSERT(((u64)ptr & (GetPageSize() - 1)) == 0);
+    ASSERT((size & (GetPageSize() - 1)) == 0);
+    BOOL result = VirtualFree(ptr, size, MEM_DECOMMIT);
+    if(result == 0) {
+        FatalError();
+    }
+}
+
+void Win32Platform::MemoryRelease(void *ptr, u64 size) {
+    ASSERT(((u64)ptr & (GetPageSize() - 1)) == 0);
+    ASSERT((size & (GetPageSize() - 1)) == 0);
+    BOOL result = VirtualFree(ptr, 0, MEM_RELEASE);
+    if(result == 0) {
+        FatalError();
+    }
+}
 
 bool Win32Platform::IsRunning() {
     return running;

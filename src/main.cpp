@@ -2,15 +2,43 @@
 
 #include "platform_selector.h"
 
+Platform *gPlatform = nullptr;
+
 int main() {
     
-    Platform *platform = PlatformSelector::Get();
-    platform->Initialize();
+    gPlatform = PlatformSelector::Get();
+    gPlatform->Initialize();
 
-    Input *input = platform->GetInput();
+    Input *input = gPlatform->GetInput();
     
-    while(platform->IsRunning()) {
-        platform->PollEvents();
+    u64 pageSize = 4096;
+
+    void *memory = gPlatform->MemoryReserve(pageSize*2);
+    gPlatform->MemoryCommit(memory, pageSize);
+    gPlatform->MemoryCommit((u8 *)memory+pageSize, pageSize);
+    
+    u32 *array = (u32 *)memory;
+    for(u32 i = 0; i < 10; ++i) {
+        array[i] = i;
+    }
+
+    for(u32 i = 0; i < 10; ++i) {
+        printf("i) %d\n", array[i]);
+    }
+
+    array = (u32 *)((u8 *)memory + pageSize);
+    for(u32 i = 0; i < 10; ++i) {
+        array[i] = i;
+    }
+
+    for(u32 i = 0; i < 10; ++i) {
+        printf("i) %d\n", array[i]);
+    }
+
+    gPlatform->MemoryRelease(memory, pageSize*2);
+
+    while(gPlatform->IsRunning()) {
+        gPlatform->PollEvents();
 
         if(input->MouseIsPress(MOUSE_BUTTON_L)) printf("mouse down\n");
         if(input->MouseJustPress(MOUSE_BUTTON_M)) printf("mouse just down\n");
@@ -22,7 +50,7 @@ int main() {
         Sleep(0.016);
     }
 
-    platform->Terminate();
+    gPlatform->Terminate();
 
     printf("hello Pipe Engine\n");
 
