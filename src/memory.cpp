@@ -29,11 +29,11 @@ void StackAllocator::Terminate() {
 void *StackAllocator::Alloc(u64 size, u64 align) {
     u64 address = (u64)((u8 *)this->memory + this->used);
     u64 alignAddress = (address + (align - 1)) & ~(align - 1);
-    u64 useForAlign = (alignAddress - address);
+    u64 alignSize = (alignAddress - address);
     
-    ASSERT((this->used + useForAlign + size) <= this->size);
+    ASSERT((this->used + alignSize + size) <= this->size);
     
-    this->used += useForAlign + size;
+    this->used += alignSize + size;
     return (void *)alignAddress;
 }
 
