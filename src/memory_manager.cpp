@@ -39,14 +39,23 @@ void *MemoryStorage::AllocTemporalMemory(u64 size, u64 align) {
 
 void MemoryStorage::BeginTemporalMemory() {
     u8 *last_bottom = memory.bottom;
+#if 0
     u64 *mark = (u64 *)memory.AllocBottom(sizeof(u64), 8);
+#else
+    u64 *mark = (u64 *)memory.AllocBottom(sizeof(u64), 1);
+
+#endif
     *mark = (u64)last_bottom;
     lastMark = (u64)mark;
 }
 
 void MemoryStorage::EndTemporalMemory() {
     memory.bottom = (u8 *)lastMark;
+#if 0
     lastMark = (((u64)memory.bottom + 7) & ~7);
+#else
+    lastMark = (u64)memory.bottom;
+#endif
 }
 
 void *MemoryStorage::AllocFrameMemory(u64 size, u64 align) {
