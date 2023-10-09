@@ -42,12 +42,11 @@ void MemoryStorage::BeginTemporalMemory() {
     u64 *mark = (u64 *)memory.AllocBottom(sizeof(u64), 8);
     *mark = (u64)last_bottom;
     lastMark = (u64)mark;
-
 }
 
 void MemoryStorage::EndTemporalMemory() {
     memory.bottom = (u8 *)lastMark;
-    lastMark = *((u64 *)memory.bottom);
+    lastMark = (((u64)memory.bottom + 7) & ~7);
 }
 
 void *MemoryStorage::AllocFrameMemory(u64 size, u64 align) {
