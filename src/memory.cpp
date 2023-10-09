@@ -69,19 +69,20 @@ void DoubleEndedStackAllocator::Terminate() {
 }
 
 void *DoubleEndedStackAllocator::AllocTop(u64 size, u64 align) {
-    u64 alignAddress = ((u64)this->top) & ~(align - 1);
-    u64 alignSize = (u64)this->top - alignAddress;
+    u64 address = ((u64)this->top - (size - 1));
+    u64 alignAddress = address & ~(align - 1);
+    u64 alignSize = address - alignAddress;
     ASSERT((size + alignSize) <= RemainingSize());
-    
-    this->top = (u8 *)(alignAddress - size);
+    this->top = (u8 *)(alignAddress - 1);
     return (void *)alignAddress;
+    
 }
 
 void *DoubleEndedStackAllocator::AllocBottom(u64 size, u64 align) {
-    u64 alignAddress = (((u64)this->bottom) + (align - 1)) & ~(align - 1);
-    u64 alignSize = alignAddress - (u64)this->bottom;
+    u64 address = (u64)this->bottom;
+    u64 alignAddress = (address + (align - 1)) & ~(align - 1);
+    u64 alignSize = alignAddress - address;
     ASSERT((size + alignSize) <= RemainingSize());
-    
     this->bottom = (u8 *)(alignAddress + size);
     return (void *)alignAddress;
 }

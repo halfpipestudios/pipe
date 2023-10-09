@@ -12,6 +12,22 @@ int main() {
     
     Input *input = gPlatform->GetInput();
     
+    DoubleEndedStackAllocator allocator;
+    
+    allocator.Initialize(1024);
+    printf("%lld\n", allocator.RemainingSize());
+    
+    allocator.AllocBottom(512, 8);
+    printf("%lld\n", allocator.RemainingSize());
+
+    allocator.AllocTop(256, 8);
+    printf("%lld\n", allocator.RemainingSize());
+
+    allocator.AllocTop(256, 8);
+    printf("%lld\n", allocator.RemainingSize());
+
+    allocator.Terminate();
+
     while(gPlatform->IsRunning()) {
         gPlatform->PollEvents();
 

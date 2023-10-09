@@ -28,8 +28,8 @@ struct DoubleEndedStackAllocator {
     void Initialize(u64 size);
     void Terminate();
     
-    void *AllocTop(u64 size, u64 align);
     void *AllocBottom(u64 size, u64 align);
+    void *AllocTop(u64 size, u64 align);
 
     void FreeTop();
     void FreeBottom();
