@@ -1,49 +1,27 @@
 #include <stdio.h>
 
-#include "platform_selector.h"
-#include "memory.h"
-
-Platform *gPlatform = nullptr;
+#include "platform_manager.h"
+#include "memory_manager.h"
 
 int main() {
     
-    gPlatform = PlatformSelector::Get();
-    gPlatform->Initialize();
-    
-    Input *input = gPlatform->GetInput();
-    
-    DoubleEndedStackAllocator allocator;
-    
-    allocator.Initialize(1024);
-    printf("%lld\n", allocator.RemainingSize());
-    
-    allocator.AllocBottom(512, 8);
-    printf("%lld\n", allocator.RemainingSize());
+    PlatformManager::Get()->Initialize();
+    MemoryManager::Get()->Initialize();
 
-    allocator.AllocTop(256, 8);
-    printf("%lld\n", allocator.RemainingSize());
+    Input *input = PlatformManager::Get()->GetInput();
 
-    allocator.AllocTop(256, 8);
-    printf("%lld\n", allocator.RemainingSize());
-
-    allocator.Terminate();
-
-    while(gPlatform->IsRunning()) {
-        gPlatform->PollEvents();
-
-        if(input->MouseIsPress(MOUSE_BUTTON_L)) printf("mouse down\n");
-        if(input->MouseJustPress(MOUSE_BUTTON_M)) printf("mouse just down\n");
-        if(input->MouseJustUp(MOUSE_BUTTON_R)) printf("mouse just up\n");
-        if(input->KeyIsPress(KEY_Q)) printf("q down\n");
-        if(input->KeyJustPress(KEY_W)) printf("w just down\n");
-        if(input->KeyJustUp(KEY_E)) printf("e just up\n");
+    while(PlatformManager::Get()->IsRunning()) {
+        
+        PlatformManager::Get()->PollEvents();
+        MemoryManager::Get()->ClearFrameMemory();
 
         Sleep(0.016);
     }
 
-    gPlatform->Terminate();
+    MemoryManager::Get()->Terminate();
+    PlatformManager::Get()->Terminate();
 
-    printf("hello Pipe Engine\n");
+    printf("Pipe Engine Terminate!\n");
 
     return 0;
 }

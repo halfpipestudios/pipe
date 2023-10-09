@@ -1,10 +1,9 @@
-#include "platform.h"
+#include "platform_manager.h"
 #include "memory.h"
 
-extern Platform *gPlatform;
-
 static inline u64 align_size_to_next_page_boundrie(u64 size) {
-    u64 pageSize = gPlatform->GetPageSize();
+    Platform *platform = PlatformManager::Get();
+    u64 pageSize = platform->GetPageSize();
     u64 numberOfPages = (size + (pageSize - 1)) / pageSize;
     u64 totalAllocSize =  numberOfPages*pageSize;
     return totalAllocSize;
@@ -15,24 +14,24 @@ static inline u64 align_size_to_next_page_boundrie(u64 size) {
 /*----------------------------------------------*/
 
 void StackAllocator::Initialize(u64 size) {
+    Platform *platform = PlatformManager::Get();
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    this->memory = gPlatform->MemoryReserveAndCommit(totalAllocSize);
+    this->memory = platform->MemoryReserveAndCommit(totalAllocSize);
     this->used = 0;
     this->size = size;
 }
 
 void StackAllocator::Terminate() {
+    Platform *platform = PlatformManager::Get();
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    gPlatform->MemoryRelease(this->memory, totalAllocSize);
+    platform->MemoryRelease(this->memory, totalAllocSize);
 }
 
 void *StackAllocator::Alloc(u64 size, u64 align) {
     u64 address = (u64)((u8 *)this->memory + this->used);
     u64 alignAddress = (address + (align - 1)) & ~(align - 1);
     u64 alignSize = (alignAddress - address);
-    
     ASSERT((this->used + alignSize + size) <= this->size);
-    
     this->used += alignSize + size;
     return (void *)alignAddress;
 }
@@ -52,8 +51,9 @@ u64 DoubleEndedStackAllocator::RemainingSize() {
 }
 
 void DoubleEndedStackAllocator::Initialize(u64 size) {
+    Platform *platform = PlatformManager::Get();
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    void *memory = gPlatform->MemoryReserveAndCommit(totalAllocSize);
+    void *memory = platform->MemoryReserveAndCommit(totalAllocSize);
     this->size = size;
     
     this->memory_bottom = memory;
@@ -64,8 +64,9 @@ void DoubleEndedStackAllocator::Initialize(u64 size) {
 }
 
 void DoubleEndedStackAllocator::Terminate() {
+    Platform *platform = PlatformManager::Get();
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    gPlatform->MemoryRelease(this->memory_bottom, totalAllocSize);
+    platform->MemoryRelease(this->memory_bottom, totalAllocSize);
 }
 
 void *DoubleEndedStackAllocator::AllocTop(u64 size, u64 align) {
@@ -101,10 +102,12 @@ void DoubleEndedStackAllocator::FreeBottom() {
 
 void PoolAllocator::Initialize(u64 blockSize, u64 numBlocks) {
     ASSERT(blockSize >= sizeof(FreeBlockNode));
+    
+    Platform *platform = PlatformManager::Get();
 
     u64 size = blockSize * numBlocks;
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    this->memory = gPlatform->MemoryReserveAndCommit(totalAllocSize);
+    this->memory = platform->MemoryReserveAndCommit(totalAllocSize);
 
     this->size = size;
     this->blockSize = blockSize;
@@ -121,8 +124,9 @@ void PoolAllocator::Initialize(u64 blockSize, u64 numBlocks) {
 }
 
 void PoolAllocator::Terminate() {
+    Platform *platform = PlatformManager::Get();
     u64 totalAllocSize =  align_size_to_next_page_boundrie(size);
-    gPlatform->MemoryRelease(memory, totalAllocSize);
+    platform->MemoryRelease(memory, totalAllocSize);
     freeList = nullptr;
 }
 

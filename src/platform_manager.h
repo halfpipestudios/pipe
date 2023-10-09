@@ -3,7 +3,7 @@
 
 #include "win32_platform.h"
 
-struct PlatformSelector {
+struct PlatformManager {
     static Platform* Get();
 private:
     static Win32Platform win32;
