@@ -18,9 +18,9 @@ struct MemoryStorage {
     void ClearFrameMemory();
 
 private:  
-    u64 lastMark;
-
     DoubleEndedStackAllocator memory;
+    u64 lastMark;
+    
     StackAllocator frame;
 };
 
