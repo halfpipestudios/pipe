@@ -2,6 +2,7 @@
 
 #include "platform_manager.h"
 #include "memory_manager.h"
+#include "graphics_manager.h"
 
 #include <math.h>
 #include <xaudio2.h>
@@ -263,6 +264,7 @@ int main() {
 
     PlatformManager::Get()->Initialize();
     MemoryManager::Get()->Initialize();
+    GraphicsManager::Get()->Initialize();
 
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -295,10 +297,18 @@ int main() {
         mixVoice->SetOutputMatrix(pMasterVoice, 1, 2, settings.pMatrixCoefficients);
 
         /* -------------------------------------------------------- */
+        GraphicsManager::Get()->ClearColorBuffer(0.5f, 0.0f, 1.0f);
+        GraphicsManager::Get()->ClearDepthStencilBuffer();
 
-        Sleep(millisecondsPerFrame);
+        // TODO: render the game
+
+        GraphicsManager::Get()->Present(1);
+
+
+        //Sleep(millisecondsPerFrame);
     }
 
+    GraphicsManager::Get()->Terminate();
     MemoryManager::Get()->Terminate();
     PlatformManager::Get()->Terminate();
 

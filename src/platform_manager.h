@@ -7,7 +7,7 @@ struct PlatformManager {
     static Platform* Get();
 private:
     static Win32Platform win32;
-    //LinuxPlatform linux
+    //LinuxPlatform linux;
     //MacPlatform mac;
 };
 
