@@ -73,6 +73,43 @@ HRESULT ReadChunkData(HANDLE hFile, void * buffer, DWORD buffersize, DWORD buffe
     return hr;
 }
 
+HRESULT LoadAudioFile(const char *path, WAVEFORMATEXTENSIBLE *wfx, XAUDIO2_BUFFER *buffer) {
+    
+    HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+
+    if(INVALID_HANDLE_VALUE == hFile)
+        return HRESULT_FROM_WIN32(GetLastError());
+
+    if(INVALID_SET_FILE_POINTER == SetFilePointer(hFile, 0, NULL, FILE_BEGIN))
+        return HRESULT_FROM_WIN32( GetLastError());
+
+    DWORD dwChunkSize;
+    DWORD dwChunkPosition;
+    
+    // NOTE: Locate the RIFF chuck
+    FindChunk(hFile, fourccRIFF, dwChunkSize, dwChunkPosition);
+    DWORD filetype;
+    ReadChunkData(hFile, &filetype, sizeof(DWORD), dwChunkPosition);
+    if (filetype != fourccWAVE)
+        return S_FALSE;
+
+    // NOTE: Locate the FMT chuck
+    FindChunk(hFile,fourccFMT, dwChunkSize, dwChunkPosition);
+    ReadChunkData(hFile, wfx, dwChunkSize, dwChunkPosition);
+    
+    // NOTE: Locate the DATA chuck
+    FindChunk(hFile,fourccDATA,dwChunkSize, dwChunkPosition);
+    BYTE * pDataBuffer = new BYTE[dwChunkSize];
+    ReadChunkData(hFile, pDataBuffer, dwChunkSize, dwChunkPosition);
+
+    // NOTE: Populate XAudio2 buffer
+    buffer->AudioBytes = dwChunkSize;
+    buffer->pAudioData = pDataBuffer;
+    buffer->Flags = XAUDIO2_END_OF_STREAM;
+
+    return S_OK;
+}
+
 int main() {
     
     /* ------------------------------ */
@@ -97,52 +134,44 @@ int main() {
 
     printf("XAudio2 initialize perfectly\n");
     
-    // NOTE: Loading audio file
-    
-    WAVEFORMATEXTENSIBLE wfx = {0};
-    XAUDIO2_BUFFER buffer = {0};
-    HANDLE hFile = CreateFileA("./data/Lugia's Song (Original).wav", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    WAVEFORMATEXTENSIBLE ambient_wfx = {0};
+    XAUDIO2_BUFFER ambient_buffer = {0};
+    if(FAILED(hr = LoadAudioFile("./data/Fantasy Sound Library/Ambience_Cave_00.wav", &ambient_wfx, &ambient_buffer)))
+        return hr;
 
-    if(INVALID_HANDLE_VALUE == hFile)
-        return HRESULT_FROM_WIN32(GetLastError());
+    WAVEFORMATEXTENSIBLE spell_wfx = {0};
+    XAUDIO2_BUFFER spell_buffer = {0};
+    if(FAILED(hr = LoadAudioFile("./data/Fantasy Sound Library/Spell_00.wav", &spell_wfx, &spell_buffer)))
+        return hr;
 
-    if(INVALID_SET_FILE_POINTER == SetFilePointer(hFile, 0, NULL, FILE_BEGIN))
-        return HRESULT_FROM_WIN32( GetLastError());
-    
-    printf("Loading audio file\n");
+    WAVEFORMATEXTENSIBLE trap_wfx = {0};
+    XAUDIO2_BUFFER trap_buffer = {0};
+    if(FAILED(hr = LoadAudioFile("./data/Fantasy Sound Library/Trap_00.wav", &trap_wfx, &trap_buffer)))
+        return hr;
 
-    DWORD dwChunkSize;
-    DWORD dwChunkPosition;
-    
-    // NOTE: Locate the RIFF chuck
-    FindChunk(hFile,fourccRIFF,dwChunkSize, dwChunkPosition);
-    DWORD filetype;
-    ReadChunkData(hFile,&filetype,sizeof(DWORD),dwChunkPosition);
-    if (filetype != fourccWAVE)
-        return S_FALSE;
+    // NOTE: Create and mix voice into mix voice
+    IXAudio2SubmixVoice * pSFXSubmixVoice;
+    pXAudio2->CreateSubmixVoice(&pSFXSubmixVoice, 1, 44100, 0, 0, 0, 0);
 
-    // NOTE: Locate the FMT chuck
-    FindChunk(hFile,fourccFMT, dwChunkSize, dwChunkPosition);
-    ReadChunkData(hFile, &wfx, dwChunkSize, dwChunkPosition);
-    
-    // NOTE: Locate the DATA chuck
-    FindChunk(hFile,fourccDATA,dwChunkSize, dwChunkPosition);
-    BYTE * pDataBuffer = new BYTE[dwChunkSize];
-    ReadChunkData(hFile, pDataBuffer, dwChunkSize, dwChunkPosition);
+    XAUDIO2_SEND_DESCRIPTOR SFXSend = {0, pSFXSubmixVoice};
+    XAUDIO2_VOICE_SENDS SFXSendList = {1, &SFXSend};
 
-    // NOTE: Populate XAudio2 buffer
-    buffer.AudioBytes = dwChunkSize;
-    buffer.pAudioData = pDataBuffer;
-    buffer.Flags = XAUDIO2_END_OF_STREAM;
+    // NOTE: Create a play source voice
+    ambient_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+    IXAudio2SourceVoice* ambientSourceVoice;
+    if(FAILED(hr = pXAudio2->CreateSourceVoice(&ambientSourceVoice, (WAVEFORMATEX*)&ambient_wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, 0, &SFXSendList, NULL))) return hr;
+    if(FAILED(hr = ambientSourceVoice->SubmitSourceBuffer(&ambient_buffer))) return hr;
+    if(FAILED(hr = ambientSourceVoice->Start(0))) return hr;
 
-    printf("Playing audio file\n");
+    // NOTE: Create a play source voice
+    IXAudio2SourceVoice* spellSourceVoice;
+    if(FAILED(hr = pXAudio2->CreateSourceVoice(&spellSourceVoice, (WAVEFORMATEX*)&spell_wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, 0, &SFXSendList, NULL))) return hr;
 
-    IXAudio2SourceVoice* pSourceVoice;
-    if(FAILED(hr = pXAudio2->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx))) return hr;
-    
-    pSourceVoice->SetVolume(1);
-    if(FAILED(hr = pSourceVoice->SubmitSourceBuffer(&buffer))) return hr;
-    if(FAILED(hr = pSourceVoice->Start(0))) return hr;
+    // NOTE: Create a play source voice
+    IXAudio2SourceVoice* trapSourceVoice;
+    if(FAILED(hr = pXAudio2->CreateSourceVoice(&trapSourceVoice, (WAVEFORMATEX*)&trap_wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, 0, &SFXSendList, NULL))) return hr;
+
+    pSFXSubmixVoice->SetVolume(1);
 
     /* ----------------------------------------- */
 
@@ -153,6 +182,20 @@ int main() {
 
     while(PlatformManager::Get()->IsRunning()) {
         
+        if(input->KeyJustPress(KEY_1)) {
+            spellSourceVoice->Stop(0);
+            spellSourceVoice->FlushSourceBuffers();
+            spellSourceVoice->SubmitSourceBuffer(&spell_buffer);
+            spellSourceVoice->Start(0);
+        }
+        
+        if(input->KeyJustPress(KEY_2)) {
+            trapSourceVoice->Stop(0);
+            trapSourceVoice->FlushSourceBuffers();
+            trapSourceVoice->SubmitSourceBuffer(&trap_buffer);
+            trapSourceVoice->Start(0);
+        }
+
         PlatformManager::Get()->PollEvents();
         MemoryManager::Get()->ClearFrameMemory();
 
