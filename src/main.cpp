@@ -147,6 +147,17 @@ HRESULT LoadAudioFile(const char *path, WAVEFORMATEXTENSIBLE *wfx, XAUDIO2_BUFFE
     return S_OK;
 }
 
+static Vertex gQuad[] = {
+    // Face 1
+    {{-0.5f, -0.5f, 0}, {0, 0, 1}, {0, 1}},
+    {{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 0}},
+    {{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 1}},
+    // Face 2
+    {{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 1}},
+    {{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 0}},
+    {{ 0.5f,  0.5f, 0}, {0, 0, 1}, {1, 0}}
+};
+
 int main() {
     
     /* ------------------------------ */
@@ -273,6 +284,8 @@ int main() {
     Shader shader = GraphicsManager::Get()->CreateShader("./data/shaders/lineVert.hlsl",
                                                          "./data/shaders/lineFrag.hlsl");
 
+    VertexBuffer quad = GraphicsManager::Get()->CreateVertexBuffer(gQuad, ARRAY_LENGTH(gQuad));
+
     while(PlatformManager::Get()->IsRunning()) {
         
         f32 millisecondsPerFrame = 16;
@@ -306,9 +319,12 @@ int main() {
         GraphicsManager::Get()->ClearDepthStencilBuffer();
 
         // TODO: render the game
+        GraphicsManager::Get()->DrawVertexBuffer(quad, shader);
 
         GraphicsManager::Get()->Present(1);
     }
+
+    GraphicsManager::Get()->DestroyVertexBuffer(quad);
 
     GraphicsManager::Get()->DestroyShader(shader);
 

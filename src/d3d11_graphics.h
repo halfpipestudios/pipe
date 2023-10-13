@@ -6,16 +6,36 @@
 
 #include "graphics.h"
 
+
+struct D3D11VertexBuffer {
+    ID3D11Buffer *buffer;
+    u32 verticesCount;
+};
+
+struct D3D11VertexBufferStorage {
+    D3D11VertexBuffer vertexBuffers[256];
+    u32 vertexBuffersCount;
+};
+
 struct D3D11Shader {
     ID3D11VertexShader *vertex;
     ID3D11PixelShader *fragment;
-    ID3DBlob *vertexShaderCompiled;
-    ID3DBlob *fragmentShaderCompiled;
+    ID3D11InputLayout *layout; 
 };
 
 struct D3D11ShaderStorage {
     D3D11Shader shaders[256];
     i32 shadersCount;
+};
+
+struct D3D11ConstBuffer {
+    ID3D11Buffer *buffer;
+    u32 index;
+};
+
+struct D3D11ConstBufferStorage {
+    D3D11ConstBuffer constBuffers[256];
+    i32 constBuffersCount;
 };
 
 struct D3D11Graphics : public Graphics {
@@ -47,11 +67,21 @@ struct D3D11Graphics : public Graphics {
     Shader CreateShader(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
 
+    virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
+    virtual void DestroyConstBuffer(ConstBuffer constBufferHandle);
+    virtual void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData);
+
     void SetProjMatrix(Mat4 proj)   override; 
     void SetViewMatrix(Mat4 view)   override; 
     void SetWorldMatrix(Mat4 world) override;
 
+    VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) override;
+    void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
+    void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
+
     static D3D11ShaderStorage shadersStorage;
+    static D3D11ConstBufferStorage constBufferStorage;
+    static D3D11VertexBufferStorage vertexBufferStorage;
 
 };
 
