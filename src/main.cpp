@@ -268,6 +268,11 @@ int main() {
 
     Input *input = PlatformManager::Get()->GetInput();
 
+
+    // TODO: Load Shader test
+    Shader shader = GraphicsManager::Get()->CreateShader("./data/shaders/lineVert.hlsl",
+                                                         "./data/shaders/lineFrag.hlsl");
+
     while(PlatformManager::Get()->IsRunning()) {
         
         f32 millisecondsPerFrame = 16;
@@ -303,10 +308,9 @@ int main() {
         // TODO: render the game
 
         GraphicsManager::Get()->Present(1);
-
-
-        //Sleep(millisecondsPerFrame);
     }
+
+    GraphicsManager::Get()->DestroyShader(shader);
 
     GraphicsManager::Get()->Terminate();
     MemoryManager::Get()->Terminate();

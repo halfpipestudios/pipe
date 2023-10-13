@@ -1,6 +1,7 @@
 #include "d3d11_graphics.h"
 
 #include "platform_manager.h"
+#include "memory_manager.h"
 
 #include <stdio.h>
 
@@ -237,57 +238,15 @@ void D3D11Graphics::Present(i32 vsync) {
     swapChain->Present(vsync, 0);
 }
 
-// TODO: remove this and use an asset pipeline
-struct File {
-    void *data;
-    size_t size;
-};
-
-static File ReadFile(char *filepath)
-{
-    File result;
-    memset(&result, 0, sizeof(File));
-
-    HANDLE hFile = CreateFileA(filepath, GENERIC_READ,
-            FILE_SHARE_READ, 0, OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL, 0);
-
-    if(hFile == INVALID_HANDLE_VALUE)
-    {
-        printf("Error reading file: %s\n", filepath);
-        ASSERT(!"INVALID_CODE_PATH");
-    }
-
-    LARGE_INTEGER bytesToRead;
-    GetFileSizeEx(hFile, &bytesToRead);
-
-    void *data =  malloc(bytesToRead.QuadPart + 1);
-
-    size_t bytesReaded = 0;
-    if(!ReadFile(hFile, data, bytesToRead.QuadPart, (LPDWORD)&bytesReaded, 0))
-    {
-        printf("Error reading file: %s\n", filepath);
-        ASSERT(!"INVALID_CODE_PATH");
-    }
-
-    char *end = ((char *)data) + bytesToRead.QuadPart;
-    end[0] = '\0';
-
-    CloseHandle(hFile);
-
-    result.data = data;
-    result.size = bytesReaded;
-
-    return result;
-}
 
 Shader D3D11Graphics::CreateShader(char *vertpath, char *fragpath)
 {
     Shader shaderHandle = -1;
     D3D11Shader shader = {}; 
 
-    File vertfile = ReadFile(vertpath);
-    File fragfile = ReadFile(fragpath);
+    MemoryManager::Get()->BeginTemporalMemory();
+    File vertfile = PlatformManager::Get()->ReadFileToTemporalMemory(vertpath);
+    File fragfile = PlatformManager::Get()->ReadFileToTemporalMemory(fragpath);
     
     HRESULT result = 0;
     ID3DBlob *errorVertexShader = 0;
@@ -328,8 +287,7 @@ Shader D3D11Graphics::CreateShader(char *vertpath, char *fragpath)
             shader.fragmentShaderCompiled->GetBufferSize(), 0,
             &shader.fragment);
 
-    free(vertfile.data);
-    free(fragfile.data);
+    MemoryManager::Get()->EndTemporalMemory();
 
     shadersStorage.shaders[shadersStorage.shadersCount] = shader;
     shaderHandle = shadersStorage.shadersCount;
@@ -344,4 +302,16 @@ void D3D11Graphics::DestroyShader(Shader shaderHandle) {
     if(shader->fragment) shader->fragment->Release();
     if(shader->vertexShaderCompiled) shader->vertexShaderCompiled->Release();
     if(shader->fragmentShaderCompiled) shader->fragmentShaderCompiled->Release();
+}
+
+void D3D11Graphics::SetProjMatrix(Mat4 proj) {
+
+}
+
+void D3D11Graphics::SetViewMatrix(Mat4 view) {
+
+}
+
+void D3D11Graphics::SetWorldMatrix(Mat4 world) {
+
 }

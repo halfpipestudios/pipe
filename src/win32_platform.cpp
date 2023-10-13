@@ -1,4 +1,7 @@
 #include "win32_platform.h"
+
+#include "memory_manager.h"
+
 #include <stdio.h>
 
 static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -152,6 +155,58 @@ void Win32Platform::MemoryRelease(void *ptr, u64 size) {
 bool Win32Platform::IsRunning() {
     return running;
 }
+
+static inline HANDLE Win32OpenFile(char *filepath, LARGE_INTEGER *bytesToRead) {
+
+    HANDLE hFile = CreateFileA(filepath, GENERIC_READ,
+            FILE_SHARE_READ, 0, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, 0);
+
+    if(hFile == INVALID_HANDLE_VALUE) {
+        // TODO: Logger
+        printf("Error reading file: %s\n", filepath);
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    GetFileSizeEx(hFile, bytesToRead);
+    return hFile;
+}
+
+static inline File Win32ReadFile(HANDLE hFile, void *data, LARGE_INTEGER bytesToRead, char *filepath) {
+    size_t bytesReaded = 0;
+    if(!ReadFile(hFile, data, bytesToRead.QuadPart, (LPDWORD)&bytesReaded, 0)) {
+        // TODO: Logger
+        printf("Error reading file: %s\n", filepath);
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    char *end = ((char *)data) + bytesToRead.QuadPart;
+    end[0] = '\0';
+
+    CloseHandle(hFile);
+
+    File result;
+    result.data = data;
+    result.size = bytesReaded;
+
+    return result;
+}
+
+File Win32Platform::ReadFileToStaticMemory(char *filepath) {
+    LARGE_INTEGER bytesToRead;
+    HANDLE hFile = Win32OpenFile(filepath, &bytesToRead);
+    void *data = MemoryManager::Get()->AllocStaticMemory(bytesToRead.QuadPart + 1, 1);
+    return Win32ReadFile(hFile, data, bytesToRead, filepath);    
+
+}
+
+File Win32Platform::ReadFileToTemporalMemory(char *filepath) {
+    LARGE_INTEGER bytesToRead;
+    HANDLE hFile = Win32OpenFile(filepath, &bytesToRead);
+    void *data = MemoryManager::Get()->AllocTemporalMemory(bytesToRead.QuadPart + 1, 1);
+    return Win32ReadFile(hFile, data, bytesToRead, filepath);  
+}
+
 
 /*----------------------------------------------*/
 /*              Win32 Window                    */

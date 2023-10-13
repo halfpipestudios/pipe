@@ -8,7 +8,7 @@ struct MemoryStorage {
     void Terminate();
 
     void *AllocStaticMemory(u64 size, u64 align);
-    void ClearMemory();
+    void ClearStaticMemory();
     
     void *AllocTemporalMemory(u64 size, u64 align);
     void BeginTemporalMemory();

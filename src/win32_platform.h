@@ -37,6 +37,9 @@ struct Win32Platform : public Platform {
     void MemoryDecommit(void *ptr, u64 size);
     void MemoryRelease(void *ptr, u64 size);
 
+    File ReadFileToStaticMemory(char *filepath) override;
+    File ReadFileToTemporalMemory(char *filepath) override;
+
     Win32Window window;
     Input input;
     bool running;

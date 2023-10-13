@@ -2,6 +2,7 @@
 #define _GRAPHICS_H_
 
 #include "common.h"
+#include "math.h"
 
 typedef u32 Shader;
 
@@ -26,6 +27,10 @@ struct Graphics {
 
     virtual Shader CreateShader(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
+
+    virtual void SetProjMatrix(Mat4 proj) = 0;
+    virtual void SetViewMatrix(Mat4 view) = 0;
+    virtual void SetWorldMatrix(Mat4 world) = 0;
 
 };
 

@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+
+struct File {
+    void *data;
+    u64 size;
+};
+
 struct Window {
     virtual void Initialize(i32 w, i32 h) = 0;
     virtual void Terminate() = 0;    
@@ -31,6 +37,9 @@ struct Platform {
     virtual void *MemoryReserveAndCommit(u64 size) = 0;
     virtual void MemoryDecommit(void *ptr, u64 size) = 0;
     virtual void MemoryRelease(void *ptr, u64 size) = 0;
+
+    virtual File ReadFileToStaticMemory(char *filepath) = 0;
+    virtual File ReadFileToTemporalMemory(char *filepath) = 0;
 
     virtual bool IsRunning() = 0;
 };

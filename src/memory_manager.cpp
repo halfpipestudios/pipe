@@ -27,7 +27,7 @@ void *MemoryStorage::AllocStaticMemory(u64 size, u64 align) {
     return result;
 }
 
-void MemoryStorage::ClearMemory() {
+void MemoryStorage::ClearStaticMemory() {
     memory.FreeTop();
     memory.FreeBottom();
 }

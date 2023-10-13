@@ -47,6 +47,10 @@ struct D3D11Graphics : public Graphics {
     Shader CreateShader(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
 
+    void SetProjMatrix(Mat4 proj)   override; 
+    void SetViewMatrix(Mat4 view)   override; 
+    void SetWorldMatrix(Mat4 world) override;
+
     static D3D11ShaderStorage shadersStorage;
 
 };
