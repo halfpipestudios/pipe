@@ -13,14 +13,14 @@ struct SoundPosition {
 
 struct PlayingSound {
     
-    virtual void Play(f32 volume, i32 count) = 0;
+    virtual void Play() = 0;
     virtual void Play3DSound(SoundPosition listener, SoundPosition emiter) = 0;
     virtual void Update3DSound(SoundPosition listener, SoundPosition emiter) = 0;
     
     virtual void Stop() = 0;
 
     virtual void IsPlaying() = 0;
-    virtual void SetVolume() = 0;
+    virtual void SetVolume(f32 volume) = 0;
 };
 
 struct SoundMixer {

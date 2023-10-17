@@ -16,14 +16,14 @@ struct XAudio2StoredSound {
 
 struct XAudio2PlayingSound : public PlayingSound {
 
-    void Play(f32 volume, i32 count);
+    void Play();
     void Play3DSound(SoundPosition listener, SoundPosition emiter);
     void Update3DSound(SoundPosition listener, SoundPosition emiter);
     
     void Stop();
 
     void IsPlaying();
-    void SetVolume();
+    void SetVolume(f32 volume);
 
     XAudio2StoredSound *sound;
     IXAudio2SourceVoice* voice;

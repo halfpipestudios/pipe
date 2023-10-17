@@ -113,22 +113,75 @@ static HRESULT LoadAudioFile(const char *path, WAVEFORMATEXTENSIBLE *wfx, XAUDIO
 /*     XAudio Playing Sound   implementation          */
 /* -------------------------------------------------- */
 
-void XAudio2PlayingSound::Play(f32 volume, i32 count) {
+static X3DAUDIO_HANDLE gX3DInstance;
+
+static X3DAUDIO_DSP_SETTINGS GetDSPSettings() {
+    static FLOAT32 monoMatrix[2];
+    X3DAUDIO_DSP_SETTINGS settings = {};
+    settings.SrcChannelCount = 1;
+    settings.DstChannelCount = 2;
+    settings.pMatrixCoefficients = (FLOAT32 *)monoMatrix;
+    return settings;
+}
+
+static X3DAUDIO_EMITTER AudioEmiterFromSoundPosition(SoundPosition pos) {
+    X3DAUDIO_EMITTER emitter = {};
+    emitter.pCone               = nullptr;
+    emitter.OrientFront         = {0, 0, -1};
+    emitter.OrientTop           = {0, 1, 0};
+    emitter.Position            = {pos.position.x, pos.position.y, pos.position.z};
+    emitter.Velocity            = {pos.velocity.x, pos.velocity.y, pos.velocity.z};
+    emitter.InnerRadius         = 1;
+    emitter.InnerRadiusAngle    = 0;
+    emitter.ChannelCount        = 1;
+    emitter.ChannelRadius       = 0;
+    emitter.pChannelAzimuths    = nullptr;
+    emitter.pVolumeCurve        = nullptr;
+    emitter.pLFECurve           = nullptr;
+    emitter.pLPFDirectCurve     = nullptr;
+    emitter.pLPFReverbCurve     = nullptr;
+    emitter.pReverbCurve        = nullptr;
+    emitter.CurveDistanceScaler = 1;
+    emitter.DopplerScaler       = 1;
+    return emitter;
+}
+
+static X3DAUDIO_LISTENER AudioListenerFromSoundPosition(SoundPosition pos) {
+    X3DAUDIO_LISTENER listener = {};
+    listener.OrientFront = {0, 0, 1};
+    listener.OrientTop   = {0, 1, 0};
+    listener.Position    = {pos.position.x, pos.position.y, pos.position.z};
+    listener.Velocity    = {pos.velocity.x, pos.velocity.y, pos.velocity.z};
+    listener.pCone       = nullptr;
+    return listener;
+}
+
+void XAudio2PlayingSound::Play() {
+    voice->Start(0);
 }
 
 void XAudio2PlayingSound::Play3DSound(SoundPosition listener, SoundPosition emiter) {
+    Update3DSound(listener, emiter);
+    Play();
 }
 
 void XAudio2PlayingSound::Update3DSound(SoundPosition listener, SoundPosition emiter) {
+    X3DAUDIO_DSP_SETTINGS settings = GetDSPSettings();
+    X3DAUDIO_LISTENER xaudioListener = AudioListenerFromSoundPosition(listener);
+    X3DAUDIO_EMITTER xaudioEmitter = AudioEmiterFromSoundPosition(emiter);
+    X3DAudioCalculate(gX3DInstance, &xaudioListener, &xaudioEmitter, X3DAUDIO_CALCULATE_MATRIX, &settings);
+    voice->SetOutputMatrix(nullptr, 1, 2, settings.pMatrixCoefficients);
 }
 
 void XAudio2PlayingSound::Stop() {
+    voice->Stop(0);
 }
 
 void XAudio2PlayingSound::IsPlaying() {
 }
 
-void XAudio2PlayingSound::SetVolume() {
+void XAudio2PlayingSound::SetVolume(f32 volume) {
+    voice->SetVolume(volume);
 }
 
 /* -------------------------------------------------- */
@@ -173,6 +226,12 @@ void XAudio2SoundMixer::Initialize() {
     }
 
     firstFreePlayingSoundList = playingSoundPool;
+
+    // NOTE: Initialize 3d audio instance
+    // TODO: Dont use a global for 3d audio
+    DWORD dwChannelMask;       
+    masterVoice->GetChannelMask(&dwChannelMask);
+    X3DAudioInitialize(dwChannelMask, X3DAUDIO_SPEED_OF_SOUND, gX3DInstance);
 
 }
 
