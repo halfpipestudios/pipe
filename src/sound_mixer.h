@@ -28,7 +28,8 @@ struct SoundMixer {
     virtual void Initialize() = 0;
     virtual void Terminate() = 0;
     
-    virtual void LoadSound(char *path) = 0;
+    virtual void LoadSound(char *path, char name) = 0;
+    virtual void UnloadSounds() = 0;
 
     virtual PlayingSound *AllocPlayingSound(char *name) = 0;
     virtual void RemovePlayingSound(PlayingSound *sound) = 0;

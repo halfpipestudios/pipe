@@ -3,11 +3,15 @@
 
 #include "sound_mixer.h"
 
+#include <xaudio2.h>
+#include <x3daudio.h>
+
 #define MAX_STORED_SOUND_NAME 256
 
 struct XAudio2StoredSound {
     char name[MAX_STORED_SOUND_NAME];
-    void *buffer;
+    WAVEFORMATEXTENSIBLE wfx;
+    XAUDIO2_BUFFER buffer;
 };
 
 struct XAudio2PlayingSound : public PlayingSound {
@@ -21,8 +25,10 @@ struct XAudio2PlayingSound : public PlayingSound {
     void IsPlaying();
     void SetVolume();
 
-private:
+    XAudio2StoredSound *sound;
+    IXAudio2SourceVoice* voice;
 
+    XAudio2PlayingSound *next;
 };
 
 struct XAudio2SoundMixer : public SoundMixer {
@@ -30,7 +36,8 @@ struct XAudio2SoundMixer : public SoundMixer {
     void Initialize();
     void Terminate();
 
-    void LoadSound(char *path);
+    void LoadSound(char *path, char *name);
+    void UnloadSounds();
 
     PlayingSound *AllocPlayingSound(char *name);
     void RemovePlayingSound(PlayingSound *sound);
@@ -43,6 +50,12 @@ private:
 
     u32 storedSoundBufferSize;
     XAudio2StoredSound *storedSoundBuffer;
+    u32 storedSoundBufferUsed;
+ 
+    IXAudio2* xaudio2;
+    IXAudio2MasteringVoice* masterVoice;
+
+    XAudio2StoredSound *FindStoredSoundByName(char *name);
 
 };
 
