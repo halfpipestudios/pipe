@@ -23,7 +23,6 @@ int main() {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-
     // TODO: Load Shader test
     Shader shader = GraphicsManager::Get()->CreateShader("./data/shaders/lineVert.hlsl",
                                                          "./data/shaders/lineFrag.hlsl");
