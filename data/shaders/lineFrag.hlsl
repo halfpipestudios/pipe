@@ -8,6 +8,12 @@ struct PS_Input {
 };
 
 float4 fs_main(PS_Input i) : SV_TARGET {
-    return float4(0, 1, 0, 1);
+
+    float3 color = float3(0, 1, 0);
+
+    float3 dir = normalize(float3(0.2f, 0.5f, -1));
+    float ambient = max(dot(dir, i.nor), 0.1f);
+    color = color * ambient;
+    return float4(color, 1.0f);
     // return srv.Sample(samplerState, i.uv);
 }
