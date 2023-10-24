@@ -209,6 +209,19 @@ void Vec3::operator/=(f32 val) {
     z /= val;
 }
 
+bool Vec3::operator==(Vec3 &vec) {
+    Vec3 diff = {*this - vec};
+    return  diff.LenSq() < VEC_EPSILON;
+}
+
+Vec3 operator*(f32 val, Vec3 vec) {
+    Vec3 result;
+    result.x = vec.x * val;
+    result.y = vec.y * val;
+    result.z = vec.z * val;
+    return result;
+}
+
 f32 Vec3::Dot(Vec3 &vec)
 {
     return (x * vec.x) + (y * vec.y) + (z * vec.z);

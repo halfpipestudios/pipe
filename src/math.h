@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+#define EPSILON 0.0001f
+#define VEC_EPSILON 0.000001f
+
 struct Vec2 {
     union {
         struct {
@@ -68,6 +71,8 @@ struct Vec3 {
     void operator*=(f32 val);
     void operator/=(f32 val);
 
+    bool operator==(Vec3 &vec);
+
     f32 Dot(Vec3 &vec);
     Vec3 Cross(Vec3 &vec);
     f32 LenSq();
@@ -75,6 +80,9 @@ struct Vec3 {
     void Normalize();
     Vec3 Normalized();
 };
+
+
+Vec3 operator*(f32 val, Vec3 vec);
 
 struct Vec4 {
     union {

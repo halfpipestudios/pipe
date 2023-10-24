@@ -6,17 +6,6 @@
 
 #include "map_importer.h"
 
-static Vertex gQuad[] = {
-    // Face 1
-    {{-0.5f, -0.5f, 0}, {0, 0, 1}, {0, 1}},
-    {{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 0}},
-    {{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 1}},
-    // Face 2
-    {{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 1}},
-    {{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 0}},
-    {{ 0.5f,  0.5f, 0}, {0, 0, 1}, {1, 0}}
-};
-
 int main() {
 
     PlatformManager::Get()->Initialize();
@@ -27,18 +16,21 @@ int main() {
 
 
     // TODO: Load Shader test
-    Shader shader = GraphicsManager::Get()->CreateShader("./data/shaders/lineVert.hlsl",
-                                                         "./data/shaders/lineFrag.hlsl");
+    Shader shader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/texVert.hlsl",
+                                                                  "./data/shaders/texFrag.hlsl");
     
-    VertexBuffer quad = GraphicsManager::Get()->CreateVertexBuffer(gQuad, ARRAY_LENGTH(gQuad));
-
+    // Test code to load the level .map file
     MapLoader loader;
-    EntityArray array = loader.LoadMapFromFile("./data/maps/test.map");
+    loader.LoadMapFromFile("./data/maps/test.map");
 
-    VertexArray mapVertices = loader.VertexArrayCreateFromEntityArray(array);
+    VertexArray mapVertices = loader.GetVertices();
+    TexArray mapTextures = loader.GetTextures();
 
     VertexBuffer map = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
+    TextureArray mapTex = GraphicsManager::Get()->CreateTextureArray(mapTextures.data, mapTextures.count);
 
+
+    // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
                 60, 
                 (f32)PlatformManager::Get()->GetWindow()->GetWidth() /
@@ -50,7 +42,7 @@ int main() {
     Vec3 up  = Vec3(0, 1,  0);
     GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, tar, up));
 
-    f32 scale = 1.0f/128.0f;
+    f32 scale = 1.0f/64.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
 
@@ -66,6 +58,7 @@ int main() {
         GraphicsManager::Get()->ClearDepthStencilBuffer();
 
         // TODO: render the game
+        GraphicsManager::Get()->BindTextureArray(mapTex);
         GraphicsManager::Get()->DrawVertexBuffer(map, shader);
 
         GraphicsManager::Get()->Present(1);
@@ -73,7 +66,8 @@ int main() {
 
     MemoryManager::Get()->ClearStaticMemory();
 
-    GraphicsManager::Get()->DestroyVertexBuffer(quad);
+    GraphicsManager::Get()->DestroyTextureArray(mapTex);
+
     GraphicsManager::Get()->DestroyVertexBuffer(map);
 
     GraphicsManager::Get()->DestroyShader(shader);

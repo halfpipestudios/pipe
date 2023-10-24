@@ -10,11 +10,13 @@
 struct D3D11VertexBuffer {
     ID3D11Buffer *buffer;
     u32 verticesCount;
+    u32 stride;
+    u32 offset;
 };
 
 struct D3D11VertexBufferStorage {
     D3D11VertexBuffer vertexBuffers[256];
-    u32 vertexBuffersCount;
+    i32 vertexBuffersCount;
 };
 
 struct D3D11Shader {
@@ -38,6 +40,19 @@ struct D3D11ConstBufferStorage {
     i32 constBuffersCount;
 };
 
+struct D3D11TextureArray {
+    ID3D11ShaderResourceView *srv;
+    ID3D11Texture2D *gpuTextureArray;
+    Texture    *cpuTextureArray;
+    u32 mipLevels;
+    u32 size;
+};
+
+struct D3D11TextureArrayStorage {
+    D3D11TextureArray textureArrays[256];
+    i32 textureArraysCount;
+};
+
 struct D3D11Graphics : public Graphics {
     ID3D11Device* device;
     ID3D11DeviceContext* deviceContext;
@@ -52,6 +67,7 @@ struct D3D11Graphics : public Graphics {
     ID3D11DepthStencilState* depthStencilOff;
     ID3D11BlendState* alphaBlendEnable;
     ID3D11BlendState* alphaBlendDisable;
+    ID3D11SamplerState *samplerStateWrap;
 
     void Initialize() override;
     void Terminate() override;
@@ -64,7 +80,8 @@ struct D3D11Graphics : public Graphics {
     void ClearDepthStencilBuffer() override;
     void Present(i32 vsync) override;
 
-    Shader CreateShader(char *vertpath, char *fragpath) override;
+    Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
+    Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
 
     virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
@@ -76,12 +93,18 @@ struct D3D11Graphics : public Graphics {
     void SetWorldMatrix(Mat4 world) override;
 
     VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) override;
+    VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) override;
     void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
     void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
+
+    TextureArray CreateTextureArray(Texture *array, u32 textureCount) override;
+    void DestroyTextureArray(TextureArray textureArrayHandle) override;
+    void BindTextureArray(TextureArray textureArrayHandle) override;
 
     static D3D11ShaderStorage shadersStorage;
     static D3D11ConstBufferStorage constBufferStorage;
     static D3D11VertexBufferStorage vertexBufferStorage;
+    static D3D11TextureArrayStorage textureArrayStorage;
 
 };
 

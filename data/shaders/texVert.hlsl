@@ -5,15 +5,17 @@ cbuffer Matrices : register(b0) {
 };
 
 struct VS_Input {
-    float3 pos : POSITION;
-    float3 nor : NORMAL;
-    float2 uv  : TEXCOORD0;
+    float3 pos       : POSITION;
+    float3 nor       : NORMAL;
+    float2 uv        : TEXCOORD0;
+    unsigned int tex : TEXCOORD1;
 };
 
 struct PS_Input {
-    float4 pos : SV_POSITION;
-    float3 nor : NORMAL;
-    float2 uv  : TEXCOORD0;
+    float4 pos       : SV_POSITION;
+    float3 nor       : NORMAL;
+    float2 uv        : TEXCOORD0;
+    unsigned int tex : TEXCOORD1;
 };
 
 PS_Input vs_main(VS_Input i) {
@@ -29,6 +31,7 @@ PS_Input vs_main(VS_Input i) {
     o.pos = wPos;
     o.nor = wNor;
     o.uv = i.uv;
+    o.tex = i.tex;
 
     return o;
 }

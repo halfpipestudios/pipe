@@ -7,6 +7,9 @@
 typedef i32 Shader;
 typedef i32 ConstBuffer;
 typedef i32 VertexBuffer;
+typedef i32 TextureArray;
+
+struct TexArray;
 
 enum RasterizerState {
     RASTERIZER_STATE_CULL_BACK,
@@ -27,7 +30,10 @@ struct Vertex {
     Vec2 uv;
 };
 
-struct LevelVertex : public Vertex {
+struct VertexMap {
+    Vec3 pos;
+    Vec3 nor;
+    Vec2 uv;
     u32 tex;
 };
 
@@ -35,6 +41,11 @@ struct LevelVertex : public Vertex {
 struct SkinVertex : public Vertex {
     i32 boneId[BONE_INFLUENCE];
     f32 weight[BONE_INFLUENCE];
+};
+
+struct Texture {
+    u32 *pixels;
+    i32 w, h;
 };
 
 struct Graphics {
@@ -49,7 +60,8 @@ struct Graphics {
     virtual void ClearDepthStencilBuffer() = 0;
     virtual void Present(i32 vsync) = 0;
 
-    virtual Shader CreateShader(char *vertpath, char *fragpath) = 0;
+    virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
+    virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
 
     virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) = 0;
@@ -61,9 +73,13 @@ struct Graphics {
     virtual void SetWorldMatrix(Mat4 world) = 0;
 
     virtual VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) = 0;
+    virtual VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) = 0;
     virtual void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) = 0;
     virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) = 0;
 
+    virtual TextureArray CreateTextureArray(Texture *array, u32 textureCount) = 0;
+    virtual void DestroyTextureArray(TextureArray textureArrayHandle) = 0;
+    virtual void BindTextureArray(TextureArray textureArrayHandle) = 0;
 
     ConstBuffer gpuMatrices; 
     CBMatrix    cpuMatrices;

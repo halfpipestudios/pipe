@@ -15,13 +15,12 @@ struct TextureAxis {
     Vec3 u, v;
 };
 
-struct Poly
-{
-    Vertex vertices[256];
+struct Poly {
+    VertexMap vertices[256];
     i32 verticesCount;
 };
 
-struct HMapHeader {
+struct MapHeader {
     u64 entityOffset;
     u64 textureOffset;
 };
@@ -53,7 +52,12 @@ struct EntityArray {
 };
 
 struct VertexArray {
-    Vertex *data;
+    VertexMap *data;
+    u32 count;
+};
+
+struct TexArray {
+    Texture *data;
     u32 count;
 };
 
@@ -67,10 +71,29 @@ struct EntitiesInfo{
 };
 
 struct MapLoader {
+
+    void LoadMapFromFile(char *filepath);
+    EntityArray GetEntities();
+    VertexArray GetVertices();
+    TexArray GetTextures();
+
+private:
+
     EntitiesInfo GetEntitiesInfo(File file);
     i32 GetTextureCount(File file);
-    EntityArray LoadMapFromFile(char *filepath);
-    VertexArray VertexArrayCreateFromEntityArray(EntityArray entityArray);
+
+    void FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count);
+    void FillPolygonsUvs(Entity *entity, Poly *polygons, i32 count);
+    void OrderPolygonsVertices(Entity *entity,  Poly *polygons, i32 count);
+    void RemoveRepeatedVertices(Poly *polygons, i32 count);
+
+    bool GetIntersection(Vec3 n1, Vec3 n2, Vec3 n3, f32 d1, f32 d2, f32 d3, VertexMap *vertex);
+    Vec3 GetCenterOfPolygon(Poly *polygon);
+    Plane GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c);
+    void RemoveVertexAtIndex(Poly *poly, i32 index);
+
+    EntityArray array;
+    TexArray texArray;
 };
 
 #endif
