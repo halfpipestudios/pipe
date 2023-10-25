@@ -596,8 +596,8 @@ void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader sha
     deviceContext->Draw(vertexBuffer->verticesCount, 0);
 }
 
-TextureArray D3D11Graphics::CreateTextureArray(Texture *array, u32 textureCount) {
-    TextureArray textureArrayHandle = -1;
+TextureBuffer D3D11Graphics::CreateTextureBuffer(Texture *array, u32 textureCount) {
+    TextureBuffer textureBufferHandle = -1;
 
     D3D11TextureArray textureArray = {};
     textureArray.size = textureCount;
@@ -651,14 +651,14 @@ TextureArray D3D11Graphics::CreateTextureArray(Texture *array, u32 textureCount)
     deviceContext->GenerateMips(textureArray.srv);
 
     textureArrayStorage.textureArrays[textureArrayStorage.textureArraysCount] = textureArray;
-    textureArrayHandle = textureArrayStorage.textureArraysCount;
+    textureBufferHandle = textureArrayStorage.textureArraysCount;
     textureArrayStorage.textureArraysCount++;
 
-    return textureArrayHandle;
+    return textureBufferHandle;
 }
 
-void D3D11Graphics::DestroyTextureArray(TextureArray textureArrayHandle) {
-    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureArrayHandle;
+void D3D11Graphics::DestroyTextureBuffer(TextureBuffer textureBufferHandle) {
+    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureBufferHandle;
 
     if(textureArray->srv) textureArray->srv->Release();
     if(textureArray->gpuTextureArray) textureArray->gpuTextureArray->Release(); 
@@ -668,7 +668,7 @@ void D3D11Graphics::DestroyTextureArray(TextureArray textureArrayHandle) {
     textureArrayStorage.textureArraysCount--;
 }
 
-void D3D11Graphics::BindTextureArray(TextureArray textureArrayHandle) {
-    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureArrayHandle;
+void D3D11Graphics::BindTextureBuffer(TextureBuffer textureBufferHandle) {
+    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureBufferHandle;
     deviceContext->PSSetShaderResources(0, 1, &textureArray->srv);
 }

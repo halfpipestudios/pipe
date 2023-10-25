@@ -67,9 +67,9 @@ void MapLoader::LoadMapFromFile(char *filepath) {
     u8 *entityChunk = data + mapheader->entityOffset;
     u8 *textureChunk = data + mapheader->textureOffset;
 
-    array = {};
-    array.data = (Entity *)MemoryManager::Get()->AllocStaticMemory(entityInfo.entityCount * sizeof(Entity), 1);
-    array.count = entityInfo.entityCount;
+    entityArray = {};
+    entityArray.data = (Entity *)MemoryManager::Get()->AllocStaticMemory(entityInfo.entityCount * sizeof(Entity), 1);
+    entityArray.count = entityInfo.entityCount;
 
     i32 index = 0;
     u8 *currentEntity = entityChunk;
@@ -77,7 +77,7 @@ void MapLoader::LoadMapFromFile(char *filepath) {
         EntityHeader *entityHeader = (EntityHeader *)currentEntity;
         u8 *faces = currentEntity + sizeof(EntityHeader);
 
-        Entity *entity = &array.data[index++];
+        Entity *entity = &entityArray.data[index++];
         entity->faces = (EntityFace *)MemoryManager::Get()->AllocStaticMemory(entityHeader->faceCount * entityHeader->faceSize, 1);
         entity->facesCount = entityHeader->faceCount;
 
@@ -90,8 +90,8 @@ void MapLoader::LoadMapFromFile(char *filepath) {
     }
 
 
-    texArray.count = texCount;
-    texArray.data = (Texture *)MemoryManager::Get()->AllocStaticMemory(texCount * sizeof(Texture), 1);
+    textureArray.count = texCount;
+    textureArray.data = (Texture *)MemoryManager::Get()->AllocStaticMemory(texCount * sizeof(Texture), 1);
 
     index = 0;
     u8 *currentTexture = textureChunk;
@@ -101,7 +101,7 @@ void MapLoader::LoadMapFromFile(char *filepath) {
 
         u64 textureSize = sizeof(u32) * textureHeader->textureWidth * textureHeader->textureHeight;
 
-        Texture *texture = &texArray.data[index++];
+        Texture *texture = &textureArray.data[index++];
         texture->w = textureHeader->textureWidth;
         texture->h = textureHeader->textureHeight;
         texture->pixels = (u32 *)MemoryManager::Get()->AllocStaticMemory(textureSize, 1);
@@ -115,22 +115,22 @@ void MapLoader::LoadMapFromFile(char *filepath) {
 }
 
 EntityArray MapLoader::GetEntities() {
-    return array;
+    return entityArray;
 }
 
 
-TexArray MapLoader::GetTextures() {
-    return texArray;
+TextureArray MapLoader::GetTextures() {
+    return textureArray;
 }
 
 VertexArray MapLoader::GetVertices() {
     std::vector<VertexMap> vertices;
 
-    for(i32 entityIndex = 0; entityIndex < array.count; ++entityIndex) {
+    for(i32 entityIndex = 0; entityIndex < entityArray.count; ++entityIndex) {
         
         MemoryManager::Get()->BeginTemporalMemory();
 
-        Entity *entity = &array.data[entityIndex];
+        Entity *entity = &entityArray.data[entityIndex];
         i32  planesCount = entity->facesCount;
         
         Poly *polygons = (Poly *)MemoryManager::Get()->AllocTemporalMemory(sizeof(Poly) * planesCount, 1);
@@ -165,17 +165,6 @@ VertexArray MapLoader::GetVertices() {
 
     return vertexArray;
 }
-
-// TODO: GetTextures
-/*
-TextureArray GetTextures()
-{
-    TextureArray textures = {};
-
-    return textures;
-}
-*/
-
 
 void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
     for(i32 i = 0; i < count - 2; ++i) {

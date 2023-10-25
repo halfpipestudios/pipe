@@ -7,7 +7,7 @@
 typedef i32 Shader;
 typedef i32 ConstBuffer;
 typedef i32 VertexBuffer;
-typedef i32 TextureArray;
+typedef i32 TextureBuffer;
 
 struct TexArray;
 
@@ -77,9 +77,9 @@ struct Graphics {
     virtual void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) = 0;
     virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) = 0;
 
-    virtual TextureArray CreateTextureArray(Texture *array, u32 textureCount) = 0;
-    virtual void DestroyTextureArray(TextureArray textureArrayHandle) = 0;
-    virtual void BindTextureArray(TextureArray textureArrayHandle) = 0;
+    virtual TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) = 0;
+    virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
+    virtual void BindTextureBuffer(TextureBuffer textureBufferHandle) = 0;
 
     ConstBuffer gpuMatrices; 
     CBMatrix    cpuMatrices;

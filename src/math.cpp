@@ -505,6 +505,16 @@ Vec4 Mat4::operator*(Vec4 &vec) {
     return result;
 }
 
+Vec3 Mat4::TransformPoint(Mat4 mat, Vec3 &vec) {
+    Vec4 result = mat * Vec4(vec, 1.0f);
+    return {result.x, result.y, result.z};
+}
+
+Vec3 Mat4::TransformVector(Mat4 mat, Vec3 &vec) {
+    Vec4 result = mat * Vec4(vec, 0.0f);
+    return {result.x, result.y, result.z};
+}
+
 Mat4 Mat4::Frustum(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
     if (l == r || t == b || n == f) {
         ASSERT(!"WARNING: Trying to create invalid frustum\n");

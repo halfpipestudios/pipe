@@ -56,7 +56,7 @@ struct VertexArray {
     u32 count;
 };
 
-struct TexArray {
+struct TextureArray {
     Texture *data;
     u32 count;
 };
@@ -75,7 +75,7 @@ struct MapLoader {
     void LoadMapFromFile(char *filepath);
     EntityArray GetEntities();
     VertexArray GetVertices();
-    TexArray GetTextures();
+    TextureArray GetTextures();
 
 private:
 
@@ -92,8 +92,8 @@ private:
     Plane GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c);
     void RemoveVertexAtIndex(Poly *poly, i32 index);
 
-    EntityArray array;
-    TexArray texArray;
+    EntityArray entityArray;
+    TextureArray textureArray;
 };
 
 #endif

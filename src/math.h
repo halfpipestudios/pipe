@@ -5,6 +5,7 @@
 
 #define EPSILON 0.0001f
 #define VEC_EPSILON 0.000001f
+#define PI 3.14159265359
 
 struct Vec2 {
     union {
@@ -94,6 +95,7 @@ struct Vec4 {
 
     Vec4() : x(0), y(0), z(0), w(0) {};
     Vec4(f32 _x, f32 _y, f32 _z, f32 _w) : x(_x), y(_y), z(_z), w(_w) {};
+    Vec4(Vec3 vec, f32 w_) : x(vec.x), y(vec.y), z(vec.z), w(w_) {}
 
     f32 operator[](i32 index);
 
@@ -181,6 +183,9 @@ struct Mat4 {
     Mat4 operator*(f32 val);
     Mat4 operator*(Mat4 &m);
     Vec4 operator*(Vec4 &vec);
+
+    static Vec3 TransformPoint(Mat4 mat, Vec3 &vec);
+    static Vec3 TransformVector(Mat4 mat, Vec3 &vec);
 
     static Mat4 Frustum(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f);
     static Mat4 Perspective(f32 fov, f32 aspect, f32 znear, f32 zfar);

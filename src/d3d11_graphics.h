@@ -97,9 +97,9 @@ struct D3D11Graphics : public Graphics {
     void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
     void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
 
-    TextureArray CreateTextureArray(Texture *array, u32 textureCount) override;
-    void DestroyTextureArray(TextureArray textureArrayHandle) override;
-    void BindTextureArray(TextureArray textureArrayHandle) override;
+    TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) override;
+    void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
+    void BindTextureBuffer(TextureBuffer textureBufferHandle) override;
 
     static D3D11ShaderStorage shadersStorage;
     static D3D11ConstBufferStorage constBufferStorage;
