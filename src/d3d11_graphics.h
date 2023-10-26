@@ -53,6 +53,32 @@ struct D3D11TextureArrayStorage {
     i32 textureArraysCount;
 };
 
+struct D3D11VertexLine {
+    Vec3 pos;
+    Vec4 col;
+};
+
+struct D3D11LineRenderer {
+
+    ID3D11Buffer      *gpuLineBuffer;
+    D3D11VertexLine   *cpuLineBuffer;
+    D3D11Shader        shader;
+    size_t             bufferSize;
+    size_t             bufferSizeInBytes;
+    size_t             bufferUsed;
+
+    void Initialize(size_t bufferSize, ID3D11Device *device);
+    void Terminate();
+    void Render(ID3D11DeviceContext *deviceContext);
+
+    void DrawLine(Vec3 a, Vec3 b, u32 color, ID3D11DeviceContext *deviceContext);
+private:
+    void AddLine(D3D11VertexLine *line);
+    Vec4 Vec4Color(u32 color);
+    D3D11Shader CreateD3D11Shader(ID3D11Device *device, char *vertpath, char *fragpath);
+    void DestroyD3D11Shader(D3D11Shader *shader);
+};
+
 struct D3D11Graphics : public Graphics {
     ID3D11Device* device;
     ID3D11DeviceContext* deviceContext;
@@ -105,6 +131,10 @@ struct D3D11Graphics : public Graphics {
     static D3D11ConstBufferStorage constBufferStorage;
     static D3D11VertexBufferStorage vertexBufferStorage;
     static D3D11TextureArrayStorage textureArrayStorage;
+
+
+    void DrawLine(Vec3 a, Vec3 b, u32 color) override;
+    D3D11LineRenderer lineRenderer;
 
 };
 

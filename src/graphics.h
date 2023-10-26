@@ -81,6 +81,9 @@ struct Graphics {
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
     virtual void BindTextureBuffer(TextureBuffer textureBufferHandle) = 0;
 
+    virtual void DrawLine(Vec3 a, Vec3 b, u32 color) = 0;
+
+
     ConstBuffer gpuMatrices; 
     CBMatrix    cpuMatrices;
 };
