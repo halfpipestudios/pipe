@@ -107,7 +107,7 @@ int main() {
 
     // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
-                80, 
+                60, 
                 (f32)PlatformManager::Get()->GetWindow()->GetWidth() /
                 (f32)PlatformManager::Get()->GetWindow()->GetHeight(),
                 0.01f, 1000.0f));
@@ -115,7 +115,7 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, -5), 0.1f); 
+    Camera camera(Vec3(0, 2, 0), 0.2f); 
 
 
     while(PlatformManager::Get()->IsRunning()) {
