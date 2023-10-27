@@ -1,34 +1,29 @@
-cbuffer Matrices : register(b0) {
+cbuffer CBuffer : register(b0)
+{
     matrix proj;
     matrix view;
     matrix world;
-};
+    float3 viewDir;
+    float pad;
+}
 
-struct VS_Input {
+struct VS_Input
+{
     float3 pos : POSITION;
-    float3 nor : NORMAL;
-    float2 uv  : TEXCOORD0;
+    float4 col : TEXCOORD0;
 };
 
-struct PS_Input {
+struct PS_Input
+{
     float4 pos : SV_POSITION;
-    float3 nor : NORMAL;
-    float2 uv  : TEXCOORD0;
+    float4 col : COLOR;
 };
 
-PS_Input vs_main(VS_Input i) {
-    PS_Input o = (PS_Input)0;
-
-    float4 wPos =  mul(float4(i.pos, 1.0f), world);
-    wPos = mul(wPos, view);
-    wPos = mul(wPos, proj);
-
-    float3 wNor = mul(i.nor, (float3x3)world);
-    wNor = normalize(wNor);
-
-    o.pos = wPos;
-    o.nor = wNor;
-    o.uv = i.uv;
-
-    return o;
+PS_Input vs_main(VS_Input vertex)
+{
+    PS_Input vsOut = (PS_Input)0;
+    float4 viewPos = mul(float4(vertex.pos, 1.0f), view);
+    vsOut.pos = mul(viewPos, proj);
+    vsOut.col = vertex.col;
+    return vsOut;
 }

@@ -209,6 +209,19 @@ void Vec3::operator/=(f32 val) {
     z /= val;
 }
 
+bool Vec3::operator==(Vec3 &vec) {
+    Vec3 diff = {*this - vec};
+    return  diff.LenSq() < VEC_EPSILON;
+}
+
+Vec3 operator*(f32 val, Vec3 vec) {
+    Vec3 result;
+    result.x = vec.x * val;
+    result.y = vec.y * val;
+    result.z = vec.z * val;
+    return result;
+}
+
 f32 Vec3::Dot(Vec3 &vec)
 {
     return (x * vec.x) + (y * vec.y) + (z * vec.z);
@@ -490,6 +503,16 @@ Vec4 Mat4::operator*(Vec4 &vec) {
         result.v[row] = v[row * 4 + 0] * vec.x + v[row * 4 + 1] * vec.y + v[row * 4 + 2] * vec.z + v[row * 4 + 3] * vec.w;
     }
     return result;
+}
+
+Vec3 Mat4::TransformPoint(Mat4 mat, Vec3 &vec) {
+    Vec4 result = mat * Vec4(vec, 1.0f);
+    return {result.x, result.y, result.z};
+}
+
+Vec3 Mat4::TransformVector(Mat4 mat, Vec3 &vec) {
+    Vec4 result = mat * Vec4(vec, 0.0f);
+    return {result.x, result.y, result.z};
 }
 
 Mat4 Mat4::Frustum(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
