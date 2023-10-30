@@ -216,11 +216,9 @@ int main() {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-
     // TODO: Load Shader test
     Shader shader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/texVert.hlsl",
                                                                   "./data/shaders/texFrag.hlsl");
-    
     // Test code to load the level .map file
     MapLoader loader;
     loader.LoadMapFromFile("./data/maps/test.map");
@@ -230,8 +228,7 @@ int main() {
 
     VertexBuffer  mapVBO = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     TextureBuffer mapSRV = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
-
-
+    
     // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
                 60, 
