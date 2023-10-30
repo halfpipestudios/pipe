@@ -5,7 +5,6 @@
 #include <vector>
 
 EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
-
     EntitiesInfo info = {};
 
     u8 *data = (u8 *)file.data;
@@ -29,9 +28,7 @@ EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
 i32 MapLoader::GetTextureCount(File file) {
     i32 count = 0;
 
-
     u8 *data = (u8 *)file.data;
-
 
     u8 *eof = data + file.size;
 
