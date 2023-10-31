@@ -34,7 +34,6 @@ struct Simplex {
         struct {
             Point a, b, c, d;
         };
-
     };
     i32 count;
 

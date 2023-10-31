@@ -150,7 +150,6 @@ void DrawCube(Vec3 *cube, u32 color) {
 void DrawCylinder(Cylinder cylinder, u32 color) {
     Vec3 vertices[40] = {};
 
-    // TODO: add rotatons
     // Top face
     f32 increment = (2.0f * PI) / 20;
     f32 angle = 0.0f;
@@ -190,27 +189,6 @@ void DrawCylinder(Cylinder cylinder, u32 color) {
 
 }
 
-Vec3 *CreateCylinderVertices(Cylinder cylinder) {
-    Vec3 *vertices = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(40 * sizeof(Vec3), 1);
-
-    // Top face
-    f32 increment = (2.0f * PI) / 20;
-    f32 angle = 0.0f;
-    for(i32 i = 0; i < 20; ++i) {
-        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
-        angle += increment;
-    }
-
-    // Bottom face
-    angle = 0.0f;
-    for(i32 i = 20; i < 40; ++i) {
-        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c - cylinder.u * cylinder.n;
-        angle += increment;
-    }
-    return vertices;
-}
-
-
 int main() {
 
     PlatformManager::Get()->Initialize();
@@ -226,7 +204,6 @@ int main() {
     // Test code to load the level .map file
     MapLoader loader;
     loader.LoadMapFromFile("./data/maps/test.map");
-
     VertexArray mapVertices = loader.GetVertices();
     TextureArray mapTextures = loader.GetTextures();
     ConvexHullArray mapCovexHulls = loader.GetConvexHulls();
@@ -278,38 +255,9 @@ int main() {
         // Temporal function ...
         camera.ProcessMovement(input);
         
-        GraphicsManager::Get()->ClearColorBuffer(0.5f, 0.0f, 1.0f);
-        GraphicsManager::Get()->ClearDepthStencilBuffer();
-
-        // TODO: render the game
-        GraphicsManager::Get()->BindTextureBuffer(mapSRV);
-        GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
-
-        /*
-        if(input->KeyIsPress(KEY_SHIFT)) {
-            cylinder.c += Vec3(0, 0.05f, 0);
-        }
-        if(input->KeyIsPress(KEY_CONTROL)) {
-            cylinder.c += Vec3(0, -0.05f, 0);
-        }
-
-        if(input->KeyIsPress(KEY_I)) {
-            cylinder.c += Vec3(0, 0,  0.05f);
-        }
-        if(input->KeyIsPress(KEY_K)) {
-            cylinder.c += Vec3(0, 0, -0.05f);
-        }
-
-        if(input->KeyIsPress(KEY_J)) {
-            cylinder.c += Vec3(-0.05f, 0, 0);
-        }
-        if(input->KeyIsPress(KEY_L)) {
-            cylinder.c += Vec3( 0.05f, 0, 0);
-        }
-        */
         cylinder.c = camera.pos;
 
-        TransformCube(cubeA, Vec3(1, 2, 0), 0.0f);
+        TransformCube(cubeA, Vec3(1, 2, sinf(time)*10), 0.0f);
         TransformCube(cubeB, Vec3(0, 2, 1), 0.0f);
         
         u32 colorA = 0xFF0000FF;
@@ -351,6 +299,15 @@ int main() {
 
         camera.SetViewMatrix();
 
+        // TODO: render the game
+        GraphicsManager::Get()->ClearColorBuffer(0.5f, 0.0f, 1.0f);
+        GraphicsManager::Get()->ClearDepthStencilBuffer();
+
+        // draw the level
+        GraphicsManager::Get()->BindTextureBuffer(mapSRV);
+        GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
+
+        // draw the debug geometry
         DrawCube(cubeA, colorA);
         DrawCube(cubeB, colorB);
         DrawCylinder(cylinder, colorC);
