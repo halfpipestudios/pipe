@@ -103,7 +103,6 @@ private:
 
     EntityArray entityArray;
     TextureArray textureArray;
-
     VertexArray vertexArray;
     ConvexHullArray convexHullArray;
 };

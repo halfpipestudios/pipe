@@ -110,9 +110,9 @@ struct D3D11Graphics : public Graphics {
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
 
-    virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
-    virtual void DestroyConstBuffer(ConstBuffer constBufferHandle);
-    virtual void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData);
+    ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
+    void DestroyConstBuffer(ConstBuffer constBufferHandle);
+    void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData);
 
     void SetProjMatrix(Mat4 proj)   override; 
     void SetViewMatrix(Mat4 view)   override; 
@@ -127,13 +127,14 @@ struct D3D11Graphics : public Graphics {
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
     void BindTextureBuffer(TextureBuffer textureBufferHandle) override;
 
+    void DrawLine(Vec3 a, Vec3 b, u32 color) override;
+
+private:
     static D3D11ShaderStorage shadersStorage;
     static D3D11ConstBufferStorage constBufferStorage;
     static D3D11VertexBufferStorage vertexBufferStorage;
     static D3D11TextureArrayStorage textureArrayStorage;
 
-
-    void DrawLine(Vec3 a, Vec3 b, u32 color) override;
     D3D11LineRenderer lineRenderer;
 
 };
