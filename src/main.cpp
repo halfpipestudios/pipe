@@ -21,7 +21,13 @@ struct Camera {
     f32 speed;
 
     void ProcessMovement(Input *input);
+    void SetViewMatrix();
 };
+
+void Camera::SetViewMatrix() {
+    Vec3 up  = Vec3(0, 1,  0);
+    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
+}
 
 void Camera::ProcessMovement(Input *input)
 {
@@ -78,9 +84,6 @@ void Camera::ProcessMovement(Input *input)
     acc *= speed;
 
     pos += acc;
-
-    Vec3 up  = Vec3(0, 1,  0);
-    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
 }
 
 static Vec3 gCube[] = {
@@ -225,6 +228,7 @@ int main() {
 
     VertexArray mapVertices = loader.GetVertices();
     TextureArray mapTextures = loader.GetTextures();
+    ConvexHullArray mapCovexHulls = loader.GetConvexHulls();
 
     VertexBuffer  mapVBO = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     TextureBuffer mapSRV = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
@@ -239,13 +243,13 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, 0), 0.2f); 
+    Camera camera(Vec3(0, 2, 0), 0.1f); 
 
     Cylinder cylinder;
     cylinder.c = Vec3(4, 2, 0);
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.5f;
-    cylinder.n = 0.5f;
+    cylinder.n = 1.0f;
 
     Vec3 *cubeA = CreateCube();
     Vec3 *cubeB = CreateCube();
@@ -280,7 +284,7 @@ int main() {
         GraphicsManager::Get()->BindTextureBuffer(mapSRV);
         GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
 
-
+        /*
         if(input->KeyIsPress(KEY_SHIFT)) {
             cylinder.c += Vec3(0, 0.05f, 0);
         }
@@ -301,10 +305,11 @@ int main() {
         if(input->KeyIsPress(KEY_L)) {
             cylinder.c += Vec3( 0.05f, 0, 0);
         }
+        */
+        cylinder.c = camera.pos;
 
-        TransformCube(cubeA, Vec3( 0, 2, 0), 0.0f);
-        TransformCube(cubeB, Vec3(-2, 2, 0), 0.0f);
-
+        TransformCube(cubeA, Vec3(1, 2, 0), 0.0f);
+        TransformCube(cubeB, Vec3(0, 2, 1), 0.0f);
         
         u32 colorA = 0xFF0000FF;
         u32 colorB = 0xFF0000FF;
@@ -317,6 +322,7 @@ int main() {
             f32 penetration = collisionData.penetration;
             Vec3 normal = collisionData.normal;
             cylinder.c += normal * penetration; 
+            camera.pos = cylinder.c;
         }
 
         collisionData = gjk.Intersect(&bHull, &cylinder);
@@ -326,7 +332,23 @@ int main() {
             f32 penetration = collisionData.penetration;
             Vec3 normal = collisionData.normal;
             cylinder.c += normal * penetration; 
+            camera.pos = cylinder.c;
         }
+
+
+        for(i32 i = 0; i < mapCovexHulls.count; ++i) {
+            ConvexHull *hull = &mapCovexHulls.data[i];
+            collisionData = gjk.Intersect(hull, &cylinder);
+            if(collisionData.hasCollision) {
+                colorC = 0xFFFF0000;
+                f32 penetration = collisionData.penetration;
+                Vec3 normal = collisionData.normal;
+                cylinder.c += normal * penetration; 
+                camera.pos = cylinder.c;
+            }
+        }
+
+        camera.SetViewMatrix();
 
         DrawCube(cubeA, colorA);
         DrawCube(cubeB, colorB);

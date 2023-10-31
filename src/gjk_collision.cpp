@@ -558,7 +558,6 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, Cylinder *b) {
     f32 penetration = (localA - localB).Len();
     Vec3 normal = (localA - localB).Normalized();
 
-
     CollisionData collisionData;
     collisionData.normal = normal;
     collisionData.penetration = penetration + 0.001f;
