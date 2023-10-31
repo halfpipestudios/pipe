@@ -3,6 +3,10 @@
 #include <math.h>
 #include <float.h>
 
+static inline f32 lerp(f32 a, f32 b, f32 t) {
+    return a*(1-t) + b*t;
+}
+
 // ----------------Vec2---------------------
 f32 Vec2::operator[](i32 index) {
     return v[index];
@@ -266,6 +270,14 @@ Vec3 Vec3::Normalized() {
     result.x = x /= len;
     result.y = y /= len;
     result.z = z /= len;
+    return result;
+}
+
+Vec3 Vec3::Lerp(Vec3 a, Vec3 b, f32 t) {
+    Vec3 result;
+    result.x = lerp(a.x, b.x, t);
+    result.y = lerp(a.y, b.y, t);
+    result.z = lerp(a.z, b.z, t);
     return result;
 }
 
@@ -557,12 +569,20 @@ Mat4 Mat4::LookAt(Vec3 position, Vec3 target, Vec3 up) {
         0,       0,       0,       1);
 }
 
+Mat4 Mat4::Translate(Vec3 pos) {
+    Translate(pos.x, pos.y, pos.z);
+}
+
 Mat4 Mat4::Translate(f32 x, f32 y, f32 z) {
     return Mat4(
             1, 0, 0, x,
             0, 1, 0, y,
             0, 0, 1, z,
             0, 0, 0, 1);
+}
+
+Mat4 Mat4::Scale(Vec3 scale) { 
+    Scale(scale.x, scale.y, scale.z);
 }
 
 Mat4 Mat4::Scale(f32 x, f32 y, f32 z) {
@@ -603,4 +623,72 @@ Mat4 Mat4::RotateZ(f32 angle) {
 f32 Quat::operator[](i32 index) {
     return v[index];
 }
+
+Quat Quat::Slerp(Quat a, Quat b, f32 t) {
+
+    f32 k0, k1;
+
+    f32 cos_omega = a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z;
+    if(cos_omega < 0.0f) {
+        b.w = -b.w;
+        b.x = -b.x;
+        b.y = -b.y;
+        b.z = -b.z;
+        cos_omega = -cos_omega;
+    }
+    
+    if(cos_omega > 0.9999f) {
+        k0 = (1 - t);
+        k1 = t;
+    } else {
+        
+        f32 sin_omega = sqrtf(1.0f - cos_omega*cos_omega);
+        f32 omega = atan2(sin_omega, cos_omega);
+        f32 one_over_sin_omega = 1.0f / sin_omega;
+        k0 = sin((1.0f - t) * omega) * one_over_sin_omega;
+        k1 = sin(t * omega) * one_over_sin_omega;
+    }
+
+    Quat result;
+
+    result.w = a.w*k0 + b.w*k1;
+    result.x = a.x*k0 + b.x*k1;
+    result.y = a.y*k0 + b.y*k1;
+    result.z = a.z*k0 + b.z*k1;
+
+    return result;
+}
+
+Mat4 Quat::ToMat4() {
+
+    Mat4 result;
+    
+    f32 w = q.w;
+    f32 x = q.x;
+    f32 y = q.y;
+    f32 z = q.z;
+
+    result.v[0] = 1 - 2*y*y - 2*z*z;
+    result.v[1] = 2 * (x*y - w*z);
+    result.v[2] = 2 * (x*z + w*y);
+    result.v[3] = 0;
+
+    result.v[4] = 2 * (x*y + w*z);
+    result.v[5] = 1 - 2*x*x - 2*z*z;
+    result.v[6] = 2 * (y*z - w*x);
+    result.v[7] = 0;
+
+    result.v[8]  = 2 * (x*z - w*y);
+    result.v[9]  = 2 * (y*z + w*x);
+    result.v[10] = 1 - 2*x*x - 2*y*y;
+    result.v[11] = 0;
+
+    result.v[12] = 0;
+    result.v[13] = 0;
+    result.v[14] = 0;
+    result.v[15] = 1;
+
+    return result;
+}
+
 // -----------------------------------------

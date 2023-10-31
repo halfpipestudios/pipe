@@ -194,6 +194,7 @@ int main() {
     PlatformManager::Get()->Initialize();
     MemoryManager::Get()->Initialize();
     GraphicsManager::Get()->Initialize();
+    AnimationManager::Get()->Initialize();
 
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -322,6 +323,7 @@ int main() {
 
     GraphicsManager::Get()->DestroyShader(shader);
 
+    AnimationManager::Get()->Terminate();
     GraphicsManager::Get()->Terminate();
     MemoryManager::Get()->Terminate();
     PlatformManager::Get()->Terminate();
