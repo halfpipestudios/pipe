@@ -4,6 +4,7 @@
 #include "memory.h"
 
 struct MemoryStorage {
+    
     void Initialize();
     void Terminate();
 

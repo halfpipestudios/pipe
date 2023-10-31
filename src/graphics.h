@@ -37,15 +37,19 @@ struct VertexMap {
     u32 tex;
 };
 
-#define BONE_INFLUENCE 4 
-struct SkinVertex : public Vertex {
-    i32 boneId[BONE_INFLUENCE];
-    f32 weight[BONE_INFLUENCE];
-};
-
 struct Texture {
     u32 *pixels;
     i32 w, h;
+};
+
+struct Mesh {
+    TextureBuffer texture;  
+    VertexBuffer vertexBuffer;
+};
+
+struct Model {
+    Mesh *meshes;
+    u32 numMeshes;
 };
 
 struct Graphics {
@@ -62,7 +66,7 @@ struct Graphics {
 
     virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
-    virtual void DestroyShader(Shader shaderHandle) = 0;
+    virtual void DesnimtroyShader(Shader shaderHandle) = 0;
 
     virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) = 0;
     virtual void DestroyConstBuffer(ConstBuffer constBufferHandle) = 0;

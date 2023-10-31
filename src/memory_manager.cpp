@@ -1,6 +1,8 @@
 #include "common.h"
 #include "memory_manager.h"
 
+#include "animation.h"
+
 MemoryStorage MemoryManager::memoryStorage;
 
 MemoryStorage *MemoryManager::Get() {
@@ -15,6 +17,8 @@ void MemoryStorage::Initialize() {
     memory.Initialize(MB(10));
     frame.Initialize(MB(10));
     lastMark = 0;
+    
+    animationStateFreeList = nullptr;
 }
 
 void MemoryStorage::Terminate() {

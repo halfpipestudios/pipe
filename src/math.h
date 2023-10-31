@@ -80,6 +80,10 @@ struct Vec3 {
     f32 Len();
     void Normalize();
     Vec3 Normalized();
+
+
+    static Vec3 Vec3::Lerp(Vec3 a, Vec3 b, f32 t);
+
 };
 
 
@@ -192,6 +196,8 @@ struct Mat4 {
     static Mat4 Ortho(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f);
     static Mat4 LookAt(Vec3 position, Vec3 target, Vec3 up);
     static Mat4 Translate(f32 x, f32 y, f32 z);
+    static Mat4 Translate(Vec3 pos);
+    static Mat4 Scale(Vec3 scale);
     static Mat4 Scale(f32 x, f32 y, f32 z);
     static Mat4 RotateX(f32 angle);
     static Mat4 RotateY(f32 angle);
@@ -202,11 +208,14 @@ struct Mat4 {
 struct Quat {
     union {
         struct {
-            f32 x, y, z, w;
+            f32 w, x, y, z;
         };
         f32 v[4];
     };
     f32 operator[](i32 index);
+    Mat4 ToMat4();
+
+    static Quat Slerp(Quat a, Quat b, f32 t);
 };
 
 #endif
