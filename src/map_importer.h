@@ -5,6 +5,8 @@
 #include "platform_manager.h"
 #include "graphics_manager.h"
 
+struct ConvexHull;
+
 struct Plane {
     Vec3 n;
     f32 d;
@@ -51,6 +53,11 @@ struct EntityArray {
     u32 count;
 };
 
+struct ConvexHullArray {
+    ConvexHull *data;
+    u32 count;
+};
+
 struct VertexArray {
     VertexMap *data;
     u32 count;
@@ -76,11 +83,13 @@ struct MapLoader {
     EntityArray GetEntities();
     VertexArray GetVertices();
     TextureArray GetTextures();
+    ConvexHullArray GetConvexHulls();
 
 private:
 
     EntitiesInfo GetEntitiesInfo(File file);
     i32 GetTextureCount(File file);
+    void LoadVertexData();
 
     void FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count);
     void FillPolygonsUvs(Entity *entity, Poly *polygons, i32 count);
@@ -94,6 +103,9 @@ private:
 
     EntityArray entityArray;
     TextureArray textureArray;
+
+    VertexArray vertexArray;
+    ConvexHullArray convexHullArray;
 };
 
 #endif

@@ -16,8 +16,30 @@ Vec3 ConvexHull::FindFurthestPoint(Vec3 dir) {
     return maxPoint;
 }
 
+f32 Sign(f32 value) {
+    if(value >= 0.0f) return 1.0f;
+    else return -1.0f;
+}
 
-void Simplex::PushFront(Vec3 point) {
+Vec3 Cylinder::FindFurthestPoint(Vec3 v) {
+
+    Vec3 w = v - (u.Dot(v) * u);
+
+    Vec3 result = c;
+
+    if(w.LenSq() >= FLT_EPSILON) {
+        result += u * Sign(u.Dot(v)) * n + (w.Normalized() * radii);
+    }
+    else {
+        result += u * Sign(u.Dot(v)) * n;
+    }
+
+    return result;
+
+}
+
+
+void Simplex::PushFront(Point point) {
     points[3] = points[2];
     points[2] = points[1];
     points[1] = points[0];
@@ -25,41 +47,80 @@ void Simplex::PushFront(Vec3 point) {
     count = MIN(count + 1, 4);
 }
 
-void Simplex::PushBack(Vec3 point) {
+void Simplex::PushBack(Point point) {
     ASSERT(count < 4);
     points[count++] = point;
 }
 
 
-Vec3 GJK::Support(ConvexHull *a, ConvexHull *b, Vec3 dir) {
-    return a->FindFurthestPoint(dir) - b->FindFurthestPoint(dir * -1.0f); 
+Point GJK::Support(ConvexHull *a, Cylinder *b, Vec3 dir) {
+    Point result;
+    result.a = a->FindFurthestPoint(dir);
+    result.b = b->FindFurthestPoint(dir * -1.0f);
+    result.p = result.a - result.b;
+    return result;
+}
+
+Point GJK::Support(ConvexHull *a, ConvexHull *b, Vec3 dir) {
+    Point result;
+    result.a = a->FindFurthestPoint(dir);
+    result.b = b->FindFurthestPoint(dir * -1.0f);
+    result.p = result.a - result.b;
+    return result;
 }
 
 
-bool GJK::Intersect(ConvexHull *a, ConvexHull *b) {
+CollisionData GJK::Intersect(ConvexHull *a, ConvexHull *b) {
 
-    Vec3 support = Support(a, b, Vec3(1, 0, 0));
+    Point support = Support(a, b, Vec3(1, 0, 0));
 
     Simplex simplex = {};
     simplex.PushFront(support);
 
-    Vec3 dir = support * -1.0f;
+    Vec3 dir = support.p * -1.0f;
 
     while(true) {
         support = Support(a, b, dir);
 
-        if(support.Dot(dir) <= 0) {
-            return false;
+        if(support.p.Dot(dir) <= 0) {
+            return {};
         }
 
         simplex.PushFront(support);
 
         if(DoSimplex(simplex, dir)) {
-            return true;
+            CollisionData collisionData = EPA(simplex, a, b);
+            return collisionData;
         }
 
     }
 
+}
+
+
+CollisionData GJK::Intersect(ConvexHull *a, Cylinder *b) {
+    Point support = Support(a, b, Vec3(1, 0, 0));
+
+    Simplex simplex = {};
+    simplex.PushFront(support);
+
+    Vec3 dir = support.p * -1.0f;
+
+    while(true) {
+        support = Support(a, b, dir);
+
+        if(support.p.Dot(dir) <= 0) {
+            return {};
+        }
+
+        simplex.PushFront(support);
+
+        if(DoSimplex(simplex, dir)) {
+            CollisionData collisionData = EPA(simplex, a, b);
+            return collisionData;
+        }
+
+    }
 }
 
 bool GJK::DoSimplex(Simplex &simplex, Vec3 &dir) {
@@ -73,11 +134,11 @@ bool GJK::DoSimplex(Simplex &simplex, Vec3 &dir) {
 
 bool GJK::Line(Simplex &simplex, Vec3 &dir) {
 
-    Vec3 a = simplex.points[0];
-    Vec3 b = simplex.points[1];
+    Point a = simplex.points[0];
+    Point b = simplex.points[1];
 
-    Vec3 ab = b - a;
-    Vec3 ao = a * -1.0f;
+    Vec3 ab = b.p - a.p;
+    Vec3 ao = a.p * -1.0f;
 
     if(SameDirection(ab, ao)) {
         dir = ab.Cross(ao).Cross(ab);
@@ -93,13 +154,13 @@ bool GJK::Line(Simplex &simplex, Vec3 &dir) {
 
 bool GJK::Triangle(Simplex &simplex, Vec3 &dir) {
 
-    Vec3 a = simplex.points[0];
-    Vec3 b = simplex.points[1];
-    Vec3 c = simplex.points[2];
+    Point a = simplex.points[0];
+    Point b = simplex.points[1];
+    Point c = simplex.points[2];
 
-    Vec3 ab = b - a;
-    Vec3 ac = c - a;
-    Vec3 ao = a * -1.0f;
+    Vec3 ab = b.p - a.p;
+    Vec3 ac = c.p - a.p;
+    Vec3 ao = a.p * -1.0f;
 
     Vec3 abc = ab.Cross(ac);
 
@@ -145,15 +206,15 @@ bool GJK::Triangle(Simplex &simplex, Vec3 &dir) {
 
 bool GJK::Tetrahedron(Simplex &simplex, Vec3 &dir) {
     
-    Vec3 a = simplex.points[0];
-    Vec3 b = simplex.points[1];
-    Vec3 c = simplex.points[2];
-    Vec3 d = simplex.points[3];
+    Point a = simplex.points[0];
+    Point b = simplex.points[1];
+    Point c = simplex.points[2];
+    Point d = simplex.points[3];
 
-    Vec3 ab = b - a;
-    Vec3 ac = c - a;
-    Vec3 ad = d - a;
-    Vec3 ao = a * -1.0f;
+    Vec3 ab = b.p - a.p;
+    Vec3 ac = c.p - a.p;
+    Vec3 ad = d.p - a.p;
+    Vec3 ao = a.p * -1.0f;
 
     Vec3 abc = ab.Cross(ac);
     Vec3 acd = ac.Cross(ad);
@@ -184,6 +245,322 @@ bool GJK::Tetrahedron(Simplex &simplex, Vec3 &dir) {
     return true;
 }
 
+Plane GJK::GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c) {
+    Plane p;
+    p.n = ((b - a).Cross(c - a)).Normalized();
+    p.d = p.n.Dot(a);
+    return p;
+}
+
+Vec3 GJK::ProjectPointOntoPlane(Plane &plane, Vec3 &point) {
+    f32 distance = point.Dot(plane.n) - plane.d;
+    return point - (plane.n * distance);
+}
+
 bool GJK::SameDirection(Vec3 &dir, Vec3 &ao) {
     return dir.Dot(ao) > 0;
+}
+
+void GJK::Barycentric(Vec3 &a, Vec3 &b, Vec3 &c, Vec3 &p, f32 &u, f32 &v, f32 &w) {
+    Vec3 v0 = b - a, v1 = c - a, v2 = p - a;
+    f32 d00 = v0.Dot(v0);
+    f32 d01 = v0.Dot(v1);
+    f32 d11 = v1.Dot(v1);
+    f32 d20 = v2.Dot(v0);
+    f32 d21 = v2.Dot(v1);
+    f32 denom = d00 * d11 - d01 * d01;
+    v = (d11 * d20 - d01 * d21) / denom;
+    w = (d00 * d21 - d01 * d20) / denom;
+    u = 1.0f - v - w;
+}
+
+#define EPA_TOLERANCE 0.0001
+#define EPA_MAX_NUM_FACES 64
+#define EPA_MAX_NUM_LOOSE_EDGES 32
+#define EPA_MAX_NUM_ITERATIONS 64
+CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, ConvexHull *b) {
+    Point faces[EPA_MAX_NUM_FACES][4];
+    faces[0][0] = simplex.a;
+    faces[0][1] = simplex.b;
+    faces[0][2] = simplex.c;
+    faces[0][3].p = (simplex.b.p - simplex.a.p).Cross(simplex.c.p - simplex.a.p).Normalized(); //ABC
+    faces[1][0] = simplex.a;
+    faces[1][1] = simplex.c;
+    faces[1][2] = simplex.d;
+    faces[1][3].p = (simplex.c.p - simplex.a.p).Cross(simplex.d.p - simplex.a.p).Normalized(); //ACD
+    faces[2][0] = simplex.a;
+    faces[2][1] = simplex.d;
+    faces[2][2] = simplex.b;
+    faces[2][3].p = (simplex.d.p - simplex.a.p).Cross(simplex.b.p - simplex.a.p).Normalized(); //ADB
+    faces[3][0] = simplex.b;
+    faces[3][1] = simplex.d;
+    faces[3][2] = simplex.c;
+    faces[3][3].p = (simplex.d.p - simplex.b.p).Cross(simplex.c.p - simplex.b.p).Normalized(); //BCD
+    
+    i32 numFaces = 4;
+    i32 closestFace;
+
+    for(i32 iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++) {
+        // Find face thats closest to origin
+        f32 minDist = faces[0][0].p.Dot(faces[0][3].p);
+        closestFace = 0;
+        for(i32 i = 1; i < numFaces; i++) {
+            f32 dist = faces[i][0].p.Dot(faces[i][3].p);
+            if(dist < minDist) {
+                minDist = dist;
+                closestFace = i;
+            }
+        }
+
+        // search normal to face thats closest to origin
+        Vec3 searchDir = faces[closestFace][3].p;
+        Point p = Support(a, b, searchDir);
+
+        if(p.p.Dot(searchDir) - minDist < EPA_TOLERANCE) {
+            Plane closestPlane = GetPlaneFromThreePoints(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p);
+            Vec3 projectionPoint = ProjectPointOntoPlane(closestPlane, Vec3());
+
+            f32 u, v, w;
+            Barycentric(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p, projectionPoint, u, v, w);
+
+            Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
+            Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
+            f32 penetration = (localA - localB).Len();
+            Vec3 normal = (localA - localB).Normalized();
+
+
+            CollisionData collisionData;
+            collisionData.normal = normal;
+            collisionData.penetration = penetration + 0.001f;
+            collisionData.hasCollision = true;
+            return collisionData;
+        }
+
+        Point looseEdges[EPA_MAX_NUM_LOOSE_EDGES][2];
+        i32 numLooseEdges = 0;
+
+        // Find all triangle that are facing p
+        for(i32 i = 0; i < numFaces; i++) {
+
+            if(faces[i][3].p.Dot(p.p - faces[i][0].p) > 0) {
+
+                for(i32 j = 0; j < 3; j++) {
+                    Point currentEdge[2] = {faces[i][j], faces[i][(j + 1) % 3]};
+                    bool foundEdge = false;
+                    for(i32 k = 0; k < numLooseEdges; k++) {
+                        if (looseEdges[k][1].p == currentEdge[0].p && looseEdges[k][0].p == currentEdge[1].p) {
+							looseEdges[k][0] = looseEdges[numLooseEdges - 1][0]; //Overwrite current edge
+							looseEdges[k][1] = looseEdges[numLooseEdges - 1][1]; //with last edge in list
+							numLooseEdges--;
+							foundEdge = true;
+							k = numLooseEdges; //exit loop because edge can only be shared once
+						}
+                    }
+
+                    if(!foundEdge) {
+                        if(numLooseEdges >= EPA_MAX_NUM_LOOSE_EDGES) break;
+					    looseEdges[numLooseEdges][0] = currentEdge[0];
+						looseEdges[numLooseEdges][1] = currentEdge[1];
+						numLooseEdges++;
+                    }
+                }
+
+                // Remove triangle i from list
+				faces[i][0] = faces[numFaces - 1][0];
+				faces[i][1] = faces[numFaces - 1][1];
+				faces[i][2] = faces[numFaces - 1][2];
+				faces[i][3] = faces[numFaces - 1][3];
+				numFaces--;
+				i--;
+            }
+        }
+
+		//Reconstruct polytope with p added
+		for (i32 i = 0; i < numLooseEdges; i++)
+		{
+			// assert(num_faces<EPA_MAX_NUM_FACES);
+			if (numFaces >= EPA_MAX_NUM_FACES) break;
+			faces[numFaces][0] = looseEdges[i][0];
+			faces[numFaces][1] = looseEdges[i][1];
+			faces[numFaces][2] = p;
+			faces[numFaces][3].p = (looseEdges[i][0].p - looseEdges[i][1].p).Cross(looseEdges[i][0].p - p.p).Normalized();
+
+			//Check for wrong normal to maintain CCW winding
+			f32 bias = 0.000001; //in case dot result is only slightly < 0 (because origin is on face)
+			if (faces[numFaces][0].p.Dot(faces[numFaces][3].p) + bias < 0) {
+				Point temp = faces[numFaces][0];
+				faces[numFaces][0] = faces[numFaces][1];
+				faces[numFaces][1] = temp;
+				faces[numFaces][3].p = faces[numFaces][3].p * -1.0f;
+			}
+			numFaces++;
+		}
+    }
+
+
+	printf("EPA did not converge\n");
+
+    // search normal to face thats closest to origin
+    Vec3 searchDir = faces[closestFace][3].p;
+
+    Plane closestPlane = GetPlaneFromThreePoints(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p);
+    Vec3 projectionPoint = ProjectPointOntoPlane(closestPlane, Vec3());
+
+    f32 u, v, w;
+    Barycentric(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p, projectionPoint, u, v, w);
+
+    Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
+    Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
+    f32 penetration = (localA - localB).Len();
+    Vec3 normal = (localA - localB).Normalized();
+
+
+    CollisionData collisionData;
+    collisionData.normal = normal;
+    collisionData.penetration = penetration + 0.001f;
+    collisionData.hasCollision = true;
+    return collisionData;
+}
+
+CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, Cylinder *b) {
+    Point faces[EPA_MAX_NUM_FACES][4];
+    faces[0][0] = simplex.a;
+    faces[0][1] = simplex.b;
+    faces[0][2] = simplex.c;
+    faces[0][3].p = (simplex.b.p - simplex.a.p).Cross(simplex.c.p - simplex.a.p).Normalized(); //ABC
+    faces[1][0] = simplex.a;
+    faces[1][1] = simplex.c;
+    faces[1][2] = simplex.d;
+    faces[1][3].p = (simplex.c.p - simplex.a.p).Cross(simplex.d.p - simplex.a.p).Normalized(); //ACD
+    faces[2][0] = simplex.a;
+    faces[2][1] = simplex.d;
+    faces[2][2] = simplex.b;
+    faces[2][3].p = (simplex.d.p - simplex.a.p).Cross(simplex.b.p - simplex.a.p).Normalized(); //ADB
+    faces[3][0] = simplex.b;
+    faces[3][1] = simplex.d;
+    faces[3][2] = simplex.c;
+    faces[3][3].p = (simplex.d.p - simplex.b.p).Cross(simplex.c.p - simplex.b.p).Normalized(); //BCD
+    
+    i32 numFaces = 4;
+    i32 closestFace;
+
+    for(i32 iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++) {
+        // Find face thats closest to origin
+        f32 minDist = faces[0][0].p.Dot(faces[0][3].p);
+        closestFace = 0;
+        for(i32 i = 1; i < numFaces; i++) {
+            f32 dist = faces[i][0].p.Dot(faces[i][3].p);
+            if(dist < minDist) {
+                minDist = dist;
+                closestFace = i;
+            }
+        }
+
+        // search normal to face thats closest to origin
+        Vec3 searchDir = faces[closestFace][3].p;
+        Point p = Support(a, b, searchDir);
+
+        if(p.p.Dot(searchDir) - minDist < EPA_TOLERANCE) {
+            Plane closestPlane = GetPlaneFromThreePoints(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p);
+            Vec3 projectionPoint = ProjectPointOntoPlane(closestPlane, Vec3());
+
+            f32 u, v, w;
+            Barycentric(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p, projectionPoint, u, v, w);
+
+            Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
+            Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
+            f32 penetration = (localA - localB).Len();
+            Vec3 normal = (localA - localB).Normalized();
+
+
+            CollisionData collisionData;
+            collisionData.normal = normal;
+            collisionData.penetration = penetration + 0.001f;
+            collisionData.hasCollision = true;
+            return collisionData;
+        }
+
+        Point looseEdges[EPA_MAX_NUM_LOOSE_EDGES][2];
+        i32 numLooseEdges = 0;
+
+        // Find all triangle that are facing p
+        for(i32 i = 0; i < numFaces; i++) {
+
+            if(faces[i][3].p.Dot(p.p - faces[i][0].p) > 0) {
+
+                for(i32 j = 0; j < 3; j++) {
+                    Point currentEdge[2] = {faces[i][j], faces[i][(j + 1) % 3]};
+                    bool foundEdge = false;
+                    for(i32 k = 0; k < numLooseEdges; k++) {
+                        if (looseEdges[k][1].p == currentEdge[0].p && looseEdges[k][0].p == currentEdge[1].p) {
+							looseEdges[k][0] = looseEdges[numLooseEdges - 1][0]; //Overwrite current edge
+							looseEdges[k][1] = looseEdges[numLooseEdges - 1][1]; //with last edge in list
+							numLooseEdges--;
+							foundEdge = true;
+							k = numLooseEdges; //exit loop because edge can only be shared once
+						}
+                    }
+
+                    if(!foundEdge) {
+                        if(numLooseEdges >= EPA_MAX_NUM_LOOSE_EDGES) break;
+					    looseEdges[numLooseEdges][0] = currentEdge[0];
+						looseEdges[numLooseEdges][1] = currentEdge[1];
+						numLooseEdges++;
+                    }
+                }
+
+                // Remove triangle i from list
+				faces[i][0] = faces[numFaces - 1][0];
+				faces[i][1] = faces[numFaces - 1][1];
+				faces[i][2] = faces[numFaces - 1][2];
+				faces[i][3] = faces[numFaces - 1][3];
+				numFaces--;
+				i--;
+            }
+        }
+
+		//Reconstruct polytope with p added
+		for (i32 i = 0; i < numLooseEdges; i++)
+		{
+			// assert(num_faces<EPA_MAX_NUM_FACES);
+			if (numFaces >= EPA_MAX_NUM_FACES) break;
+			faces[numFaces][0] = looseEdges[i][0];
+			faces[numFaces][1] = looseEdges[i][1];
+			faces[numFaces][2] = p;
+			faces[numFaces][3].p = (looseEdges[i][0].p - looseEdges[i][1].p).Cross(looseEdges[i][0].p - p.p).Normalized();
+
+			//Check for wrong normal to maintain CCW winding
+			f32 bias = 0.000001; //in case dot result is only slightly < 0 (because origin is on face)
+			if (faces[numFaces][0].p.Dot(faces[numFaces][3].p) + bias < 0) {
+				Point temp = faces[numFaces][0];
+				faces[numFaces][0] = faces[numFaces][1];
+				faces[numFaces][1] = temp;
+				faces[numFaces][3].p = faces[numFaces][3].p * -1.0f;
+			}
+			numFaces++;
+		}
+    }
+
+
+	printf("EPA did not converge\n");
+
+    // search normal to face thats closest to origin
+    Vec3 searchDir = faces[closestFace][3].p;
+
+    Plane closestPlane = GetPlaneFromThreePoints(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p);
+    Vec3 projectionPoint = ProjectPointOntoPlane(closestPlane, Vec3());
+
+    f32 u, v, w;
+    Barycentric(faces[closestFace][0].p, faces[closestFace][1].p, faces[closestFace][2].p, projectionPoint, u, v, w);
+
+    Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
+    Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
+    f32 penetration = (localA - localB).Len();
+    Vec3 normal = (localA - localB).Normalized();
+
+    CollisionData collisionData;
+    collisionData.normal = normal;
+    collisionData.penetration = penetration + 0.001f;
+    collisionData.hasCollision = true;
+    return collisionData;
 }

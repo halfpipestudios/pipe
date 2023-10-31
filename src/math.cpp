@@ -249,7 +249,7 @@ f32 Vec3::Len() {
 
 void Vec3::Normalize() {
     f32 lenSqr = LenSq();
-    if(lenSqr < FLT_EPSILON) {
+    if(lenSqr == 0.0f) {
         ASSERT(!"ERROR trying to normalize a zero len vector");
     }
 
@@ -261,7 +261,7 @@ void Vec3::Normalize() {
 
 Vec3 Vec3::Normalized() {
     f32 lenSqr = LenSq();
-    if(lenSqr < FLT_EPSILON) {
+    if(lenSqr == 0.0f) {
         ASSERT(!"ERROR trying to normalize a zero len vector");
     }
 

@@ -1,11 +1,11 @@
 #include "map_importer.h"
 #include "memory_manager.h"
+#include "gjk_collision.h"
 
 // TODO: FIX AND REMOVE !!!! ....
 #include <vector>
 
 EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
-
     EntitiesInfo info = {};
 
     u8 *data = (u8 *)file.data;
@@ -29,9 +29,7 @@ EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
 i32 MapLoader::GetTextureCount(File file) {
     i32 count = 0;
 
-
     u8 *data = (u8 *)file.data;
-
 
     u8 *eof = data + file.size;
 
@@ -112,6 +110,9 @@ void MapLoader::LoadMapFromFile(char *filepath) {
 
     MemoryManager::Get()->EndTemporalMemory();
 
+
+    LoadVertexData();
+
 }
 
 EntityArray MapLoader::GetEntities() {
@@ -123,8 +124,22 @@ TextureArray MapLoader::GetTextures() {
     return textureArray;
 }
 
+
+ConvexHullArray MapLoader::GetConvexHulls() {
+    return convexHullArray;
+}
+
 VertexArray MapLoader::GetVertices() {
+    return vertexArray;
+}
+
+
+
+void MapLoader::LoadVertexData() {
     std::vector<VertexMap> vertices;
+
+    convexHullArray.data = (ConvexHull *)MemoryManager::Get()->AllocStaticMemory(sizeof(ConvexHull) * entityArray.count, 1);
+    convexHullArray.count = entityArray.count;
 
     for(i32 entityIndex = 0; entityIndex < entityArray.count; ++entityIndex) {
         
@@ -154,16 +169,35 @@ VertexArray MapLoader::GetVertices() {
         }
 
         MemoryManager::Get()->EndTemporalMemory();
+
+        i32 verticesCount = 0;
+        for(i32 i = 0; i < planesCount; ++i) {
+            Poly *polyD = &polygons[i];
+            for(i32 j = 0; j < polyD->verticesCount; ++j) {
+                verticesCount++;
+            }
+        }
+
+        convexHullArray.data[entityIndex].points = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(sizeof(Vec3) * verticesCount, 1);
+        convexHullArray.data[entityIndex].count = verticesCount;
+
+        convexHullArray.data[entityIndex].count = 0;
+        for(i32 i = 0; i < planesCount; ++i) {
+            Poly *polyD = &polygons[i];
+            for(i32 j = 0; j < polyD->verticesCount; ++j) {
+                f32 scale = 1.0f/32.0f;
+                convexHullArray.data[entityIndex].points[convexHullArray.data[entityIndex].count++] =
+                    Mat4::TransformPoint(Mat4::Scale(scale, scale, scale), polyD->vertices[j].pos);
+            }
+        }
+
     }
 
 
-    VertexArray vertexArray = {};
     vertexArray.count = vertices.size();
     vertexArray.data = (VertexMap *)MemoryManager::Get()->AllocStaticMemory(vertices.size() * sizeof(VertexMap), 1);
-
     memcpy(vertexArray.data, vertices.data(), vertices.size() * sizeof(VertexMap));
 
-    return vertexArray;
 }
 
 void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {

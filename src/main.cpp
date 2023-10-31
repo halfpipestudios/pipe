@@ -21,7 +21,13 @@ struct Camera {
     f32 speed;
 
     void ProcessMovement(Input *input);
+    void SetViewMatrix();
 };
+
+void Camera::SetViewMatrix() {
+    Vec3 up  = Vec3(0, 1,  0);
+    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
+}
 
 void Camera::ProcessMovement(Input *input)
 {
@@ -78,11 +84,7 @@ void Camera::ProcessMovement(Input *input)
     acc *= speed;
 
     pos += acc;
-
-    Vec3 up  = Vec3(0, 1,  0);
-    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
 }
-
 
 static Vec3 gCube[] = {
 
@@ -145,6 +147,70 @@ void DrawCube(Vec3 *cube, u32 color) {
     }
 }
 
+void DrawCylinder(Cylinder cylinder, u32 color) {
+    Vec3 vertices[40] = {};
+
+    // TODO: add rotatons
+    // Top face
+    f32 increment = (2.0f * PI) / 20;
+    f32 angle = 0.0f;
+    for(i32 i = 0; i < 20; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
+        angle += increment;
+    }
+
+    // Bottom face
+    angle = 0.0f;
+    for(i32 i = 20; i < 40; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c - cylinder.u * cylinder.n;
+        angle += increment;
+    }
+
+    // Rendering code
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[i];
+        Vec3 b = vertices[(i + 1) % 20];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[20 + i];
+        Vec3 b = vertices[20 + (i + 1) % 20];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[i];
+        Vec3 b = vertices[20 + i];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
+}
+
+Vec3 *CreateCylinderVertices(Cylinder cylinder) {
+    Vec3 *vertices = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(40 * sizeof(Vec3), 1);
+
+    // Top face
+    f32 increment = (2.0f * PI) / 20;
+    f32 angle = 0.0f;
+    for(i32 i = 0; i < 20; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
+        angle += increment;
+    }
+
+    // Bottom face
+    angle = 0.0f;
+    for(i32 i = 20; i < 40; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c - cylinder.u * cylinder.n;
+        angle += increment;
+    }
+    return vertices;
+}
+
+
 int main() {
 
     PlatformManager::Get()->Initialize();
@@ -163,6 +229,7 @@ int main() {
 
     VertexArray mapVertices = loader.GetVertices();
     TextureArray mapTextures = loader.GetTextures();
+    ConvexHullArray mapCovexHulls = loader.GetConvexHulls();
 
     VertexBuffer  mapVBO = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     TextureBuffer mapSRV = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
@@ -177,7 +244,13 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, 0), 0.2f); 
+    Camera camera(Vec3(0, 2, 0), 0.1f); 
+
+    Cylinder cylinder;
+    cylinder.c = Vec3(4, 2, 0);
+    cylinder.u = Vec3(0, 1, 0);
+    cylinder.radii = 0.5f;
+    cylinder.n = 1.0f;
 
     Vec3 *cubeA = CreateCube();
     Vec3 *cubeB = CreateCube();
@@ -212,17 +285,75 @@ int main() {
         GraphicsManager::Get()->BindTextureBuffer(mapSRV);
         GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
 
-        u32 color = 0xFF0000FF;
-
-        TransformCube(cubeA, Vec3(0.5f, 2 + cosf(time + (PI*0.5f)), 0), time);
-        TransformCube(cubeB, Vec3(0, 2 + sinf(time), 0), time);
-
-        if(gjk.Intersect(&aHull, &bHull)) {
-            color = 0xFFFF0000;
+        /*
+        if(input->KeyIsPress(KEY_SHIFT)) {
+            cylinder.c += Vec3(0, 0.05f, 0);
+        }
+        if(input->KeyIsPress(KEY_CONTROL)) {
+            cylinder.c += Vec3(0, -0.05f, 0);
         }
 
-        DrawCube(cubeA, color);
-        DrawCube(cubeB, color);
+        if(input->KeyIsPress(KEY_I)) {
+            cylinder.c += Vec3(0, 0,  0.05f);
+        }
+        if(input->KeyIsPress(KEY_K)) {
+            cylinder.c += Vec3(0, 0, -0.05f);
+        }
+
+        if(input->KeyIsPress(KEY_J)) {
+            cylinder.c += Vec3(-0.05f, 0, 0);
+        }
+        if(input->KeyIsPress(KEY_L)) {
+            cylinder.c += Vec3( 0.05f, 0, 0);
+        }
+        */
+        cylinder.c = camera.pos;
+
+        TransformCube(cubeA, Vec3(1, 2, 0), 0.0f);
+        TransformCube(cubeB, Vec3(0, 2, 1), 0.0f);
+        
+        u32 colorA = 0xFF0000FF;
+        u32 colorB = 0xFF0000FF;
+        u32 colorC = 0xFF0000FF;
+
+        CollisionData collisionData = gjk.Intersect(&aHull, &cylinder);
+        if(collisionData.hasCollision) {
+            colorA = 0xFFFF0000;
+            colorC = 0xFFFF0000;
+            f32 penetration = collisionData.penetration;
+            Vec3 normal = collisionData.normal;
+            cylinder.c += normal * penetration; 
+            camera.pos = cylinder.c;
+        }
+
+        collisionData = gjk.Intersect(&bHull, &cylinder);
+        if(collisionData.hasCollision) {
+            colorB = 0xFFFF0000;
+            colorC = 0xFFFF0000;
+            f32 penetration = collisionData.penetration;
+            Vec3 normal = collisionData.normal;
+            cylinder.c += normal * penetration; 
+            camera.pos = cylinder.c;
+        }
+
+
+        for(i32 i = 0; i < mapCovexHulls.count; ++i) {
+            ConvexHull *hull = &mapCovexHulls.data[i];
+            collisionData = gjk.Intersect(hull, &cylinder);
+            if(collisionData.hasCollision) {
+                colorC = 0xFFFF0000;
+                f32 penetration = collisionData.penetration;
+                Vec3 normal = collisionData.normal;
+                cylinder.c += normal * penetration; 
+                camera.pos = cylinder.c;
+            }
+        }
+
+        camera.SetViewMatrix();
+
+        DrawCube(cubeA, colorA);
+        DrawCube(cubeB, colorB);
+        DrawCylinder(cylinder, colorC);
 
         GraphicsManager::Get()->Present(1);
     }
