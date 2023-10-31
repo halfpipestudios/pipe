@@ -5,11 +5,6 @@
 
 #include <stdio.h>
 
-D3D11ShaderStorage D3D11Graphics::shadersStorage;
-D3D11ConstBufferStorage D3D11Graphics::constBufferStorage;
-D3D11VertexBufferStorage D3D11Graphics::vertexBufferStorage;
-D3D11TextureArrayStorage D3D11Graphics::textureArrayStorage;
-
 void D3D11Graphics::Initialize() {
 
     i32 gMsaa = 4;
@@ -200,6 +195,7 @@ void D3D11Graphics::Initialize() {
 }
 
 void  D3D11Graphics::Terminate() {
+
     if(device) device->Release();
     if(deviceContext) deviceContext->Release();
     if(swapChain) swapChain->Release();
@@ -214,16 +210,6 @@ void  D3D11Graphics::Terminate() {
     if(alphaBlendEnable) alphaBlendEnable->Release();
     if(alphaBlendDisable) alphaBlendDisable->Release();
     if(samplerStateWrap) samplerStateWrap->Release();
-
-    for(i32 i = 0; i < shadersStorage.shadersCount; ++i) {
-        DestroyShader(i);
-    }
-    for(i32 i = 0; i < constBufferStorage.constBuffersCount; ++i) {
-        DestroyConstBuffer(i);
-    }
-    for(i32 i = 0; i < vertexBufferStorage.vertexBuffersCount; ++i) {
-        DestroyVertexBuffer(i);
-    }
 
     lineRenderer.Terminate();
 }
@@ -273,9 +259,7 @@ void D3D11Graphics::Present(i32 vsync) {
     swapChain->Present(vsync, 0);
 }
 
-Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath)
-{
-    Shader shaderHandle = -1;
+Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath) {
     D3D11Shader shader = {}; 
 
     MemoryManager::Get()->BeginTemporalMemory();
@@ -326,8 +310,7 @@ Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath)
 
 
     // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
-    {
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
          0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
@@ -351,17 +334,12 @@ Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath)
     if(vertexShaderCompiled) vertexShaderCompiled->Release();
     if(fragmentShaderCompiled) fragmentShaderCompiled->Release();
 
-
-    shadersStorage.shaders[shadersStorage.shadersCount] = shader;
-    shaderHandle = shadersStorage.shadersCount;
-    shadersStorage.shadersCount++;
-
-    return shaderHandle;
+    D3D11Shader *shaderHandle = shadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (Shader)shaderHandle;
 }
 
-Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath)
-{
-    Shader shaderHandle = -1;
+Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath) {
     D3D11Shader shader = {}; 
 
     MemoryManager::Get()->BeginTemporalMemory();
@@ -412,8 +390,7 @@ Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath)
 
 
     // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
-    {
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
          0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
@@ -439,24 +416,20 @@ Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath)
     if(vertexShaderCompiled) vertexShaderCompiled->Release();
     if(fragmentShaderCompiled) fragmentShaderCompiled->Release();
 
-
-    shadersStorage.shaders[shadersStorage.shadersCount] = shader;
-    shaderHandle = shadersStorage.shadersCount;
-    shadersStorage.shadersCount++;
-
-    return shaderHandle;
+    D3D11Shader *shaderHandle = shadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (Shader)shaderHandle;
 }
 
 void D3D11Graphics::DestroyShader(Shader shaderHandle) {
-    D3D11Shader *shader = shadersStorage.shaders + shaderHandle;
+    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
     if(shader->vertex) shader->vertex->Release();
     if(shader->fragment) shader->fragment->Release();
     if(shader->layout) shader->layout->Release();
-    shadersStorage.shadersCount--;
+    shadersStorage.Free(shader);
 }
 
 ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) {
-    ConstBuffer constBufferHandle = -1;
     D3D11ConstBuffer constBuffer = {};
 
     D3D11_BUFFER_DESC constBufferDesc;
@@ -465,8 +438,7 @@ ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u
     constBufferDesc.ByteWidth = bufferSize;
     constBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     HRESULT result = device->CreateBuffer(&constBufferDesc, 0, &constBuffer.buffer);
-    if(FAILED(result))
-    {
+    if(FAILED(result)) {
         printf("error creating const buffer\n");
         ASSERT(!"INVALID_CODE_PATH");
     }
@@ -475,22 +447,20 @@ ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u
     deviceContext->PSSetConstantBuffers(index, 1, &constBuffer.buffer);
     constBuffer.index = index;
 
-    constBufferStorage.constBuffers[constBufferStorage.constBuffersCount] = constBuffer;
-    constBufferHandle = constBufferStorage.constBuffersCount;
-    constBufferStorage.constBuffersCount++;
-
-    return constBufferHandle;
+    D3D11ConstBuffer *constBufferHandle = constBufferStorage.Alloc();
+    *constBufferHandle = constBuffer;
+    return (ConstBuffer)constBufferHandle;
 }
 
 void D3D11Graphics::DestroyConstBuffer(ConstBuffer constBufferHandle) {
-    D3D11ConstBuffer *constBuffer = constBufferStorage.constBuffers + constBufferHandle;
+    D3D11ConstBuffer *constBuffer = (D3D11ConstBuffer *)constBufferHandle;
     if(constBuffer->buffer) constBuffer->buffer->Release();
     constBuffer->index = -1;
-    constBufferStorage.constBuffersCount--;
+    constBufferStorage.Free(constBuffer);
 }
 
 void D3D11Graphics::UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData) {
-    D3D11ConstBuffer *constBuffer = constBufferStorage.constBuffers + constBufferHandle;
+    D3D11ConstBuffer *constBuffer = (D3D11ConstBuffer *)constBufferHandle;
     deviceContext->UpdateSubresource(constBuffer->buffer, 0, 0, bufferData, 0, 0);
     deviceContext->VSSetConstantBuffers(constBuffer->index, 1, &constBuffer->buffer);
     deviceContext->PSSetConstantBuffers(constBuffer->index, 1, &constBuffer->buffer);
@@ -513,7 +483,6 @@ void D3D11Graphics::SetWorldMatrix(Mat4 world) {
 
 
 VertexBuffer D3D11Graphics::CreateVertexBuffer(Vertex *vertices, u32 count) {
-    VertexBuffer vertexBufferHandle = -1;
 
     D3D11VertexBuffer vertexBuffer = {};
     vertexBuffer.verticesCount = count;
@@ -538,15 +507,12 @@ VertexBuffer D3D11Graphics::CreateVertexBuffer(Vertex *vertices, u32 count) {
         ASSERT(!"INVALID_CODE_PATH");
     }
 
-    vertexBufferStorage.vertexBuffers[vertexBufferStorage.vertexBuffersCount] = vertexBuffer;
-    vertexBufferHandle = vertexBufferStorage.vertexBuffersCount;
-    vertexBufferStorage.vertexBuffersCount++;
-
-    return vertexBufferHandle;
+    D3D11VertexBuffer *vertexBufferHandle = vertexBufferStorage.Alloc();
+    *vertexBufferHandle = vertexBuffer;
+    return (VertexBuffer)vertexBufferHandle;
 }
 
 VertexBuffer D3D11Graphics::CreateVertexBuffer(VertexMap *vertices, u32 count) {
-    VertexBuffer vertexBufferHandle = -1;
 
     D3D11VertexBuffer vertexBuffer = {};
     vertexBuffer.verticesCount = count;
@@ -571,29 +537,29 @@ VertexBuffer D3D11Graphics::CreateVertexBuffer(VertexMap *vertices, u32 count) {
         ASSERT(!"INVALID_CODE_PATH");
     }
 
-    vertexBufferStorage.vertexBuffers[vertexBufferStorage.vertexBuffersCount] = vertexBuffer;
-    vertexBufferHandle = vertexBufferStorage.vertexBuffersCount;
-    vertexBufferStorage.vertexBuffersCount++;
-
-    return vertexBufferHandle;
+    D3D11VertexBuffer *vertexBufferHandle = vertexBufferStorage.Alloc();
+    *vertexBufferHandle = vertexBuffer;
+    return (VertexBuffer)vertexBufferHandle;
 }
 
 void D3D11Graphics::DestroyVertexBuffer(VertexBuffer vertexBufferHandle) {
-    D3D11VertexBuffer *vertexBuffer = vertexBufferStorage.vertexBuffers + vertexBufferHandle;
+    D3D11VertexBuffer *vertexBuffer = (D3D11VertexBuffer *)vertexBufferHandle;
     if(vertexBuffer->buffer) vertexBuffer->buffer->Release();
     vertexBuffer->verticesCount = 0;
-    vertexBufferStorage.vertexBuffersCount--;
+    vertexBuffer->stride = 0;
+    vertexBuffer->offset = 0;
+    vertexBufferStorage.Free(vertexBuffer);
 }
 
 void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) {
     // set shader
-    D3D11Shader *shader = shadersStorage.shaders + shaderHandle;
+    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
     deviceContext->VSSetShader(shader->vertex, 0, 0);
     deviceContext->PSSetShader(shader->fragment, 0, 0);
     deviceContext->IASetInputLayout(shader->layout);
 
     // set buffer
-    D3D11VertexBuffer *vertexBuffer = vertexBufferStorage.vertexBuffers + vertexBufferHandle;
+    D3D11VertexBuffer *vertexBuffer = (D3D11VertexBuffer *)vertexBufferHandle;
     deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer->buffer, &vertexBuffer->stride, &vertexBuffer->offset);
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -602,7 +568,6 @@ void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader sha
 }
 
 TextureBuffer D3D11Graphics::CreateTextureBuffer(Texture *array, u32 textureCount) {
-    TextureBuffer textureBufferHandle = -1;
 
     D3D11TextureArray textureArray = {};
     textureArray.size = textureCount;
@@ -655,26 +620,25 @@ TextureBuffer D3D11Graphics::CreateTextureBuffer(Texture *array, u32 textureCoun
 
     deviceContext->GenerateMips(textureArray.srv);
 
-    textureArrayStorage.textureArrays[textureArrayStorage.textureArraysCount] = textureArray;
-    textureBufferHandle = textureArrayStorage.textureArraysCount;
-    textureArrayStorage.textureArraysCount++;
-
-    return textureBufferHandle;
+    D3D11TextureArray *textureArrayHandle = textureArrayStorage.Alloc();
+    *textureArrayHandle = textureArray;
+    return (TextureBuffer)textureArrayHandle;
 }
 
 void D3D11Graphics::DestroyTextureBuffer(TextureBuffer textureBufferHandle) {
-    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureBufferHandle;
+    D3D11TextureArray *textureArray = (D3D11TextureArray *)textureBufferHandle;
 
     if(textureArray->srv) textureArray->srv->Release();
     if(textureArray->gpuTextureArray) textureArray->gpuTextureArray->Release(); 
     textureArray->size = 0;
     textureArray->mipLevels = 0;
+
+    textureArrayStorage.Free(textureArray);
     
-    textureArrayStorage.textureArraysCount--;
 }
 
 void D3D11Graphics::BindTextureBuffer(TextureBuffer textureBufferHandle) {
-    D3D11TextureArray *textureArray = textureArrayStorage.textureArrays + textureBufferHandle;
+    D3D11TextureArray *textureArray = (D3D11TextureArray *)textureBufferHandle;
     deviceContext->PSSetShaderResources(0, 1, &textureArray->srv);
 }
 

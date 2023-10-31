@@ -22,7 +22,7 @@ struct ObjectAllocator {
             result = (T *)firstFree;
             firstFree = firstFree->next;
         } else {
-            result = MemoryManager::Get()->AllocStaticMemory(sizeof(T), 8);
+            result = (T *)MemoryManager::Get()->AllocStaticMemory(sizeof(T), 8);
         }
         ASSERT(result != nullptr);
         return result;

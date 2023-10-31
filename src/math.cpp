@@ -570,7 +570,7 @@ Mat4 Mat4::LookAt(Vec3 position, Vec3 target, Vec3 up) {
 }
 
 Mat4 Mat4::Translate(Vec3 pos) {
-    Translate(pos.x, pos.y, pos.z);
+    return Translate(pos.x, pos.y, pos.z);
 }
 
 Mat4 Mat4::Translate(f32 x, f32 y, f32 z) {
@@ -582,7 +582,7 @@ Mat4 Mat4::Translate(f32 x, f32 y, f32 z) {
 }
 
 Mat4 Mat4::Scale(Vec3 scale) { 
-    Scale(scale.x, scale.y, scale.z);
+    return Scale(scale.x, scale.y, scale.z);
 }
 
 Mat4 Mat4::Scale(f32 x, f32 y, f32 z) {
@@ -662,11 +662,6 @@ Quat Quat::Slerp(Quat a, Quat b, f32 t) {
 Mat4 Quat::ToMat4() {
 
     Mat4 result;
-    
-    f32 w = q.w;
-    f32 x = q.x;
-    f32 y = q.y;
-    f32 z = q.z;
 
     result.v[0] = 1 - 2*y*y - 2*z*z;
     result.v[1] = 2 * (x*y - w*z);

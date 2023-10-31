@@ -5,6 +5,7 @@
 #include <d3dcompiler.h>
 
 #include "graphics.h"
+#include "allocators.h"
 
 
 struct D3D11VertexBuffer {
@@ -14,30 +15,15 @@ struct D3D11VertexBuffer {
     u32 offset;
 };
 
-struct D3D11VertexBufferStorage {
-    D3D11VertexBuffer vertexBuffers[256];
-    i32 vertexBuffersCount;
-};
-
 struct D3D11Shader {
     ID3D11VertexShader *vertex;
     ID3D11PixelShader *fragment;
     ID3D11InputLayout *layout; 
 };
 
-struct D3D11ShaderStorage {
-    D3D11Shader shaders[256];
-    i32 shadersCount;
-};
-
 struct D3D11ConstBuffer {
     ID3D11Buffer *buffer;
     u32 index;
-};
-
-struct D3D11ConstBufferStorage {
-    D3D11ConstBuffer constBuffers[256];
-    i32 constBuffersCount;
 };
 
 struct D3D11TextureArray {
@@ -46,11 +32,6 @@ struct D3D11TextureArray {
     Texture    *cpuTextureArray;
     u32 mipLevels;
     u32 size;
-};
-
-struct D3D11TextureArrayStorage {
-    D3D11TextureArray textureArrays[256];
-    i32 textureArraysCount;
 };
 
 struct D3D11VertexLine {
@@ -130,10 +111,11 @@ struct D3D11Graphics : public Graphics {
     void DrawLine(Vec3 a, Vec3 b, u32 color) override;
 
 private:
-    static D3D11ShaderStorage shadersStorage;
-    static D3D11ConstBufferStorage constBufferStorage;
-    static D3D11VertexBufferStorage vertexBufferStorage;
-    static D3D11TextureArrayStorage textureArrayStorage;
+
+    ObjectAllocator<D3D11Shader> shadersStorage;
+    ObjectAllocator<D3D11ConstBuffer> constBufferStorage;
+    ObjectAllocator<D3D11VertexBuffer> vertexBufferStorage;
+    ObjectAllocator<D3D11TextureArray> textureArrayStorage;
 
     D3D11LineRenderer lineRenderer;
 

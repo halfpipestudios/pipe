@@ -4,10 +4,10 @@
 #include "common.h"
 #include "math.h"
 
-typedef i32 Shader;
-typedef i32 ConstBuffer;
-typedef i32 VertexBuffer;
-typedef i32 TextureBuffer;
+typedef void * Shader;
+typedef void * ConstBuffer;
+typedef void * VertexBuffer;
+typedef void * TextureBuffer;
 
 struct TexArray;
 
@@ -66,7 +66,7 @@ struct Graphics {
 
     virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
-    virtual void DesnimtroyShader(Shader shaderHandle) = 0;
+    virtual void DestroyShader(Shader shaderHandle) = 0;
 
     virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) = 0;
     virtual void DestroyConstBuffer(ConstBuffer constBufferHandle) = 0;
