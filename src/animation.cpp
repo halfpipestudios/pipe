@@ -165,7 +165,7 @@ bool AnimationSet::IsAnimationFinish(const char *name) {
 
 }
 
-void AnimationSet::Update(f32 dt) {
+void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut) {
     
     MemoryManager::Get()->BeginTemporalMemory();
     Mat4 *finalTransformMatrices = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*skeleton->numJoints, 8);
@@ -185,6 +185,9 @@ void AnimationSet::Update(f32 dt) {
 
     CalculateFinalTransformMatrices(finalLocalPose, finalTransformMatrices);
     MemoryManager::Get()->EndTemporalMemory();
+
+    *finalTransformMatricesOut = finalTransformMatrices;
+    *numFinaltrasformMatricesOut = skeleton->numJoints;
 
 }
 

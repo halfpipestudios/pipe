@@ -1,44 +1,25 @@
 #ifndef _ANIMATION_H_
 #define _ANIMATION_H_
 
-#include "common.h"
-#include "graphics.h"
-#include "allocators.h"
 #include "math.h"
-
-#define MAX_NAME_SIZE 256
-#define MAX_FINAL_BONE_MATRICES 100
-
-#define BONE_INFLUENCE 4 
-struct SkinVertex : public Vertex {
-    i32 boneId[BONE_INFLUENCE];
-    f32 weight[BONE_INFLUENCE];
-};
+#include "common.h"
+#include "allocators.h"
+#include "mesh_importer.h"
 
 struct Joint {
-    char name[MAX_NAME_SIZE];
+    char name[TWEEN_MAX_NAME_SIZE];
     i32 parent;
     Mat4 localTransform;
     Mat4 invBindTransform;
 };
 
 struct Skeleton {
-    char name[MAX_NAME_SIZE];
+    char name[TWEEN_MAX_NAME_SIZE];
     Joint *joints;
     u32 numJoints;
 
     i32 GetJointIndex(const char *name);
     bool JointIsInHierarchy(i32 index, i32 parentIndex);
-};
-
-struct SkinMesh : public Mesh {
-    SkinVertex *vertices;
-    u32 numVertices;
-    
-};
-
-struct SkinModel : public Model {
-    Skeleton *skeleton;
 };
 
 // NOTE: the size of all JointPose array is the number of joints of the parent skeleton
@@ -56,7 +37,7 @@ struct AnimationSample {
 struct AnimationClip {
     Skeleton *skeleton;
     
-    char name[MAX_NAME_SIZE];
+    char name[TWEEN_MAX_NAME_SIZE];
     f32 duration;
     AnimationSample *samples;
     u32 numSamples;
@@ -102,7 +83,7 @@ struct AnimationSet {
     void UpdateWeight(const char *name, f32 weight);
     bool IsAnimationFinish(const char *name);
 
-    void Update(f32 dt);
+    void Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut);
     
     void SetRootJoint(const char *name, const char *joint);
 
