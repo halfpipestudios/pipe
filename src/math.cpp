@@ -116,8 +116,8 @@ Vec2 Vec2::Normalized() {
 
     f32 len = sqrtf(lenSqr);
     Vec2 result;
-    result.x = x /= len;
-    result.y = y /= len;
+    result.x = x / len;
+    result.y = y / len;
     return result;
 }
 
@@ -262,15 +262,18 @@ void Vec3::Normalize() {
 Vec3 Vec3::Normalized() {
     f32 lenSqr = LenSq();
     if(lenSqr == 0.0f) {
-        ASSERT(!"ERROR trying to normalize a zero len vector");
+        //ASSERT(!"ERROR trying to normalize a zero len vector");
+        return {};
     }
-
-    f32 len = sqrtf(lenSqr);
-    Vec3 result;
-    result.x = x /= len;
-    result.y = y /= len;
-    result.z = z /= len;
-    return result;
+    else
+    {
+        f32 len = sqrtf(lenSqr);
+        Vec3 result;
+        result.x = x / len;
+        result.y = y / len;
+        result.z = z / len;
+        return result;
+    }
 }
 
 Vec3 Vec3::Lerp(Vec3 a, Vec3 b, f32 t) {
@@ -420,10 +423,10 @@ Vec4 Vec4::Normalized() {
 
     f32 len = sqrtf(lenSqr);
     Vec4 result;
-    result.x = x /= len;
-    result.y = y /= len;
-    result.z = z /= len;
-    result.w = w /= len;
+    result.x = x / len;
+    result.y = y / len;
+    result.z = z / len;
+    result.w = w / len;
     return result;
 }
 

@@ -51,11 +51,9 @@ struct CollisionData {
 struct GJK {
     CollisionData Intersect(ConvexHull *a, ConvexHull *b);
     CollisionData Intersect(ConvexHull *a, Cylinder *b);
-    CollisionData Intersect(ConvexHull *a, Cylinder *b, Cylinder *c);
 
 private: 
     Point Support(ConvexHull *a, Cylinder *b, Vec3 dir);
-    Point Support(ConvexHull *a, Cylinder *b, Cylinder *c, Vec3 dir);
     Point Support(ConvexHull *a, ConvexHull *b, Vec3 dir);
     bool DoSimplex(Simplex &simplex, Vec3 &dir);
     bool Line(Simplex &simplex, Vec3 &dir);
