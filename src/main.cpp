@@ -15,7 +15,9 @@
 struct Camera {
 
     Camera(Vec3 pos_, f32 speed_)
-        : pos(pos_), speed(speed_) {}
+        : pos(pos_), speed(speed_),
+          vel(Vec3()), acc(Vec3()),
+          grounded(false), maxDist(5), dist(5) {}
 
     Vec3 pos;
     Vec2 rot;
@@ -24,13 +26,20 @@ struct Camera {
     Vec3 up;
     f32 speed;
 
+    f32 dist;
+    f32 maxDist;
+
+    Vec3 vel;
+    Vec3 acc;
+    bool grounded;
+
     void ProcessMovement(Input *input, f32 deltaTime);
     void SetViewMatrix();
 };
 
 void Camera::SetViewMatrix() {
     Vec3 up  = Vec3(0, 1,  0);
-    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
+    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos - front * dist, pos, Vec3(0, 1, 0)));
 }
 
 void Camera::ProcessMovement(Input *input, f32 deltaTime)
@@ -43,9 +52,9 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
     right = Vec3(0, 1, 0).Cross(front).Normalized();
     up = front.Cross(right).Normalized();
 
-    Vec3 acc = {};
     Vec3 worldFront = right.Cross(Vec3(0, 1, 0)).Normalized();
 
+    acc = {};
     if(input->KeyIsPress(KEY_W)) {
         acc += worldFront;
     }
@@ -58,24 +67,32 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
     if(input->KeyIsPress(KEY_D)) {
         acc += right;
     }
-    if(input->KeyIsPress(KEY_R)) {
-        acc += Vec3(0, 1, 0);
-    }
+
+    f32 zoomSpeed = 0.25f;
     if(input->KeyIsPress(KEY_F)) {
-        acc -= Vec3(0, 1, 0);
+        maxDist = MIN(maxDist + zoomSpeed, 15.0f);
+
+    }
+    if(input->KeyIsPress(KEY_R)) {
+        maxDist = MAX(maxDist - zoomSpeed, 1.0f);
+    }
+
+    if(input->KeyJustPress(KEY_SPACE) && grounded) {
+        Vec3 jumpForce = Vec3(0, 30, 0);
+        vel += jumpForce;
     }
 
     if(input->KeyIsPress(KEY_LEFT)) {
-        rot.y += speed * 0.25f * deltaTime;
+        rot.y += 2.5f * deltaTime;
     }
     if(input->KeyIsPress(KEY_RIGHT)) {
-        rot.y -= speed * 0.25f * deltaTime;
+        rot.y -= 2.5f * deltaTime;
     }
     if(input->KeyIsPress(KEY_UP)) {
-        rot.x += speed * 0.25f * deltaTime;
+        rot.x += 2.5f * deltaTime;
     }
     if(input->KeyIsPress(KEY_DOWN)) {
-        rot.x -= speed * 0.25f * deltaTime;
+        rot.x -= 2.5f * deltaTime;
     }
 
     if (rot.x >  (89.0f/180.0f) * PI)
@@ -85,9 +102,65 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
 
     if(acc.LenSq() > 0.0f) acc.Normalize();
 
-    acc *= speed * deltaTime;
+    acc *= speed;
 
-    pos += acc;
+    if(!grounded)
+        acc += Vec3(0, -9.8 * 5, 0);
+
+    vel += acc * deltaTime;
+
+    f32 dammping = powf(0.001f, deltaTime);
+    vel = vel * dammping;
+
+    pos += vel * deltaTime;
+}
+
+struct Segment {
+    Vec3 a;
+    Vec3 b;
+
+    bool HitEntity(Entity *entity, f32 *tOut);
+};
+
+bool Segment::HitEntity(Entity *entity, f32 *tOut) {
+    Vec3 d = b - a;
+    // Set initial interval to being the whole segment. For a ray, tlast should be
+    // sety to FLT_MAX. For a line tfirst should be set to - FLT_MAX
+    f32 tFirst = 0.0f;
+    f32 tLast = 1.0f;
+    // intersect segment agains each plane
+    for(i32 i = 0; i < entity->facesCount; i++)
+    {
+        Plane p = entity->faces[i].plane;
+
+        f32 denom = p.n.Dot(d);
+        f32 dot = p.n.Dot(a);
+        f32 dist = dot - (p.d/32.0f);
+        // test if segment runs parallel to tha plane
+        if(denom == 0.0f)
+        {
+            // If so, return "no intersection" if segemnt lies outside the plane
+            if(dist > 0.0f) return 0;
+        }
+        else
+        {
+            f32 t = -(dist / denom);
+            if(denom < 0.0f)
+            {
+                // when entering halfspace, update tfirst if t is larger
+                if(t > tFirst) tFirst = t;
+            }
+            else
+            {
+                // when exiting halfspace, update tLast if t is smaller
+                if(t < tLast) tLast = t;
+            }
+
+            if(tFirst > tLast) return 0;
+        }
+    }
+    *tOut = tFirst;
+    return 1;
 }
 
 static Vec3 gCube[] = {
@@ -210,6 +283,7 @@ int main() {
     VertexArray mapVertices = loader.GetVertices();
     TextureArray mapTextures = loader.GetTextures();
     ConvexHullArray mapCovexHulls = loader.GetConvexHulls();
+    EntityArray mapEntityArray = loader.GetEntities();
 
     VertexBuffer  mapVBO = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     TextureBuffer mapSRV = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
@@ -231,7 +305,7 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, 0), 10.0f); 
+    Camera camera(Vec3(0, 2, 0), 40.0f); 
 
     Cylinder cylinder;
     cylinder.c = Vec3(4, 2, 0);
@@ -257,6 +331,7 @@ int main() {
 
         f64 currentTime = PlatformManager::Get()->GetTimeInSeconds();
         f64 deltaTime = currentTime - lastTimer;
+
         lastTimer = currentTime;
 
         static f32 time = 0;
@@ -274,7 +349,7 @@ int main() {
         
         cylinder.c = camera.pos;
 
-        TransformCube(cubeA, Vec3(1, 2, sinf(time)*10), 0.0f);
+        TransformCube(cubeA, Vec3(1, 2, sinf(time)), 0.0f);
         TransformCube(cubeB, Vec3(0, 2, 1), 0.0f);
         
         u32 colorA = 0xFF0000FF;
@@ -289,6 +364,7 @@ int main() {
             Vec3 normal = collisionData.normal;
             cylinder.c += normal * penetration; 
             camera.pos = cylinder.c;
+            camera.vel -= camera.vel.Dot(normal)*normal;
         }
 
         collisionData = gjk.Intersect(&bHull, &cylinder);
@@ -299,6 +375,7 @@ int main() {
             Vec3 normal = collisionData.normal;
             cylinder.c += normal * penetration; 
             camera.pos = cylinder.c;
+            camera.vel -= camera.vel.Dot(normal)*normal;
         }
 
 
@@ -311,8 +388,34 @@ int main() {
                 Vec3 normal = collisionData.normal;
                 cylinder.c += normal * penetration; 
                 camera.pos = cylinder.c;
+                camera.vel -= camera.vel.Dot(normal)*normal;
             }
         }
+
+        Segment cameraSegment;
+        cameraSegment.a = camera.pos;
+        cameraSegment.b = (camera.pos - camera.front * camera.maxDist);
+
+        Segment groundSegment;
+        groundSegment.a = cylinder.c;
+        groundSegment.b = groundSegment.a + Vec3(0, -(cylinder.n + 0.001), 0);
+        camera.grounded = false;
+
+        f32 tMin = FLT_MAX;
+        for(i32 i = 0; i < mapEntityArray.count; ++i) {
+            Entity *entity = &mapEntityArray.data[i];
+            f32 t = -1.0f;
+            if(groundSegment.HitEntity(entity, &t)) {
+                camera.grounded = true;
+            }
+            if(cameraSegment.HitEntity(entity, &t)) {
+                if(t < tMin) {
+                    tMin = t;
+                }
+            }
+        }
+
+        camera.dist = MIN((camera.maxDist-0.1f) * tMin, camera.maxDist);
 
         camera.SetViewMatrix();
 
@@ -328,6 +431,10 @@ int main() {
         DrawCube(cubeA, colorA);
         DrawCube(cubeB, colorB);
         DrawCylinder(cylinder, colorC);
+
+        u32 rayColor = camera.grounded ? 0xFFFF0000 : 0xFF00FF00;
+        GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, rayColor);
+        GraphicsManager::Get()->DrawLine(cameraSegment.a, cameraSegment.b, 0xFFFF00FF);
 
         GraphicsManager::Get()->Present(1);
     }
