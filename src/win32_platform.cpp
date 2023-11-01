@@ -59,6 +59,8 @@ void Win32Platform::Initialize() {
     
     GetSystemInfo(&systemInfo);
     ASSERT(IS_POWER_OF_TWO(GetPageSize()));
+
+    QueryPerformanceFrequency(&frequency);
 }
 
 void Win32Platform::Terminate()  {
@@ -89,6 +91,15 @@ void Win32Platform::PollEvents() {
         DispatchMessage(&msg);
     }
 }
+
+f64 Win32Platform::GetTimeInSeconds() {
+    LARGE_INTEGER currentTime;
+    QueryPerformanceCounter(&currentTime);
+
+    f64 time = (f64)currentTime.QuadPart / (f64)frequency.QuadPart;
+    return time;
+}
+
 
 // NOTE: memory interface
 

@@ -61,6 +61,21 @@ Point GJK::Support(ConvexHull *a, Cylinder *b, Vec3 dir) {
     return result;
 }
 
+Point GJK::Support(ConvexHull *a, Cylinder *b, Cylinder *c, Vec3 dir) {
+
+    Vec3 cb = b->FindFurthestPoint(dir * -1.0f);
+    Vec3 cc = c->FindFurthestPoint(dir * -1.0f);
+
+    f32 cbDist = cb.Dot(dir * -1.0f);
+    f32 ccDist = cc.Dot(dir * -1.0f);
+
+    Point result;
+    result.a = a->FindFurthestPoint(dir);
+    result.b = (cbDist > ccDist) ? cb : cc;
+    result.p = result.a - result.b;
+    return result;
+}
+
 Point GJK::Support(ConvexHull *a, ConvexHull *b, Vec3 dir) {
     Point result;
     result.a = a->FindFurthestPoint(dir);
@@ -97,6 +112,30 @@ CollisionData GJK::Intersect(ConvexHull *a, ConvexHull *b) {
 
 }
 
+CollisionData GJK::Intersect(ConvexHull *a, Cylinder *b, Cylinder *c) {
+    Point support = Support(a, b, c, Vec3(1, 0, 0));
+
+    Simplex simplex = {};
+    simplex.PushFront(support);
+
+    Vec3 dir = support.p * -1.0f;
+
+    while(true) {
+        support = Support(a, b, c, dir);
+
+        if(support.p.Dot(dir) <= 0) {
+            return {};
+        }
+
+        simplex.PushFront(support);
+
+        if(DoSimplex(simplex, dir)) {
+            CollisionData collisionData = EPA(simplex, a, c);
+            return collisionData;
+        }
+
+    }
+}
 
 CollisionData GJK::Intersect(ConvexHull *a, Cylinder *b) {
     Point support = Support(a, b, Vec3(1, 0, 0));
@@ -326,7 +365,10 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, ConvexHull *b) {
             Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
             Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
             f32 penetration = (localA - localB).Len();
-            Vec3 normal = (localA - localB).Normalized();
+            
+            Vec3 normal = (localA - localB);
+            if(penetration > 0.0f)
+               normal.Normalized();
 
 
             CollisionData collisionData;
@@ -412,8 +454,10 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, ConvexHull *b) {
     Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
     Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
     f32 penetration = (localA - localB).Len();
-    Vec3 normal = (localA - localB).Normalized();
 
+    Vec3 normal = (localA - localB);
+    if(penetration > 0.0f)
+       normal.Normalized();
 
     CollisionData collisionData;
     collisionData.normal = normal;
@@ -470,8 +514,10 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, Cylinder *b) {
             Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
             Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
             f32 penetration = (localA - localB).Len();
-            Vec3 normal = (localA - localB).Normalized();
 
+            Vec3 normal = (localA - localB);
+            if(penetration > 0.0f)
+               normal.Normalized();
 
             CollisionData collisionData;
             collisionData.normal = normal;
@@ -556,7 +602,10 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, Cylinder *b) {
     Vec3 localA = faces[closestFace][0].a * u + faces[closestFace][1].a * v + faces[closestFace][2].a * w;
     Vec3 localB = faces[closestFace][0].b * u + faces[closestFace][1].b * v + faces[closestFace][2].b * w;
     f32 penetration = (localA - localB).Len();
-    Vec3 normal = (localA - localB).Normalized();
+
+    Vec3 normal = (localA - localB);
+    if(penetration > 0.0f)
+       normal.Normalized();
 
     CollisionData collisionData;
     collisionData.normal = normal;

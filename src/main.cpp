@@ -20,7 +20,7 @@ struct Camera {
     Vec3 up;
     f32 speed;
 
-    void ProcessMovement(Input *input);
+    void ProcessMovement(Input *input, f32 deltaTime);
     void SetViewMatrix();
 };
 
@@ -29,7 +29,7 @@ void Camera::SetViewMatrix() {
     GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, pos + front, Vec3(0, 1, 0)));
 }
 
-void Camera::ProcessMovement(Input *input)
+void Camera::ProcessMovement(Input *input, f32 deltaTime)
 {
     front = {0, 0, 1};
     front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
@@ -62,16 +62,16 @@ void Camera::ProcessMovement(Input *input)
     }
 
     if(input->KeyIsPress(KEY_LEFT)) {
-        rot.y += speed * 0.25f;
+        rot.y += speed * 0.25f * deltaTime;
     }
     if(input->KeyIsPress(KEY_RIGHT)) {
-        rot.y -= speed * 0.25f;
+        rot.y -= speed * 0.25f * deltaTime;
     }
     if(input->KeyIsPress(KEY_UP)) {
-        rot.x += speed * 0.25f;
+        rot.x += speed * 0.25f * deltaTime;
     }
     if(input->KeyIsPress(KEY_DOWN)) {
-        rot.x -= speed * 0.25f;
+        rot.x -= speed * 0.25f * deltaTime;
     }
 
     if (rot.x >  (89.0f/180.0f) * PI)
@@ -81,7 +81,7 @@ void Camera::ProcessMovement(Input *input)
 
     if(acc.LenSq() > 0.0f) acc.Normalize();
 
-    acc *= speed;
+    acc *= speed * deltaTime;
 
     pos += acc;
 }
@@ -220,7 +220,7 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, 0), 0.1f); 
+    Camera camera(Vec3(0, 2, 0), 10.0f); 
 
     Cylinder cylinder;
     cylinder.c = Vec3(4, 2, 0);
@@ -240,11 +240,18 @@ int main() {
 
     GJK gjk;
 
+    f64 lastTimer = PlatformManager::Get()->GetTimeInSeconds();
+    u32 FPS = 0;
     while(PlatformManager::Get()->IsRunning()) {
 
+        f64 currentTime = PlatformManager::Get()->GetTimeInSeconds();
+        f64 deltaTime = currentTime - lastTimer;
+        lastTimer = currentTime;
+
         static f32 time = 0;
-        time += 0.01f;
-        
+        time += deltaTime;
+
+ 
         f32 millisecondsPerFrame = 16;
         f32 secondsPerFrame = millisecondsPerFrame / 1000.0f;
 
@@ -252,7 +259,7 @@ int main() {
         MemoryManager::Get()->ClearFrameMemory();
 
         // Temporal function ...
-        camera.ProcessMovement(input);
+        camera.ProcessMovement(input, deltaTime);
         
         cylinder.c = camera.pos;
 
@@ -314,7 +321,6 @@ int main() {
         GraphicsManager::Get()->Present(1);
     }
 
-    MemoryManager::Get()->ClearStaticMemory();
 
     GraphicsManager::Get()->DestroyTextureBuffer(mapSRV);
 
@@ -323,6 +329,9 @@ int main() {
     GraphicsManager::Get()->DestroyShader(shader);
 
     GraphicsManager::Get()->Terminate();
+
+    MemoryManager::Get()->ClearStaticMemory();
+
     MemoryManager::Get()->Terminate();
     PlatformManager::Get()->Terminate();
 

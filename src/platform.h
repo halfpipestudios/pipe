@@ -29,6 +29,8 @@ struct Platform {
     virtual Window *GetWindow() = 0;
     virtual Input *GetInput() = 0;
     virtual void PollEvents() = 0;
+
+    virtual f64 GetTimeInSeconds() = 0;
     
     // NOTE: memory interface
     virtual u64 GetPageSize() = 0;

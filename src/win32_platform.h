@@ -27,8 +27,9 @@ struct Win32Platform : public Platform {
     Window *GetWindow() override;
     Input *GetInput() override;
     void PollEvents() override;
-    bool IsRunning() override;
-
+    
+    f64 GetTimeInSeconds() override;
+    
     // NOTE: memory interface
     u64 GetPageSize();
     void *MemoryReserve(u64 size);
@@ -40,9 +41,13 @@ struct Win32Platform : public Platform {
     File ReadFileToStaticMemory(char *filepath) override;
     File ReadFileToTemporalMemory(char *filepath) override;
 
+    bool IsRunning() override;
+
     Win32Window window;
     Input input;
     bool running;
+
+    LARGE_INTEGER frequency;
 
 private:
     SYSTEM_INFO systemInfo;

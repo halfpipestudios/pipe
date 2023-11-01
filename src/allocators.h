@@ -12,9 +12,8 @@ struct ObjectAllocator {
     
     static_assert(sizeof(T) >= sizeof(FreeNode), "Object must be at least 8 bytes large");
     
-    void Initialize() {
-        firstFree = nullptr;
-    }
+    ObjectAllocator()
+        : firstFree(nullptr) {}
 
     T *Alloc() {
         T *result = nullptr;

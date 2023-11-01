@@ -211,6 +211,8 @@ void  D3D11Graphics::Terminate() {
     if(alphaBlendDisable) alphaBlendDisable->Release();
     if(samplerStateWrap) samplerStateWrap->Release();
 
+    DestroyConstBuffer(gpuMatrices);
+
     lineRenderer.Terminate();
 }
 
