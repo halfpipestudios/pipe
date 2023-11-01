@@ -6,6 +6,8 @@
 #include "graphics_manager.h"
 
 #include "map_importer.h"
+#include "model_importer.h"
+
 #include "gjk_collision.h"
 
 #include "animation.h"
@@ -212,6 +214,13 @@ int main() {
     VertexBuffer  mapVBO = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     TextureBuffer mapSRV = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     
+    // Test code to load model and animation file
+    ModelImporter modelImporter;
+    modelImporter.Read("./data/models/model.twm");
+
+    AnimationImporter animationImporter;
+    animationImporter.Read("./data/models/model.twa");
+
     // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
                 60, 

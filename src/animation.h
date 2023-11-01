@@ -4,17 +4,16 @@
 #include "math.h"
 #include "common.h"
 #include "allocators.h"
-#include "mesh_importer.h"
 
 struct Joint {
-    char name[TWEEN_MAX_NAME_SIZE];
+    char name[MAX_NAME_SIZE];
     i32 parent;
     Mat4 localTransform;
     Mat4 invBindTransform;
 };
 
 struct Skeleton {
-    char name[TWEEN_MAX_NAME_SIZE];
+    char name[MAX_NAME_SIZE];
     Joint *joints;
     u32 numJoints;
 
@@ -37,7 +36,7 @@ struct AnimationSample {
 struct AnimationClip {
     Skeleton *skeleton;
     
-    char name[TWEEN_MAX_NAME_SIZE];
+    char name[MAX_NAME_SIZE];
     f32 duration;
     AnimationSample *samples;
     u32 numSamples;

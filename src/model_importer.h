@@ -2,14 +2,14 @@
 #define _MESH_IMPORTER_H_
 
 #include "common.h"
+#include "graphics.h"
+#include "animation.h"
 
 #define TWEEN_MAGIC ((unsigned int)('E'<<24)|('E'<<16)|('W'<<8)|'T')
 
 #define TWEEN_MODEL      (1 << 0)
 #define TWEEN_SKELETON   (1 << 1)
 #define TWEEN_ANIMATIONS (1 << 2)
-
-#define TWEEN_MAX_NAME_SIZE 256
 
 #define READ_U64(buffer) *((u64 *)buffer); buffer += 8
 #define READ_U32(buffer) *((u32 *)buffer); buffer += 4
@@ -25,18 +25,18 @@
 
 struct Vertex;
 struct SkinVertex;
-struct Model;
-
-struct Joint;
-struct AnimationSample;
-struct Skeleton;
-struct AnimationClip;
 
 struct Vec3;
 struct Mat4;
 struct Quat;
 
 struct TweenImporter {
+
+    virtual void Read(char *path) = 0;
+
+protected:
+
+    u8 *file;
 
     void ReadString(u8 **file, char *buffer);
     void ReadVertex(u8 **file, Vertex *vertex);
@@ -49,15 +49,25 @@ struct TweenImporter {
     void ReadSample(u8 **file, AnimationSample *sample, u32 num_joints);
 
     void AddWeightToVertex(SkinVertex *vertex, u32 boneId, f32 weight);
-
-
 };
 
 struct ModelImporter : public TweenImporter {
+    void Read(char *path) override;
+    Model model;
+
+private:
     void ReadModelFile(Model *model, u8 *file);
 };
 
 struct AnimationImporter : public TweenImporter {
+    
+    void Read(char *path) override;
+
+    Skeleton skeleton;
+    AnimationClip *animations;
+    u32 numAnimations;
+
+private:
     void ReadSkeletonFile(Skeleton *skeleton, AnimationClip **animations, u32 *num_animations, u8 *file);
 };
 

@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "math.h"
-#include "mesh_importer.h"
 
 typedef void * Shader;
 typedef void * ConstBuffer;
@@ -59,7 +58,7 @@ struct Mesh {
     u32 *indices;
     u32 numIndices;
 
-    char material[TWEEN_MAX_NAME_SIZE];
+    char material[MAX_NAME_SIZE];
 };
 
 enum ModelType {

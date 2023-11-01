@@ -1,4 +1,6 @@
-#include "mesh_importer.h"
+#include "model_importer.h"
+
+#include "platform_manager.h"
 #include "memory_manager.h"
 #include "animation.h"
 #include "graphics.h"
@@ -8,8 +10,8 @@
 
 void TweenImporter::ReadString(u8 **file, char *buffer) {
     u32 len = READ_U32(*file);
-    if(len > TWEEN_MAX_NAME_SIZE) {
-        len = TWEEN_MAX_NAME_SIZE;
+    if(len > MAX_NAME_SIZE) {
+        len = MAX_NAME_SIZE;
     }
     memcpy(buffer, *file, len);
     buffer[len] = '\0';
@@ -78,9 +80,54 @@ void TweenImporter::AddWeightToVertex(SkinVertex *vertex, u32 boneId, f32 weight
     }
 }
 
+void TweenImporter::ReadJoint(u8 **file, Joint *joint) {
+    joint->parent = READ_S32(*file);
+    ReadString(file, joint->name);
+    ReadMatrix(file, &joint->localTransform);
+    ReadMatrix(file, &joint->invBindTransform);
+}
+
+void TweenImporter::ReadSample(u8 **file, AnimationSample *sample, u32 num_joints) {
+    
+    u32 num_animated_bones = READ_U32(*file);
+    sample->localPoses = (JointPose *)MemoryManager::Get()->AllocStaticMemory(sizeof(JointPose)*num_joints, 8);
+
+    for(u32 pose_index = 0; pose_index < num_joints; ++pose_index) {
+        JointPose *pose = sample->localPoses + pose_index;
+        pose->position = Vec3(0, 0, 1);
+        pose->rotation = Quat(1, 0, 0, 0);
+        pose->scale = Vec3(1, 1, 1);
+    }
+    
+    bool time_stamp_initialize = false;
+
+    for(u32 animated_bone_index = 0; animated_bone_index < num_animated_bones; ++animated_bone_index) {
+        u32 bone_index = READ_U32(*file);
+        f32 time_stamp = READ_F32(*file);
+        ReadVec3(file, &sample->localPoses[bone_index].position);
+        ReadQuat(file, &sample->localPoses[bone_index].rotation);
+        ReadVec3(file, &sample->localPoses[bone_index].scale);
+        
+        if(time_stamp_initialize == false) {
+            sample->time_stamp = time_stamp;
+            time_stamp_initialize = true;
+        }
+    }
+
+}
+
 /*-----------------------------------------------------*/
 /*        Model importer interface implementation      */
 /*-----------------------------------------------------*/
+
+void ModelImporter::Read(char *path) {
+    MemoryManager::Get()->BeginTemporalMemory();
+    
+    File file = PlatformManager::Get()->ReadFileToTemporalMemory(path);
+    ReadModelFile(&model, (u8 *)file.data);
+    
+    MemoryManager::Get()->EndTemporalMemory();
+}
 
 void ModelImporter::ReadModelFile(Model *model, u8 *file) {
     
@@ -153,7 +200,7 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
             }
         }
         
-        char skeletonName[TWEEN_MAX_NAME_SIZE];
+        char skeletonName[MAX_NAME_SIZE];
         ReadString(&file, skeletonName);
         u32 totalNumberOfBones = READ_U32(file);
         
@@ -169,7 +216,6 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
                 
                 u32 currentBoneId = READ_U32(file);
                 u32 numWeights = READ_U32(file);
-                printf("%d) num_weights: %d\n", currentBoneId, numWeights);
 
                 for(u32 WightsIndex = 0; WightsIndex < numWeights; ++WightsIndex) {
                     
@@ -192,42 +238,14 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
 /*    Animation importer interface implementation      */
 /*-----------------------------------------------------*/
 
-void TweenImporter::ReadJoint(u8 **file, Joint *joint) {
-    joint->parent = READ_S32(*file);
-    ReadString(file, joint->name);
-    ReadMatrix(file, &joint->localTransform);
-    ReadMatrix(file, &joint->invBindTransform);
+void AnimationImporter::Read(char *path) {
+
+    MemoryManager::Get()->BeginTemporalMemory();
     
-    printf("bone %s: parent index: %d\n", joint->name, joint->parent);
-}
-
-void TweenImporter::ReadSample(u8 **file, AnimationSample *sample, u32 num_joints) {
+    File file = PlatformManager::Get()->ReadFileToTemporalMemory(path);
+    ReadSkeletonFile(&skeleton, &animations, &numAnimations, (u8 *)file.data);
     
-    u32 num_animated_bones = READ_U32(*file);
-    sample->localPoses = (JointPose *)MemoryManager::Get()->AllocStaticMemory(sizeof(JointPose)*num_joints, 8);
-
-    for(u32 pose_index = 0; pose_index < num_joints; ++pose_index) {
-        JointPose *pose = sample->localPoses + pose_index;
-        pose->position = Vec3(0, 0, 1);
-        pose->rotation = Quat(1, 0, 0, 0);
-        pose->scale = Vec3(1, 1, 1);
-    }
-    
-    bool time_stamp_initialize = false;
-
-    for(u32 animated_bone_index = 0; animated_bone_index < num_animated_bones; ++animated_bone_index) {
-        u32 bone_index = READ_U32(*file);
-        f32 time_stamp = READ_F32(*file);
-        ReadVec3(file, &sample->localPoses[bone_index].position);
-        ReadQuat(file, &sample->localPoses[bone_index].rotation);
-        ReadVec3(file, &sample->localPoses[bone_index].scale);
-        
-        if(time_stamp_initialize == false) {
-            sample->time_stamp = time_stamp;
-            time_stamp_initialize = true;
-        }
-    }
-
+    MemoryManager::Get()->EndTemporalMemory();
 }
 
 void AnimationImporter::ReadSkeletonFile(Skeleton *skeleton, AnimationClip **animations, u32 *num_animations, u8 *file) {
