@@ -8,6 +8,8 @@
 #include "map_importer.h"
 #include "gjk_collision.h"
 
+#include "animation.h"
+
 struct Camera {
 
     Camera(Vec3 pos_, f32 speed_)

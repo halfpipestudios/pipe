@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include <math.h>
+
 #define EPSILON 0.0001f
 #define VEC_EPSILON 0.000001f
 #define PI 3.14159265359
@@ -212,6 +214,10 @@ struct Quat {
         };
         f32 v[4];
     };
+
+    Quat() : w(1), x(0), y(0), z(0) {}
+    Quat(f32 w, f32 x, f32 y, f32 z) : w(w), x(x), y(y), z(z) {}
+    
     f32 operator[](i32 index);
     Mat4 ToMat4();
 

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "math.h"
+#include "mesh_importer.h"
 
 typedef void * Shader;
 typedef void * ConstBuffer;
@@ -37,6 +38,12 @@ struct VertexMap {
     u32 tex;
 };
 
+#define MAX_BONES_INFLUENCE 4 
+struct SkinVertex : public Vertex {
+    i32 boneIds[MAX_BONES_INFLUENCE];
+    f32 weights[MAX_BONES_INFLUENCE];
+};
+
 struct Texture {
     u32 *pixels;
     i32 w, h;
@@ -45,9 +52,24 @@ struct Texture {
 struct Mesh {
     TextureBuffer texture;  
     VertexBuffer vertexBuffer;
+
+    Vertex *vertices;
+    u32 numVertices;
+
+    u32 *indices;
+    u32 numIndices;
+
+    char material[TWEEN_MAX_NAME_SIZE];
+};
+
+enum ModelType {
+    MODEL_TYPE_STATIC,
+    MODEL_TYPE_ANIMATED,
 };
 
 struct Model {
+    ModelType type;
+
     Mesh *meshes;
     u32 numMeshes;
 };
