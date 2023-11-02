@@ -154,7 +154,7 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
     printf("Number of meshes: %d\n", model->numMeshes);
     
     u64 sizeOfVertex = sizeof(Vertex);
-    if(model->type = MODEL_TYPE_ANIMATED) {
+    if(model->type == MODEL_TYPE_ANIMATED) {
         sizeOfVertex = sizeof(SkinVertex);
     }
 
@@ -176,7 +176,13 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex;
         for(u32 vertexIndex = 0; vertexIndex < mesh->numVertices; ++vertexIndex) {
-            Vertex *vertex = mesh->vertices + vertexIndex;
+            Vertex *vertex = nullptr;
+            if(model->type == MODEL_TYPE_ANIMATED) {
+                vertex = (Vertex *)(((SkinVertex *)mesh->vertices) + vertexIndex);
+            } else {
+                vertex = mesh->vertices + vertexIndex;
+            }
+            ASSERT(vertex != nullptr);
             ReadVertex(&file, vertex);
         }
 

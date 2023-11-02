@@ -330,7 +330,7 @@ int main() {
     Cylinder cylinder;
     cylinder.c = Vec3(4, 2, 0);
     cylinder.u = Vec3(0, 1, 0);
-    cylinder.radii = 0.5f;
+    cylinder.radii = 0.3f;
     cylinder.n = 1.0f;
 
     Vec3 *cubeA = CreateCube();
@@ -441,8 +441,8 @@ int main() {
         
         // NOTE: Update animation state
         
-        Mat4 *finalTransformMatricesOut;
-        u32 numFinaltrasformMatricesOut;
+        Mat4 *finalTransformMatricesOut = nullptr;
+        u32 numFinaltrasformMatricesOut = 0;
         animation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
         GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
 
@@ -458,7 +458,9 @@ int main() {
         GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
 
         // NOTE: Draw player
-        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) * Mat4::Scale(0.01f, 0.01f, 0.01f));
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) *
+                                               Mat4::RotateY(camera.rot.y) *
+                                               Mat4::Scale(0.0125f, 0.0125f, 0.0125f));
         for(u32 meshIndex = 0; meshIndex < modelImporter.model.numMeshes; ++meshIndex) {
             Mesh *mesh = modelImporter.model.meshes + meshIndex;
             GraphicsManager::Get()->BindTextureBuffer(mesh->texture);

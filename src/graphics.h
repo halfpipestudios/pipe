@@ -49,6 +49,7 @@ struct SkinVertex : public Vertex {
     f32 weights[MAX_BONES_INFLUENCE];
 };
 
+
 struct Texture {
     u32 *pixels;
     i32 w, h;

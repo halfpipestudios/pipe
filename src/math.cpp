@@ -432,6 +432,11 @@ Vec4 Vec4::Normalized() {
 
 // -----------------------------------------
 
+i32 iVec4::operator[](i32 index) {
+    return v[index];
+}
+
+
 // ----------------Mat3---------------------
 f32 *Mat3::operator[](i32 index) {
     return &(v[index * 3]);

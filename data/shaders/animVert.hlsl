@@ -45,7 +45,7 @@ PS_Input vs_main(VS_Input input) {
         totalPosition += localPosition * input.weigths[i];
     }
     
-    float4 wPos =  mul(float4(input.pos, 1.0f), world);
+    float4 wPos =  mul(totalPosition, world);
     wPos = mul(wPos, view);
     wPos = mul(wPos, proj);
 

@@ -127,6 +127,17 @@ struct Vec4 {
     Vec4 Normalized();
 };
 
+struct iVec4 {
+    union {
+        struct {
+            i32 x, y, z, w;
+        };
+        i32 v[4];
+    };
+
+    i32 operator[](i32 index);
+};
+
 struct Mat3 {
     union {
         struct {

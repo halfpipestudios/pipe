@@ -399,7 +399,7 @@ Shader D3D11Graphics::CreateShaderSkinVertex(char *vertpath, char *fragpath) {
          0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
          0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_UINT,
+        {"TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_SINT,
          0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,
          0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
@@ -568,7 +568,7 @@ void D3D11Graphics::SetWorldMatrix(Mat4 world) {
 }
 
 void D3D11Graphics::SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) {
-    memcpy(cpuAnimMatrices.boneMatrix, finalTransformMatrices, count*sizeof(Mat4));
+    memcpy(cpuAnimMatrices.boneMatrix, finalTransformMatrices, MIN(count, 100)*sizeof(Mat4));
     UpdateConstBuffer(gpuAnimMatrices, (void *)&cpuAnimMatrices);
 }
 
@@ -689,7 +689,7 @@ void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader sha
 
 IndexBuffer D3D11Graphics::CreateIndexBuffer(u32 *indices, u32 count) {
     D3D11IndexBuffer indexBuffer = {};
-    indexBuffer.indexCount= count;
+    indexBuffer.indexCount = count;
     indexBuffer.format = DXGI_FORMAT_R32_UINT;
 
     // create gpu buffer
@@ -698,7 +698,7 @@ IndexBuffer D3D11Graphics::CreateIndexBuffer(u32 *indices, u32 count) {
 
     D3D11_BUFFER_DESC indexDesc;
     ZeroMemory(&indexDesc, sizeof(indexDesc));
-    indexDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
     indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexDesc.ByteWidth = sizeof(u32) * count;
     resourceData.pSysMem = indices;
