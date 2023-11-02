@@ -12,6 +12,9 @@
 
 #include "animation.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 struct Camera {
 
     Camera(Vec3 pos_, f32 speed_)
@@ -266,11 +269,29 @@ void DrawCylinder(Cylinder cylinder, u32 color) {
 
 }
 
+static TextureBuffer LoadTextureFromPath(char *path) {
+    static char diffuse_material_path_cstr[4096];
+    sprintf(diffuse_material_path_cstr, "%s%s", "./data/", path); 
+    
+    stbi_set_flip_vertically_on_load(true);
+    i32 w, h, n;
+    u32 *bitmap = (u32 *)stbi_load(diffuse_material_path_cstr, &w, &h, &n, 4);
+    
+    Texture texture = {bitmap, w, h};
+    TextureBuffer textureBuffer = GraphicsManager::Get()->CreateTextureBuffer(&texture, 1);
+    
+    stbi_image_free(bitmap);
+
+    printf("Texture: %s loaded\n", diffuse_material_path_cstr);
+
+    return textureBuffer;
+}
+
 static void LoadModelToGpu(Model *model, TextureBuffer defaultTexture) {
     ASSERT(model->type == MODEL_TYPE_ANIMATED);
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex; 
-        mesh->texture = defaultTexture;
+        mesh->texture = LoadTextureFromPath(mesh->material);
         mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices);
         mesh->indexBuffer = GraphicsManager::Get()->CreateIndexBuffer(mesh->indices, mesh->numIndices);
     }
@@ -312,6 +333,7 @@ int main() {
     AnimationSet animation;
     animation.Initialize(animationImporter.animations, animationImporter.numAnimations);
     animation.SetRootJoint("punch", "mixamorig1_Spine");
+    
     animation.Play("idle", 1, true);
     animation.Play("walking", 1, true);
 
@@ -440,13 +462,20 @@ int main() {
         camera.SetViewMatrix();
         
         // NOTE: Update animation state
-        
+        if(input->KeyJustPress(KEY_1)) {
+            if(animation.IsAnimationFinish("punch")) {
+                animation.PlaySmooth("punch", 0.5f);
+            }
+        }
+
+        animation.UpdateWeight("walking", CLAMP(camera.vel.Len()*0.25f, 0, 1));
+
         Mat4 *finalTransformMatricesOut = nullptr;
         u32 numFinaltrasformMatricesOut = 0;
         animation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
         GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
 
-        printf("Remaining memory storage %lld\n", MemoryManager::Get()->RemainingMemorySotrage());
+        // printf("Remaining memory storage %lld\n", MemoryManager::Get()->RemainingMemorySotrage());
 
         // TODO: render the game
         GraphicsManager::Get()->ClearColorBuffer(0.5f, 0.0f, 1.0f);

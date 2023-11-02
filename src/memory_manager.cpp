@@ -14,7 +14,7 @@ MemoryStorage *MemoryManager::Get() {
 void MemoryStorage::Initialize() {
     memory.Initialize(MB(10));
     frame.Initialize(MB(10));
-    lastMark = (u64 *)memory.bottom;
+    lastMark = (u64)memory.bottom;
 }
 
 void MemoryStorage::Terminate() {
@@ -38,14 +38,14 @@ void *MemoryStorage::AllocTemporalMemory(u64 size, u64 align) {
 }
 
 void MemoryStorage::BeginTemporalMemory() {
-    u64 *mark = (u64 *)memory.AllocBottom(sizeof(u64), 1);
-    *mark = (u64)lastMark;
-    lastMark = mark;
+    u64 *markHeader = (u64 *)memory.AllocBottom(sizeof(u64), 1);
+    *markHeader = lastMark;
+    lastMark = (u64)markHeader;
 }
 
 void MemoryStorage::EndTemporalMemory() {
-    memory.bottom = (u8 *)(*lastMark);
-    lastMark = (u64 *)memory.bottom;
+    memory.bottom = (u8 *)lastMark;
+    lastMark = *((u64 *)lastMark);
 }
 
 void *MemoryStorage::AllocFrameMemory(u64 size, u64 align) {

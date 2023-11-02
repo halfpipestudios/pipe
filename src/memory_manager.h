@@ -22,7 +22,7 @@ struct MemoryStorage {
 
 private:  
     DoubleEndedStackAllocator memory;
-    u64 *lastMark;
+    u64 lastMark;
     
     StackAllocator frame;
 };

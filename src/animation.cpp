@@ -263,7 +263,8 @@ void AnimationSet::UpdateAnimationState(AnimationState *state, f32 dt, JointPose
             local_pose->position = Vec3::Lerp(local_pose->position, sample_local_pose->position, state->weight);
             local_pose->rotation = Quat::Slerp(local_pose->rotation, sample_local_pose->rotation, state->weight);
             local_pose->scale = Vec3::Lerp(local_pose->scale, sample_local_pose->scale, state->weight);
-
+            
+            int breakHere = 0;
         }
     }
 
