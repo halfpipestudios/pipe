@@ -14,6 +14,8 @@ struct MemoryStorage {
     void *AllocTemporalMemory(u64 size, u64 align);
     void BeginTemporalMemory();
     void EndTemporalMemory();
+
+    u64 RemainingMemorySotrage();
     
     void *AllocFrameMemory(u64 size, u64 align);
     void ClearFrameMemory();

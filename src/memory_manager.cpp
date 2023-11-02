@@ -50,7 +50,7 @@ void MemoryStorage::BeginTemporalMemory() {
 }
 
 void MemoryStorage::EndTemporalMemory() {
-    memory.bottom = (u8 *)lastMark;
+    memory.bottom = (u8 *)(*((u64 *)lastMark));
 #if 0
     lastMark = (((u64)memory.bottom + 7) & ~7);
 #else
@@ -65,4 +65,8 @@ void *MemoryStorage::AllocFrameMemory(u64 size, u64 align) {
 
 void MemoryStorage::ClearFrameMemory() {
     frame.Free();
+}
+
+u64 MemoryStorage::RemainingMemorySotrage() {
+    return memory.RemainingSize();
 }

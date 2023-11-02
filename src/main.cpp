@@ -266,6 +266,16 @@ void DrawCylinder(Cylinder cylinder, u32 color) {
 
 }
 
+static void LoadModelToGpu(Model *model, TextureBuffer defaultTexture) {
+    ASSERT(model->type == MODEL_TYPE_ANIMATED);
+    for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
+        Mesh *mesh = model->meshes + meshIndex; 
+        mesh->texture = defaultTexture;
+        mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices);
+        mesh->indexBuffer = GraphicsManager::Get()->CreateIndexBuffer(mesh->indices, mesh->numIndices);
+    }
+}
+
 int main() {
 
     PlatformManager::Get()->Initialize();
@@ -277,6 +287,9 @@ int main() {
     // TODO: Load Shader test
     Shader shader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/texVert.hlsl",
                                                                   "./data/shaders/texFrag.hlsl");
+    
+    Shader animShader = GraphicsManager::Get()->CreateShaderSkinVertex("./data/shaders/animVert.hlsl",
+                                                                       "./data/shaders/texFrag.hlsl");
     // Test code to load the level .map file
     MapLoader loader;
     loader.LoadMapFromFile("./data/maps/test.map");
@@ -291,9 +304,16 @@ int main() {
     // Test code to load model and animation file
     ModelImporter modelImporter;
     modelImporter.Read("./data/models/model.twm");
+    LoadModelToGpu(&modelImporter.model, mapSRV);
 
     AnimationImporter animationImporter;
     animationImporter.Read("./data/models/model.twa");
+    
+    AnimationSet animation;
+    animation.Initialize(animationImporter.animations, animationImporter.numAnimations);
+    animation.SetRootJoint("punch", "mixamorig1_Spine");
+    animation.Play("idle", 1, true);
+    animation.Play("walking", 1, true);
 
     // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
@@ -418,14 +438,32 @@ int main() {
         camera.dist = MIN((camera.maxDist-0.1f) * tMin, camera.maxDist);
 
         camera.SetViewMatrix();
+        
+        // NOTE: Update animation state
+        
+        Mat4 *finalTransformMatricesOut;
+        u32 numFinaltrasformMatricesOut;
+        animation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
+        GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
+
+        printf("Remaining memory storage %lld\n", MemoryManager::Get()->RemainingMemorySotrage());
 
         // TODO: render the game
         GraphicsManager::Get()->ClearColorBuffer(0.5f, 0.0f, 1.0f);
         GraphicsManager::Get()->ClearDepthStencilBuffer();
 
         // draw the level
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
         GraphicsManager::Get()->BindTextureBuffer(mapSRV);
         GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
+
+        // NOTE: Draw player
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) * Mat4::Scale(0.01f, 0.01f, 0.01f));
+        for(u32 meshIndex = 0; meshIndex < modelImporter.model.numMeshes; ++meshIndex) {
+            Mesh *mesh = modelImporter.model.meshes + meshIndex;
+            GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, animShader);
+        }
 
         // draw the debug geometry
         DrawCube(cubeA, colorA);
@@ -439,12 +477,14 @@ int main() {
         GraphicsManager::Get()->Present(1);
     }
 
+    animation.Terminate();
 
     GraphicsManager::Get()->DestroyTextureBuffer(mapSRV);
 
     GraphicsManager::Get()->DestroyVertexBuffer(mapVBO);
 
     GraphicsManager::Get()->DestroyShader(shader);
+    GraphicsManager::Get()->DestroyShader(animShader);
 
     GraphicsManager::Get()->Terminate();
 

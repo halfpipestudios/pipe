@@ -15,6 +15,12 @@ struct D3D11VertexBuffer {
     u32 offset;
 };
 
+struct D3D11IndexBuffer {
+    ID3D11Buffer *buffer;
+    u32 indexCount;
+    DXGI_FORMAT format;
+};
+
 struct D3D11Shader {
     ID3D11VertexShader *vertex;
     ID3D11PixelShader *fragment;
@@ -88,6 +94,7 @@ struct D3D11Graphics : public Graphics {
     void Present(i32 vsync) override;
 
     Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
+    Shader CreateShaderSkinVertex(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
 
@@ -99,10 +106,17 @@ struct D3D11Graphics : public Graphics {
     void SetViewMatrix(Mat4 view)   override; 
     void SetWorldMatrix(Mat4 world) override;
 
+    void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) override;
+
     VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) override;
+    VertexBuffer CreateVertexBuffer(SkinVertex *vertices, u32 count) override;
     VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) override;
     void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
     void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
+
+    IndexBuffer CreateIndexBuffer(u32 *indices, u32 count) override;
+    void DestroyIndexBuffer(IndexBuffer indexBuffer) override;
+    void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) override;
 
     TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) override;
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
@@ -116,6 +130,7 @@ private:
     ObjectAllocator<D3D11ConstBuffer> constBufferStorage;
     ObjectAllocator<D3D11VertexBuffer> vertexBufferStorage;
     ObjectAllocator<D3D11TextureArray> textureArrayStorage;
+    ObjectAllocator<D3D11IndexBuffer> indexBufferStorage;
 
     D3D11LineRenderer lineRenderer;
 

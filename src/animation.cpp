@@ -167,7 +167,6 @@ bool AnimationSet::IsAnimationFinish(const char *name) {
 
 void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut) {
     
-    MemoryManager::Get()->BeginTemporalMemory();
     Mat4 *finalTransformMatrices = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*skeleton->numJoints, 8);
     
     MemoryManager::Get()->BeginTemporalMemory();
@@ -176,7 +175,7 @@ void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFina
     ZeroFinalLocalPose(finalLocalPose);
     
     AnimationState *state = states;
-    while(states != nullptr) {
+    while(state != nullptr) {
         if(state->enable) {
             UpdateAnimationState(state, dt, finalLocalPose);
         }

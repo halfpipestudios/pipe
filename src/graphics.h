@@ -7,6 +7,7 @@
 typedef void * Shader;
 typedef void * ConstBuffer;
 typedef void * VertexBuffer;
+typedef void * IndexBuffer;
 typedef void * TextureBuffer;
 
 struct TexArray;
@@ -22,6 +23,11 @@ struct CBMatrix {
     Mat4 proj;
     Mat4 view;
     Mat4 world;
+};
+
+#define MAX_BONES 100
+struct CBAnimation {
+    Mat4 boneMatrix[MAX_BONES];
 };
 
 struct Vertex {
@@ -51,6 +57,7 @@ struct Texture {
 struct Mesh {
     TextureBuffer texture;  
     VertexBuffer vertexBuffer;
+    IndexBuffer indexBuffer;
 
     Vertex *vertices;
     u32 numVertices;
@@ -86,6 +93,7 @@ struct Graphics {
     virtual void Present(i32 vsync) = 0;
 
     virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
+    virtual Shader CreateShaderSkinVertex(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
 
@@ -97,10 +105,17 @@ struct Graphics {
     virtual void SetViewMatrix(Mat4 view) = 0;
     virtual void SetWorldMatrix(Mat4 world) = 0;
 
+    virtual void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) = 0;
+
     virtual VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) = 0;
+    virtual VertexBuffer CreateVertexBuffer(SkinVertex *vertices, u32 count) = 0;
     virtual VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) = 0;
     virtual void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) = 0;
     virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) = 0;
+
+    virtual IndexBuffer CreateIndexBuffer(u32 *indices, u32 count) = 0;
+    virtual void DestroyIndexBuffer(IndexBuffer indexBuffer) = 0;
+    virtual void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) = 0;
 
     virtual TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) = 0;
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
@@ -108,6 +123,8 @@ struct Graphics {
 
     virtual void DrawLine(Vec3 a, Vec3 b, u32 color) = 0;
 
+    ConstBuffer gpuAnimMatrices;
+    CBAnimation cpuAnimMatrices;
 
     ConstBuffer gpuMatrices; 
     CBMatrix    cpuMatrices;

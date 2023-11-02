@@ -189,7 +189,8 @@ void D3D11Graphics::Initialize() {
     cpuMatrices.view = Mat4();
     cpuMatrices.world = Mat4();
 
-    gpuMatrices = CreateConstBuffer((void *)&cpuMatrices, sizeof(cpuMatrices), 0, 0);
+    gpuMatrices = CreateConstBuffer((void *)&cpuMatrices, sizeof(cpuMatrices), 0, nullptr);
+    gpuAnimMatrices = CreateConstBuffer((void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
 
     lineRenderer.Initialize(200, device);
 }
@@ -319,6 +320,89 @@ Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath) {
          0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
          0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+
+    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
+    HRESULT layoutResult = device->CreateInputLayout(inputLayoutDesc,
+        totalLayoutElements,
+        vertexShaderCompiled->GetBufferPointer(),
+        vertexShaderCompiled->GetBufferSize(),
+        &shader.layout);
+
+    if(FAILED(layoutResult)) {
+        OutputDebugString("ERROR Creating Layout Input\n");
+        ASSERT(!"ERROR");
+    }
+
+    if(vertexShaderCompiled) vertexShaderCompiled->Release();
+    if(fragmentShaderCompiled) fragmentShaderCompiled->Release();
+
+    D3D11Shader *shaderHandle = shadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (Shader)shaderHandle;
+}
+
+Shader D3D11Graphics::CreateShaderSkinVertex(char *vertpath, char *fragpath) {
+    D3D11Shader shader = {}; 
+
+    MemoryManager::Get()->BeginTemporalMemory();
+    File vertfile = PlatformManager::Get()->ReadFileToTemporalMemory(vertpath);
+    File fragfile = PlatformManager::Get()->ReadFileToTemporalMemory(fragpath);
+
+    ID3DBlob *vertexShaderCompiled = 0;
+    ID3DBlob *fragmentShaderCompiled = 0;
+    
+    HRESULT result = 0;
+    ID3DBlob *errorVertexShader = 0;
+    result = D3DCompile(vertfile.data, vertfile.size,
+                        0, 0, 0, "vs_main", "vs_5_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &vertexShaderCompiled,
+                        &errorVertexShader);
+    if(errorVertexShader != 0) {
+        char *errorString = (char *)errorVertexShader->GetBufferPointer();
+        printf("error compiling vertex shader (%s): %s", vertpath, errorString);
+        errorVertexShader->Release();
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    ID3DBlob *errorFragmentShader = 0;
+    result = D3DCompile(fragfile.data, fragfile.size,
+                        0, 0, 0, "fs_main", "ps_5_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &fragmentShaderCompiled,
+                        &errorFragmentShader);
+    if(errorFragmentShader) {
+        char *errorString = (char *)errorFragmentShader->GetBufferPointer();
+        printf("error compiling fragment shader (%s): %s", fragpath, errorString);
+        errorFragmentShader->Release();
+        ASSERT(!"INVALID_CODE_PATH")
+    }
+
+    // create the vertex and fragment shader
+    result = device->CreateVertexShader(
+            vertexShaderCompiled->GetBufferPointer(),
+            vertexShaderCompiled->GetBufferSize(), 0,
+            &shader.vertex);
+    result = device->CreatePixelShader(
+            fragmentShaderCompiled->GetBufferPointer(),
+            fragmentShaderCompiled->GetBufferSize(), 0,
+            &shader.fragment);
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+    // create input layout
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_UINT,
+         0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,
+         0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
     i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
@@ -483,6 +567,10 @@ void D3D11Graphics::SetWorldMatrix(Mat4 world) {
     UpdateConstBuffer(gpuMatrices, (void *)&cpuMatrices);
 }
 
+void D3D11Graphics::SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) {
+    memcpy(cpuAnimMatrices.boneMatrix, finalTransformMatrices, count*sizeof(Mat4));
+    UpdateConstBuffer(gpuAnimMatrices, (void *)&cpuAnimMatrices);
+}
 
 VertexBuffer D3D11Graphics::CreateVertexBuffer(Vertex *vertices, u32 count) {
 
@@ -501,6 +589,36 @@ VertexBuffer D3D11Graphics::CreateVertexBuffer(Vertex *vertices, u32 count) {
     vertexDesc.Usage = D3D11_USAGE_DEFAULT;
     vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexDesc.ByteWidth = sizeof(Vertex) * count;
+    resourceData.pSysMem = vertices;
+
+    HRESULT result = device->CreateBuffer(&vertexDesc, &resourceData, &vertexBuffer.buffer);
+    if(FAILED(result)) {
+        printf("error loading Vertex buffer\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    D3D11VertexBuffer *vertexBufferHandle = vertexBufferStorage.Alloc();
+    *vertexBufferHandle = vertexBuffer;
+    return (VertexBuffer)vertexBufferHandle;
+}
+
+VertexBuffer D3D11Graphics::CreateVertexBuffer(SkinVertex *vertices, u32 count) {
+
+    D3D11VertexBuffer vertexBuffer = {};
+    vertexBuffer.verticesCount = count;
+
+    vertexBuffer.stride = sizeof(SkinVertex);
+    vertexBuffer.offset = 0;
+
+    // create gpu buffer
+    D3D11_SUBRESOURCE_DATA resourceData;
+    ZeroMemory(&resourceData, sizeof(resourceData));
+
+    D3D11_BUFFER_DESC vertexDesc;
+    ZeroMemory(&vertexDesc, sizeof(vertexDesc));
+    vertexDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexDesc.ByteWidth = sizeof(SkinVertex) * count;
     resourceData.pSysMem = vertices;
 
     HRESULT result = device->CreateBuffer(&vertexDesc, &resourceData, &vertexBuffer.buffer);
@@ -567,6 +685,61 @@ void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader sha
 
     // draw buffer with the shader
     deviceContext->Draw(vertexBuffer->verticesCount, 0);
+}
+
+IndexBuffer D3D11Graphics::CreateIndexBuffer(u32 *indices, u32 count) {
+    D3D11IndexBuffer indexBuffer = {};
+    indexBuffer.indexCount= count;
+    indexBuffer.format = DXGI_FORMAT_R32_UINT;
+
+    // create gpu buffer
+    D3D11_SUBRESOURCE_DATA resourceData;
+    ZeroMemory(&resourceData, sizeof(resourceData));
+
+    D3D11_BUFFER_DESC indexDesc;
+    ZeroMemory(&indexDesc, sizeof(indexDesc));
+    indexDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexDesc.ByteWidth = sizeof(u32) * count;
+    resourceData.pSysMem = indices;
+
+    HRESULT result = device->CreateBuffer(&indexDesc, &resourceData, &indexBuffer.buffer);
+    if(FAILED(result)) {
+        printf("error loading Index buffer\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    D3D11IndexBuffer *indexBufferHandle = indexBufferStorage.Alloc();
+    *indexBufferHandle = indexBuffer;
+    return (IndexBuffer)indexBufferHandle;
+}
+
+void D3D11Graphics::DestroyIndexBuffer(IndexBuffer indexBuffer) {
+    D3D11IndexBuffer *indexBufferHandle = (D3D11IndexBuffer *)indexBuffer;
+    if(indexBufferHandle->buffer) indexBufferHandle->buffer->Release();
+    indexBufferStorage.Free(indexBufferHandle);
+}
+
+void D3D11Graphics::DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) {
+    
+    // NOTE: set shader
+    D3D11Shader *shaderHandle = (D3D11Shader *)shader;
+    deviceContext->VSSetShader(shaderHandle->vertex, 0, 0);
+    deviceContext->PSSetShader(shaderHandle->fragment, 0, 0);
+    deviceContext->IASetInputLayout(shaderHandle->layout);
+
+    // NOTE: set buffer
+    D3D11VertexBuffer *vertexBufferHandle = (D3D11VertexBuffer *)vertexBuffer;
+    deviceContext->IASetVertexBuffers(0, 1, &vertexBufferHandle->buffer, &vertexBufferHandle->stride, &vertexBufferHandle->offset);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // NOTE: set indices
+    D3D11IndexBuffer *indexBufferHandle = (D3D11IndexBuffer *)indexBuffer;
+    deviceContext->IASetIndexBuffer(indexBufferHandle->buffer, indexBufferHandle->format, 0);
+
+    // NOTE: Draw
+    deviceContext->DrawIndexed(indexBufferHandle->indexCount, 0, 0);
+
 }
 
 TextureBuffer D3D11Graphics::CreateTextureBuffer(Texture *array, u32 textureCount) {

@@ -79,8 +79,8 @@ struct AnimationSet {
     void Play(const char *name, f32 weight, bool loop);
     void PlaySmooth(const char *name, f32 transitionTime);
     void Stop(const char *name);
-    void UpdateWeight(const char *name, f32 weight);
     bool IsAnimationFinish(const char *name);
+    void UpdateWeight(const char *name, f32 weight);
 
     void Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut);
     
