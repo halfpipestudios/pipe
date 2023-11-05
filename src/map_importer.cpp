@@ -200,6 +200,7 @@ void MapLoader::LoadVertexData() {
 
 }
 
+#define ILEGAL_EPSILON 0.01f
 void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
     for(i32 i = 0; i < count - 2; ++i) {
     for(i32 j = i; j < count - 1; ++j) {
@@ -217,7 +218,7 @@ void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) 
                     f32 dot = plane.n.Dot(vertex.pos);
                     f32 d = plane.d;
                     f32 dist = dot - d;
-                    if(dist > EPSILON) {
+                    if(dist > ILEGAL_EPSILON) {
                         illegal = true;
                     }
                 }

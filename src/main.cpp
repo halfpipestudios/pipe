@@ -81,7 +81,7 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
     }
 
     if(input->KeyJustPress(KEY_SPACE) && grounded) {
-        Vec3 jumpForce = Vec3(0, 30, 0);
+        Vec3 jumpForce = Vec3(0, 40, 0);
         vel += jumpForce;
     }
 
@@ -347,7 +347,7 @@ int main() {
     f32 scale = 1.0f/32.0f;
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
 
-    Camera camera(Vec3(0, 2, 0), 40.0f); 
+    Camera camera(Vec3(0, 30, 0), 40.0f); 
 
     Cylinder cylinder;
     cylinder.c = Vec3(4, 2, 0);
@@ -468,7 +468,8 @@ int main() {
             }
         }
 
-        animation.UpdateWeight("walking", CLAMP(camera.vel.Len()*0.25f, 0, 1));
+        Vec2 cameraVel = Vec2(camera.vel.x, camera.vel.z);
+        animation.UpdateWeight("walking", CLAMP(cameraVel.Len()*0.25f, 0, 1));
 
         Mat4 *finalTransformMatricesOut = nullptr;
         u32 numFinaltrasformMatricesOut = 0;
