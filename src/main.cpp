@@ -499,7 +499,7 @@ int main() {
         // draw the debug geometry
         DrawCube(cubeA, colorA);
         DrawCube(cubeB, colorB);
-        DrawCylinder(cylinder, colorC);
+        // DrawCylinder(cylinder, colorC);
 
         u32 rayColor = camera.grounded ? 0xFFFF0000 : 0xFF00FF00;
         GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, rayColor);
