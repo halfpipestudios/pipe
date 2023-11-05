@@ -10,7 +10,7 @@ struct PS_Input {
 
 float4 fs_main(PS_Input i) : SV_TARGET {
     float3 color = srv.Sample(samplerState, float3(i.uv, i.tex)).rgb;
-    float3 dir = normalize(float3(0.2f, 0.5f, -1));
+    float3 dir = normalize(float3(-0.2f, 0.5f, 1));
     float ambient = max(dot(dir, i.nor), 0.3f);
     color = color * ambient;
     return float4(color, 1.0f);
