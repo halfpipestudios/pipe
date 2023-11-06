@@ -40,7 +40,7 @@ void AnimationState::SamplePrevAndNextAnimationPose(AnimationSample *prev, Anima
     
     u32 nextSampleIndex = 1;
     
-    for(u32 sampleIndex = 0; sampleIndex < animation->numSamples; ++sampleIndex) {
+    for(u32 sampleIndex = 1; sampleIndex < animation->numSamples; ++sampleIndex) {
         AnimationSample *sample = animation->samples + sampleIndex;
         if(sample->time_stamp > time) {
             nextSampleIndex = sampleIndex;

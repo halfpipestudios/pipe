@@ -271,7 +271,7 @@ void DrawCylinder(Cylinder cylinder, u32 color) {
 
 static TextureBuffer LoadTextureFromPath(char *path) {
     static char diffuse_material_path_cstr[4096];
-    sprintf(diffuse_material_path_cstr, "%s%s", "./data/", path); 
+    sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", path); 
     
     stbi_set_flip_vertically_on_load(true);
     i32 w, h, n;
@@ -332,7 +332,6 @@ int main() {
     
     AnimationSet animation;
     animation.Initialize(animationImporter.animations, animationImporter.numAnimations);
-    animation.SetRootJoint("punch", "mixamorig1_Spine");
     
     animation.Play("idle", 1, true);
     animation.Play("walking", 1, true);
@@ -461,13 +460,6 @@ int main() {
 
         camera.SetViewMatrix();
         
-        // NOTE: Update animation state
-        if(input->KeyJustPress(KEY_1)) {
-            if(animation.IsAnimationFinish("punch")) {
-                animation.PlaySmooth("punch", 0.5f);
-            }
-        }
-
         Vec2 cameraVel = Vec2(camera.vel.x, camera.vel.z);
         animation.UpdateWeight("walking", CLAMP(cameraVel.Len()*0.25f, 0, 1));
 
@@ -489,8 +481,8 @@ int main() {
 
         // NOTE: Draw player
         GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) *
-                                               Mat4::RotateY(camera.rot.y) *
-                                               Mat4::Scale(0.0125f, 0.0125f, 0.0125f));
+                                               Mat4::RotateY(camera.rot.y +  TO_RAD(180)) * Mat4::RotateX(TO_RAD(90)) * 
+                                               Mat4::Scale(1,1,1));
         for(u32 meshIndex = 0; meshIndex < modelImporter.model.numMeshes; ++meshIndex) {
             Mesh *mesh = modelImporter.model.meshes + meshIndex;
             GraphicsManager::Get()->BindTextureBuffer(mesh->texture);

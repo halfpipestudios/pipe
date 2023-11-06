@@ -9,6 +9,8 @@
 #define VEC_EPSILON 0.000001f
 #define PI 3.14159265359
 
+#define TO_RAD(angle) ((angle)/180.0f * PI)
+
 struct Vec2 {
     union {
         struct {
