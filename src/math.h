@@ -217,6 +217,7 @@ struct Mat4 {
     static Mat4 RotateX(f32 angle);
     static Mat4 RotateY(f32 angle);
     static Mat4 RotateZ(f32 angle);
+    static Mat4 Rotate(Vec3 rotate);
 
 };
 

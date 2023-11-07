@@ -3,17 +3,8 @@
 
 #include "common.h"
 #include "camera.h"
-#include "map_importer.h"
-#include "model_importer.h"
-#include "gjk_collision.h"
 
-struct Map {
-    MapImporter::ConvexHullArray covexHulls;
-    MapImporter::EntityArray entities;
-    VertexBuffer vertexBuffer;
-    TextureBuffer texture;
-    f32 scale;
-};
+#include "level.h"
 
 struct Game {
 
@@ -33,6 +24,10 @@ private:
     
     Shader statShader;
     Shader animShader;
+
+    Level level;
+
+#if 0
     Map map;
 
     Model orc;
@@ -47,8 +42,8 @@ private:
     Mat4 *heroFinalTransformMatrices;
     u32 heroNumFinalTrasformMatrices;
 
-
     u32 colorC;
+#endif
 };
 
 #endif // _GAME_H_

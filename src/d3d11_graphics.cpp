@@ -213,6 +213,7 @@ void  D3D11Graphics::Terminate() {
     if(samplerStateWrap) samplerStateWrap->Release();
 
     DestroyConstBuffer(gpuMatrices);
+    DestroyConstBuffer(gpuAnimMatrices);
 
     lineRenderer.Terminate();
 }

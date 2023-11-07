@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <float.h>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "game.h"
-
 #include "platform_manager.h" 
-
 #include "geometry.h"
 
-void DrawCylinder(Cylinder cylinder, u32 color) {
+static void DrawCylinder(Cylinder cylinder, u32 color) {
     Vec3 vertices[40] = {};
 
     // Top face
@@ -97,6 +94,9 @@ void Game::Initialize() {
                                                                "./data/shaders/texFrag.hlsl");
     animShader = GraphicsManager::Get()->CreateShaderSkinVertex("./data/shaders/animVert.hlsl",
                                                                 "./data/shaders/texFrag.hlsl");
+
+    level.Initialize("./data/maps/test.map");
+    #if 0
 // NOTE Load Map ------------------------------------------------------------------------------------------
     MapImporter mapImporter;
     mapImporter.LoadMapFromFile("./data/maps/test.map");
@@ -140,15 +140,21 @@ void Game::Initialize() {
     heroAnimation.Play("walking", 1, true);
 
     orcAnimation.Play("idle", 1, true);
+    #endif
+
+
 }
 
 void Game::Terminate() {
-
+#if 0
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
 
     orcAnimation.Terminate();
     heroAnimation.Terminate();
+#endif
+    
+    level.Terminate();
 
     GraphicsManager::Get()->DestroyShader(statShader);
     GraphicsManager::Get()->DestroyShader(animShader);
@@ -159,8 +165,13 @@ void Game::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-// NOTE: process movement and collision
+    // NOTE: process movement and collision
     camera.ProcessMovement(input, dt);
+    camera.SetViewMatrix();
+
+    level.Update(dt);
+
+#if 0
     heroCollider.c = camera.pos;
 
     colorC = 0xFF0000FF;
@@ -227,19 +238,21 @@ void Game::Update(f32 dt) {
         camera.dist = MIN((camera.maxDist-0.1f) * tMin, camera.maxDist);
     }
 
-    camera.SetViewMatrix();
-
 // NOTE: update animations
     Vec2 cameraVel = Vec2(camera.vel.x, camera.vel.z);
     heroAnimation.UpdateWeight("walking", CLAMP(cameraVel.Len()*0.25f, 0, 1));
 
     heroAnimation.Update(dt, &heroFinalTransformMatrices, &heroNumFinalTrasformMatrices);
     orcAnimation.Update(dt, &orcFinalTransformMatrices, &orcNumFinalTrasformMatrices);
+#endif
 }
 
 
 void Game::Render() {
+    
+    level.Render(statShader, animShader);
 
+#if 0
     // draw the level
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(map.scale, map.scale, map.scale));
     GraphicsManager::Get()->BindTextureBuffer(map.texture);
@@ -269,6 +282,7 @@ void Game::Render() {
     // NOTE: Draw debug geometry
     DrawCylinder(heroCollider, colorC);
     DrawCylinder(orcCollider, 0xFF00FF00);
+#endif
 }
 
 

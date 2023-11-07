@@ -625,6 +625,10 @@ Mat4 Mat4::RotateZ(f32 angle) {
                        0,           0, 0, 1);
 }
 
+Mat4 Mat4::Rotate(Vec3 rotate) {
+    return RotateX(rotate.x) * RotateY(rotate.y) * RotateZ(rotate.z) ;
+}
+
 // -----------------------------------------
 
 // ----------------Quat---------------------
