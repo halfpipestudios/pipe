@@ -287,7 +287,7 @@ static TextureBuffer LoadTextureFromPath(char *path) {
     return textureBuffer;
 }
 
-static void LoadModelToGpu(Model *model, TextureBuffer defaultTexture) {
+static void LoadModelToGpu(Model *model) {
     ASSERT(model->type == MODEL_TYPE_ANIMATED);
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex; 
@@ -324,17 +324,36 @@ int main() {
     
     // Test code to load model and animation file
     ModelImporter modelImporter;
-    modelImporter.Read("./data/models/model.twm");
-    LoadModelToGpu(&modelImporter.model, mapSRV);
+    modelImporter.Read("./data/models/orc.twm");
+    LoadModelToGpu(&modelImporter.model);
 
     AnimationImporter animationImporter;
-    animationImporter.Read("./data/models/model.twa");
+    animationImporter.Read("./data/models/orc.twa");
     
     AnimationSet animation;
     animation.Initialize(animationImporter.animations, animationImporter.numAnimations);
     
     animation.Play("idle", 1, true);
-    animation.Play("walking", 1, true);
+
+    // Test other model
+    ModelImporter heroImporter;
+    heroImporter.Read("./data/models/hero.twm");
+    LoadModelToGpu(&heroImporter.model);
+
+    AnimationImporter heroAnimationImporter;
+    heroAnimationImporter.Read("./data/models/hero.twa");
+    
+    AnimationSet heroAnimation;
+    heroAnimation.Initialize(heroAnimationImporter.animations, heroAnimationImporter.numAnimations);
+    
+    heroAnimation.Play("idle", 1, true);
+    heroAnimation.Play("walking", 1, true);
+
+    // Temporal identities matricies
+    static Mat4 identity[100];
+    for(u32 i = 0; i < 100; ++i) {
+        identity[i] = Mat4();
+    }
 
     // Set Matrices
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
@@ -461,11 +480,11 @@ int main() {
         camera.SetViewMatrix();
         
         Vec2 cameraVel = Vec2(camera.vel.x, camera.vel.z);
-        animation.UpdateWeight("walking", CLAMP(cameraVel.Len()*0.25f, 0, 1));
+        heroAnimation.UpdateWeight("walking", CLAMP(cameraVel.Len()*0.25f, 0, 1));
 
         Mat4 *finalTransformMatricesOut = nullptr;
         u32 numFinaltrasformMatricesOut = 0;
-        animation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
+        heroAnimation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
         GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
 
         // printf("Remaining memory storage %lld\n", MemoryManager::Get()->RemainingMemorySotrage());
@@ -481,8 +500,22 @@ int main() {
 
         // NOTE: Draw player
         GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) *
-                                               Mat4::RotateY(camera.rot.y +  TO_RAD(180)) * Mat4::RotateX(TO_RAD(90)) * 
-                                               Mat4::Scale(1,1,1));
+                                               Mat4::RotateY(camera.rot.y) *
+                                               Mat4::Scale(0.8f, 0.8f, 0.8f));
+        for(u32 meshIndex = 0; meshIndex < heroImporter.model.numMeshes; ++meshIndex) {
+            Mesh *mesh = heroImporter.model.meshes + meshIndex;
+            GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, animShader);
+        }
+        
+       //GraphicsManager::Get()->SetAnimMatrices(identity, 100);
+       finalTransformMatricesOut = nullptr;
+       numFinaltrasformMatricesOut = 0;
+       animation.Update(deltaTime, &finalTransformMatricesOut, &numFinaltrasformMatricesOut);
+       GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
+
+        // NOTE: Draw NPC
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(Vec3(6, 2, 0)) * Mat4::Scale(1,1,1));
         for(u32 meshIndex = 0; meshIndex < modelImporter.model.numMeshes; ++meshIndex) {
             Mesh *mesh = modelImporter.model.meshes + meshIndex;
             GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
