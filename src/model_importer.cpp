@@ -71,11 +71,47 @@ void TweenImporter::ReadQuat(u8 **file, Quat *quat) {
 }
 
 void TweenImporter::AddWeightToVertex(SkinVertex *vertex, u32 boneId, f32 weight) {
+    
     for(u32 i = 0; i < MAX_BONES_INFLUENCE; ++i) {
         if(vertex->boneIds[i] < 0) {
             vertex->boneIds[i] = boneId;
             vertex->weights[i] = weight;
             return;
+        }
+    }
+    
+    // NOTE: Vertex weights is full, find the smaller weight and check if we need to add the new one 
+    
+    f32 minWeight = vertex->weights[0];
+    u32 minIndex = 0;
+    ASSERT(vertex->boneIds[minIndex] >= 0);
+
+    for(u32 i = 1; i < MAX_BONES_INFLUENCE; ++i) {
+        ASSERT(vertex->boneIds[i] >= 0);
+        if(vertex->weights[i] < minWeight) {
+            minWeight = vertex->weights[i];
+            minIndex = i;
+        }
+    }
+    
+    if(minWeight < weight) {
+        vertex->boneIds[minIndex] = boneId;
+        vertex->weights[minIndex] = weight;
+    }
+
+}
+
+void TweenImporter::NormalizeVertexWeigths(SkinVertex *vertex) {
+    f32 totalSum = 0;
+    for(u32 i = 0; i < MAX_BONES_INFLUENCE; ++i) {
+        if(vertex->boneIds[i] >= 0) {
+            totalSum += vertex->weights[i];
+        }
+    }
+
+    for(u32 i = 0; i < MAX_BONES_INFLUENCE; ++i) {
+        if(vertex->boneIds[i] >= 0) {
+            vertex->weights[i] /= totalSum;
         }
     }
 }
@@ -214,7 +250,7 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
         printf("Loading vertex weights for skeleton ... \n");
         
         for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
-            Mesh *mesh = model->meshes + meshIndex; (void)mesh;
+            Mesh *mesh = model->meshes + meshIndex;
 
             u32 numberOfBones = READ_U32(file);
             
@@ -233,6 +269,14 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
                     AddWeightToVertex(vertex, currentBoneId, weight);
                 
                 }
+            }
+        }
+
+        for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
+            Mesh *mesh = model->meshes + meshIndex;
+            for(u32 vertexIndex = 0; vertexIndex < mesh->numVertices; ++vertexIndex) {
+                SkinVertex *vertex = (SkinVertex *)mesh->vertices + vertexIndex;
+                NormalizeVertexWeigths(vertex);
             }
         }
 
