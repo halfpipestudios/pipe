@@ -23,6 +23,7 @@ struct Camera {
           grounded(false), maxDist(5), dist(5) {}
 
     Vec3 pos;
+    Vec3 lastPos;
     Vec2 rot;
     Vec3 front;
     Vec3 right;
@@ -115,6 +116,7 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
     f32 dammping = powf(0.001f, deltaTime);
     vel = vel * dammping;
 
+    lastPos = pos;
     pos += vel * deltaTime;
 }
 
@@ -371,7 +373,7 @@ int main() {
     cylinder.c = Vec3(4, 2, 0);
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.3f;
-    cylinder.n = 1.0f;
+    cylinder.n = 0.75f;
 
     Vec3 *cubeA = CreateCube();
     Vec3 *cubeB = CreateCube();
@@ -409,12 +411,32 @@ int main() {
         
         cylinder.c = camera.pos;
 
-        TransformCube(cubeA, Vec3(1, 2, sinf(time)), 0.0f);
-        TransformCube(cubeB, Vec3(0, 2, 1), 0.0f);
+        TransformCube(cubeA, Vec3(10, 3, sinf(time)), 0.0f);
+        TransformCube(cubeB, Vec3(12, 3, 1), 0.0f);
         
         u32 colorA = 0xFF0000FF;
         u32 colorB = 0xFF0000FF;
         u32 colorC = 0xFF0000FF;
+
+        Segment playerSegment;
+        playerSegment.a =  camera.lastPos;
+        playerSegment.b = camera.pos;
+        Vec3 cameraDir = camera.pos - camera.lastPos;
+        f32 tMin = FLT_MAX;
+        for(i32 i = 0; i < mapEntityArray.count; ++i) {
+            Entity *entity = &mapEntityArray.data[i];
+            f32 t = -1.0f;
+            if(playerSegment.HitEntity(entity, &t)) {
+               if(t < tMin) {
+                    tMin = t;
+                }
+            }
+        }
+
+        if(tMin >= 0.0f && tMin <= 1.0f) {
+            camera.pos = camera.lastPos + (camera.pos - camera.lastPos) * (tMin*0.8);
+            cylinder.c = camera.pos;
+        }
 
         CollisionData collisionData = gjk.Intersect(&aHull, &cylinder);
         if(collisionData.hasCollision) {
@@ -438,10 +460,9 @@ int main() {
             camera.vel -= camera.vel.Dot(normal)*normal;
         }
 
-
         for(i32 i = 0; i < mapCovexHulls.count; ++i) {
             ConvexHull *hull = &mapCovexHulls.data[i];
-            collisionData = gjk.Intersect(hull, &cylinder);
+            CollisionData collisionData = gjk.Intersect(hull, &cylinder);
             if(collisionData.hasCollision) {
                 colorC = 0xFFFF0000;
                 f32 penetration = collisionData.penetration;
@@ -461,7 +482,7 @@ int main() {
         groundSegment.b = groundSegment.a + Vec3(0, -(cylinder.n + 0.001), 0);
         camera.grounded = false;
 
-        f32 tMin = FLT_MAX;
+        tMin = FLT_MAX;
         for(i32 i = 0; i < mapEntityArray.count; ++i) {
             Entity *entity = &mapEntityArray.data[i];
             f32 t = -1.0f;
@@ -475,7 +496,10 @@ int main() {
             }
         }
 
-        camera.dist = MIN((camera.maxDist-0.1f) * tMin, camera.maxDist);
+        camera.dist = camera.maxDist;
+        if(tMin > 0.0f && tMin <= 1.0f) {
+            camera.dist = MIN((camera.maxDist-0.1f) * tMin, camera.maxDist);
+        }
 
         camera.SetViewMatrix();
         
@@ -499,7 +523,7 @@ int main() {
         GraphicsManager::Get()->DrawVertexBuffer(mapVBO, shader);
 
         // NOTE: Draw player
-        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 1, 0)) *
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(camera.pos - Vec3(0, 0.75f, 0)) *
                                                Mat4::RotateY(camera.rot.y) *
                                                Mat4::Scale(0.8f, 0.8f, 0.8f));
         for(u32 meshIndex = 0; meshIndex < heroImporter.model.numMeshes; ++meshIndex) {
@@ -515,7 +539,7 @@ int main() {
        GraphicsManager::Get()->SetAnimMatrices(finalTransformMatricesOut, numFinaltrasformMatricesOut);
 
         // NOTE: Draw NPC
-        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(Vec3(6, 2, 0)) * Mat4::Scale(1,1,1));
+        GraphicsManager::Get()->SetWorldMatrix(Mat4::Translate(Vec3(6, 2, 0)) * Mat4::RotateY(TO_RAD(180.0f)) * Mat4::Scale(1,1,1));
         for(u32 meshIndex = 0; meshIndex < modelImporter.model.numMeshes; ++meshIndex) {
             Mesh *mesh = modelImporter.model.meshes + meshIndex;
             GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
@@ -525,7 +549,7 @@ int main() {
         // draw the debug geometry
         DrawCube(cubeA, colorA);
         DrawCube(cubeB, colorB);
-        // DrawCylinder(cylinder, colorC);
+        DrawCylinder(cylinder, colorC);
 
         u32 rayColor = camera.grounded ? 0xFFFF0000 : 0xFF00FF00;
         GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, rayColor);
