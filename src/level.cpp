@@ -65,16 +65,19 @@ void Level::Initialize(char *mapFilePath) {
     modelImporter.Read("./data/models/orc.twm");
     animationImporter.Read("./data/models/orc.twa");
     LoadModelToGpu(&modelImporter.model);
-    Entity *orc = AddEntity(Vec3(6, 2, 0), Vec3(), Vec3(1, 1, 1),
-                            modelImporter.model, animationImporter.animations, 
-                            animationImporter.numAnimations);
+    orc = AddEntity(Vec3(6, 2, 0), Vec3(), Vec3(1, 1, 1),
+                    modelImporter.model, animationImporter.animations, 
+                    animationImporter.numAnimations);
 
     modelImporter.Read("./data/models/hero.twm");
     animationImporter.Read("./data/models/hero.twa");
     LoadModelToGpu(&modelImporter.model);
-    Entity *hero = AddEntity(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
-                             modelImporter.model, animationImporter.animations, 
-                             animationImporter.numAnimations);
+    hero = AddEntity(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
+                     modelImporter.model, animationImporter.animations, 
+                     animationImporter.numAnimations);
+
+
+    camera.Initialize();
 }
 
 void Level::Terminate() {
@@ -94,11 +97,19 @@ void Level::Terminate() {
 }
 
 void Level::Update(f32 dt) {
+
+    Input *input = PlatformManager::Get()->GetInput();
+
+    hero->Move(input, camera);
     Entity *entity = entities;
     while(entity != nullptr) {
         entity->Update(&map, dt);
         entity = entity->next;
     }
+
+    camera.target = hero->collider.c;
+    camera.ProcessMovement(input, &map, dt);
+    camera.SetViewMatrix();
 }
 
 void Level::Render(Shader statShader, Shader animShader) {
@@ -164,15 +175,18 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationCl
     transform.pos = pos;
     transform.rot = rot;
     transform.scale = scale;
-    transform.vel = Vec3();
 
-    lastTransform = transform;
+    physics.pos = pos;
+    physics.vel = Vec3();
+    physics.acc = Vec3();
+    lastPhysics = physics;
 
     this->model = model;
     animation.Initialize(animations, numAnimations);
     animation.Play("idle", 1, true);
+    animation.Play("walking", 0, true);
     
-    collider.c = transform.pos;
+    SetColliderPos();
     collider.u = Vec3(0, 1, 0);
     collider.radii = 0.3f;
     collider.n = 0.75f;
@@ -201,14 +215,29 @@ void Entity::Terminate() {
 void Entity::Update(Map *map, f32 dt) {
 
     RemoveFlag(ENTITY_COLLIDING);
-    RemoveFlag(ENTITY_GROUNDED);
-    
+
+    if(!HaveFlag(ENTITY_GROUNDED))
+        physics.acc += Vec3(0, -9.8 * 5, 0);
+
+    physics.vel += physics.acc * dt;
+
+    f32 dammping = powf(0.001f, dt);
+    physics.vel = physics.vel * dammping;
+
+    physics.pos += physics.vel * dt;
+
+    Vec2 vel2d = Vec2(physics.vel.x, physics.vel.z);
+    animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
+    animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
+
+    SetColliderPos();
+ 
+    /*
     Segment playerSegment;
-    playerSegment.a =  lastTransform.pos;
-    playerSegment.b = transform.pos;
-    Vec3 cameraDir = transform.pos - lastTransform.pos;
-    f32 tMin = FLT_MAX;
-    
+    playerSegment.a =  lastPhysics.pos;
+    playerSegment.b = physics.pos;
+
+    f32 tMin = FLT_MAX; 
     for(i32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *entity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -220,9 +249,10 @@ void Entity::Update(Map *map, f32 dt) {
     }
 
     if(tMin >= 0.0f && tMin <= 1.0f) {
-        transform.pos = lastTransform.pos + (transform.pos - lastTransform.pos) * (tMin*0.8);
-        collider.c = transform.pos;
+        physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8);
+        SetColliderPos();
     }
+    */
 
     GJK gjk;
     for(i32 i = 0; i < map->covexHulls.count; ++i) {
@@ -232,16 +262,16 @@ void Entity::Update(Map *map, f32 dt) {
             AddFlag(ENTITY_COLLIDING);
             f32 penetration = collisionData.penetration;
             Vec3 normal = collisionData.normal;
-            collider.c += normal * penetration; 
-            transform.pos = collider.c;
-            transform.vel -= transform.vel.Dot(normal)*normal;
+            physics.pos += normal * penetration; 
+            physics.vel -= physics.vel.Dot(normal)*normal;
+            SetColliderPos();
         }
     }
 
     Segment groundSegment;
     groundSegment.a = collider.c;
     groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
-
+    RemoveFlag(ENTITY_GROUNDED);
     for(i32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *entity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -250,9 +280,11 @@ void Entity::Update(Map *map, f32 dt) {
         }
     }
 
-    animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
+    transform.pos = physics.pos;
 
-    lastTransform = transform;
+    lastPhysics = physics;
+
+    physics.acc = Vec3();
 }
 
 void Entity::Render(Shader shader) {
@@ -266,5 +298,34 @@ void Entity::Render(Shader shader) {
         GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
     }
 
-    DrawCylinder(collider, HaveFlag(ENTITY_COLLIDING) ? 0xffff0000 : 0xff00ff00);
+   //DrawCylinder(collider, HaveFlag(ENTITY_COLLIDING) ? 0xffff0000 : 0xff00ff00);
+}
+
+void Entity::Move(Input *input, Camera camera) {
+
+    Vec3 worldFront = camera.GetWorldFront();
+    Vec3 right = camera.right;
+    if(input->KeyIsPress(KEY_W)) {
+        physics.acc += worldFront;
+    }
+    if(input->KeyIsPress(KEY_S)) {
+        physics.acc -= worldFront;
+    }
+    if(input->KeyIsPress(KEY_A)) {
+        physics.acc -= right;
+    }
+    if(input->KeyIsPress(KEY_D)) {
+        physics.acc += right;
+    }
+    if((input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A)) && HaveFlag(ENTITY_GROUNDED)) {
+        physics.vel += Vec3(0, 40, 0);
+    }
+
+    physics.acc += worldFront * input->state[0].leftStickY;
+    physics.acc += right      * input->state[0].leftStickX;
+
+    //if(physics.acc.LenSq() > 0.0f) physics.acc.Normalize();
+    physics.acc *= 40.0f;
+
+    transform.rot.y = camera.rot.y;
 }

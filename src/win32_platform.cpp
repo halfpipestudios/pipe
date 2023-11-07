@@ -4,6 +4,21 @@
 
 #include <stdio.h>
 
+#include <xinput.h>
+
+static WORD XInputButtons[] = {
+    XINPUT_GAMEPAD_DPAD_UP,
+    XINPUT_GAMEPAD_DPAD_DOWN,
+    XINPUT_GAMEPAD_DPAD_LEFT,
+    XINPUT_GAMEPAD_DPAD_RIGHT,
+    XINPUT_GAMEPAD_START,
+    XINPUT_GAMEPAD_BACK,
+    XINPUT_GAMEPAD_A,
+    XINPUT_GAMEPAD_B,
+    XINPUT_GAMEPAD_X,
+    XINPUT_GAMEPAD_Y
+};
+
 static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     Win32Platform *platform = (Win32Platform *)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
@@ -78,6 +93,19 @@ Input *Win32Platform::GetInput() {
     return &input;
 }
 
+static f32 Win32ProcessXInputStick(SHORT value, i32 deadZoneValue)
+{
+    f32 result = 0;
+    if(value < -deadZoneValue)
+    {
+        result = (f32)(value + deadZoneValue) / (32768.0f - deadZoneValue);
+    }
+    else if(value > deadZoneValue)
+    {
+        result = (f32)(value - deadZoneValue) / (32767.0f - deadZoneValue);
+    }
+    return result;
+}
 
 void Win32Platform::PollEvents() {
 
@@ -89,6 +117,22 @@ void Win32Platform::PollEvents() {
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+    }
+
+    XINPUT_STATE state = {};
+    if(XInputGetState(0, &state) == ERROR_SUCCESS)
+    {
+        XINPUT_GAMEPAD *pad = &state.Gamepad;
+        for(int i = 0; i < ARRAY_LENGTH(input.state[0].joyButtons) - 2; ++i)
+        {
+            input.state[0].joyButtons[i] = pad->wButtons & XInputButtons[i];
+        }
+        input.state[0].joyButtons[10] = (pad->bLeftTrigger > 0);
+        input.state[0].joyButtons[11] = (pad->bRightTrigger > 0);
+        input.state[0].leftStickX =  Win32ProcessXInputStick(pad->sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+        input.state[0].leftStickY =  Win32ProcessXInputStick(pad->sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+        input.state[0].rightStickX = Win32ProcessXInputStick(pad->sThumbRX, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+        input.state[0].rightStickY = Win32ProcessXInputStick(pad->sThumbRY, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
     }
 }
 

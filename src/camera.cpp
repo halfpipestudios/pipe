@@ -1,63 +1,23 @@
 #include "camera.h"
 #include "graphics_manager.h"
+#include "level.h"
 #include "input.h"
+#include "geometry.h"
 
-void Camera::Initialize(Vec3 pos_, f32 speed_) {
-    pos = pos_;
-    speed = speed_;
-    vel = Vec3();
-    acc = Vec3();
-    grounded =  false;
+#include <float.h>
+#include <stdio.h>
+
+void Camera::Initialize() {
     maxDist = 5;
     dist = 5; 
 }
 
-
 void Camera::SetViewMatrix() {
-    Vec3 up  = Vec3(0, 1,  0);
-    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos - front * dist, pos, Vec3(0, 1, 0)));
+    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, target, Vec3(0, 1, 0)));
 }
 
-void Camera::ProcessMovement(Input *input, f32 deltaTime)
-{
-    front = {0, 0, 1};
-    front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
-    front = Mat4::TransformVector(Mat4::RotateY(rot.y), front);
-    front.Normalize();
-
-    right = Vec3(0, 1, 0).Cross(front).Normalized();
-    up = front.Cross(right).Normalized();
-
-    Vec3 worldFront = right.Cross(Vec3(0, 1, 0)).Normalized();
-
-    acc = {};
-    if(input->KeyIsPress(KEY_W)) {
-        acc += worldFront;
-    }
-    if(input->KeyIsPress(KEY_S)) {
-        acc -= worldFront;
-    }
-    if(input->KeyIsPress(KEY_A)) {
-        acc -= right;
-    }
-    if(input->KeyIsPress(KEY_D)) {
-        acc += right;
-    }
-
-    f32 zoomSpeed = 0.25f;
-    if(input->KeyIsPress(KEY_F)) {
-        maxDist = MIN(maxDist + zoomSpeed, 15.0f);
-
-    }
-    if(input->KeyIsPress(KEY_R)) {
-        maxDist = MAX(maxDist - zoomSpeed, 1.0f);
-    }
-
-    if(input->KeyJustPress(KEY_SPACE) && grounded) {
-        Vec3 jumpForce = Vec3(0, 40, 0);
-        vel += jumpForce;
-    }
-
+void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
+    // TODO: mouse
     if(input->KeyIsPress(KEY_LEFT)) {
         rot.y += 2.5f * deltaTime;
     }
@@ -71,23 +31,57 @@ void Camera::ProcessMovement(Input *input, f32 deltaTime)
         rot.x -= 2.5f * deltaTime;
     }
 
+
+    rot.y -= input->state[0].rightStickX * 2.5f * deltaTime;
+    rot.x += input->state[0].rightStickY * 2.5f * deltaTime;
+
+    f32 zoomSpeed = 0.25f;
+    if(input->KeyIsPress(KEY_F) || input->JoystickIsPress(JOYSTICK_BUTTON_DOWN)) {
+        maxDist = MIN(maxDist + zoomSpeed, 15.0f);
+
+    }
+    if(input->KeyIsPress(KEY_R) || input->JoystickIsPress(JOYSTICK_BUTTON_UP)) {
+        maxDist = MAX(maxDist - zoomSpeed, 1.0f);
+    }
+
     if (rot.x >  (89.0f/180.0f) * PI)
         rot.x =  (89.0f/180.0f) * PI;
     if (rot.x < -(89.0f/180.0f) * PI)
         rot.x = -(89.0f/180.0f) * PI;
 
-    if(acc.LenSq() > 0.0f) acc.Normalize();
+    front = {0, 0, 1};
+    front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
+    front = Mat4::TransformVector(Mat4::RotateY(rot.y), front);
+    front.Normalize();
 
-    acc *= speed;
+    right = Vec3(0, 1, 0).Cross(front).Normalized();
+    up = front.Cross(right).Normalized();
 
-    if(!grounded)
-        acc += Vec3(0, -9.8 * 5, 0);
 
-    vel += acc * deltaTime;
+    Segment cameraSegment;
+    cameraSegment.a = target;
+    cameraSegment.b = target - (front * maxDist);
 
-    f32 dammping = powf(0.001f, deltaTime);
-    vel = vel * dammping;
+    f32 tMin = FLT_MAX;
+    for(i32 i = 0; i < map->entities.count; ++i) {
+        MapImporter::Entity *entity = &map->entities.data[i];
+        f32 t = -1.0f;
+        if(cameraSegment.HitEntity(entity, &t)) {
+            if(t < tMin) {
+                tMin = t;
+            }
+        }
+    }
 
-    lastPos = pos;
-    pos += vel * deltaTime;
+    dist = maxDist;
+    if(tMin > 0.0f && tMin <= 1.0f) {
+        dist = MIN((maxDist-0.1f) * tMin, maxDist);
+    }
+
+    pos = target - (front * dist);
+}
+
+
+Vec3 Camera::GetWorldFront() {
+    return right.Cross(Vec3(0, 1, 0)).Normalized();
 }

@@ -88,8 +88,6 @@ void Game::Initialize() {
 
     GraphicsManager::Get()->SetWorldMatrix(Mat4());
 
-    camera.Initialize(Vec3(0, 30, 0), 40.0f);
-
     statShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/texVert.hlsl",
                                                                "./data/shaders/texFrag.hlsl");
     animShader = GraphicsManager::Get()->CreateShaderSkinVertex("./data/shaders/animVert.hlsl",
@@ -163,12 +161,7 @@ void Game::Terminate() {
 
 void Game::Update(f32 dt) {
 
-    Input *input = PlatformManager::Get()->GetInput();
-
     // NOTE: process movement and collision
-    camera.ProcessMovement(input, dt);
-    camera.SetViewMatrix();
-
     level.Update(dt);
 
 #if 0

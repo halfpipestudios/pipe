@@ -2,7 +2,6 @@
 #define _GAME_H_
 
 #include "common.h"
-#include "camera.h"
 
 #include "level.h"
 
@@ -19,9 +18,7 @@ struct Game {
     void Render();
 
 private:
-
-    Camera camera;
-    
+ 
     Shader statShader;
     Shader animShader;
 

@@ -6,6 +6,7 @@
 #include "gjk_collision.h"
 #include "map_importer.h"
 #include "model_importer.h"
+#include "camera.h"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -17,10 +18,15 @@ struct Map {
 
 struct Transform {
     Vec3 pos;
-    Vec3 vel;
     Vec3 rot;
     Vec3 scale;
     inline Mat4 GetWorldMatrix() { return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); };
+};
+
+struct Physics {
+    Vec3 pos;
+    Vec3 vel;
+    Vec3 acc;
 };
 
 enum EntityFlags {
@@ -38,18 +44,25 @@ struct Entity {
 
     void Update(Map *map, f32 dt);
     void Render(Shader shader);
+
+    void Move(Input *input, Camera camera);
     
     Entity *next;
+
+    Transform transform;
+    Physics physics;
+    Physics lastPhysics;
+    Cylinder collider;
+
+    inline void SetColliderPos() {
+        collider.c = physics.pos + Vec3(0, 0.75f, 0);
+    }
 
 private:
     u32 flags;
 
-    Transform transform;
-    Transform lastTransform;
-
     Model model;
     AnimationSet animation;
-    Cylinder collider;
     
     Mat4 *finalTransformMatrices;
     u32 numFinalTrasformMatrices;
@@ -70,8 +83,13 @@ struct Level {
     void Render(Shader statShader, Shader animShader);
 
 private:
+
+    Camera camera;
     
     Map map;
+
+    Entity *hero;
+    Entity *orc;
     
     Entity *entities;
     ObjectAllocator<Entity> entitiesAllocator;
