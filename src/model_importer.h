@@ -49,6 +49,8 @@ protected:
     void ReadSample(u8 **file, AnimationSample *sample, u32 num_joints);
 
     void AddWeightToVertex(SkinVertex *vertex, u32 boneId, f32 weight);
+
+    void TweenImporter::NormalizeVertexWeigths(SkinVertex *vertex);
 };
 
 struct ModelImporter : public TweenImporter {
