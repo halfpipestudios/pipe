@@ -5,7 +5,7 @@
 // TODO: FIX AND REMOVE !!!! ....
 #include <vector>
 
-EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
+MapImporter::EntitiesInfo MapImporter::GetEntitiesInfo(File file) {
     EntitiesInfo info = {};
 
     u8 *data = (u8 *)file.data;
@@ -26,7 +26,7 @@ EntitiesInfo MapLoader::GetEntitiesInfo(File file) {
     return info;
 }
 
-i32 MapLoader::GetTextureCount(File file) {
+i32 MapImporter::GetTextureCount(File file) {
     i32 count = 0;
 
     u8 *data = (u8 *)file.data;
@@ -49,7 +49,7 @@ i32 MapLoader::GetTextureCount(File file) {
     return count;
 }
 
-void MapLoader::LoadMapFromFile(char *filepath) {
+void MapImporter::LoadMapFromFile(char *filepath) {
 
     MemoryManager::Get()->BeginTemporalMemory();
     File file = PlatformManager::Get()->ReadFileToTemporalMemory(filepath);
@@ -115,27 +115,27 @@ void MapLoader::LoadMapFromFile(char *filepath) {
 
 }
 
-EntityArray MapLoader::GetEntities() {
+MapImporter::EntityArray MapImporter::GetEntities() {
     return entityArray;
 }
 
 
-TextureArray MapLoader::GetTextures() {
+MapImporter::TextureArray MapImporter::GetTextures() {
     return textureArray;
 }
 
 
-ConvexHullArray MapLoader::GetConvexHulls() {
+MapImporter::ConvexHullArray MapImporter::GetConvexHulls() {
     return convexHullArray;
 }
 
-VertexArray MapLoader::GetVertices() {
+MapImporter::VertexArray MapImporter::GetVertices() {
     return vertexArray;
 }
 
 
 
-void MapLoader::LoadVertexData() {
+void MapImporter::LoadVertexData() {
     std::vector<VertexMap> vertices;
 
     convexHullArray.data = (ConvexHull *)MemoryManager::Get()->AllocStaticMemory(sizeof(ConvexHull) * entityArray.count, 1);
@@ -201,7 +201,7 @@ void MapLoader::LoadVertexData() {
 }
 
 #define ILEGAL_EPSILON 0.01f
-void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
+void MapImporter::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
     for(i32 i = 0; i < count - 2; ++i) {
     for(i32 j = i; j < count - 1; ++j) {
     for(i32 k = j; k < count - 0; ++k) {
@@ -235,7 +235,7 @@ void MapLoader::FillPolygonsVertices(Entity *entity, Poly *polygons, i32 count) 
     }}}
 }
 
-void MapLoader::FillPolygonsUvs(Entity *entity, Poly *polygons, i32 count) {
+void MapImporter::FillPolygonsUvs(Entity *entity, Poly *polygons, i32 count) {
     for(i32 i = 0; i < count; ++i) {
         TextureAxis texAxis = entity->faces[i].textureAxis;
         u32 texture = entity->faces[i].texture;
@@ -260,7 +260,7 @@ void MapLoader::FillPolygonsUvs(Entity *entity, Poly *polygons, i32 count) {
 
 
 
-void MapLoader::OrderPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
+void MapImporter::OrderPolygonsVertices(Entity *entity, Poly *polygons, i32 count) {
     // order the vertices in the polygons
     for(i32 p = 0; p < count; ++p) {
         Plane polygonPlane = entity->faces[p].plane; 
@@ -301,7 +301,7 @@ void MapLoader::OrderPolygonsVertices(Entity *entity, Poly *polygons, i32 count)
 }
 
 
-void MapLoader::RemoveRepeatedVertices(Poly *polygons, i32 count) {
+void MapImporter::RemoveRepeatedVertices(Poly *polygons, i32 count) {
     // remove repeted vertex
     for(i32 j = 0; j < count; ++j) {
         Poly *poly = &polygons[j];
@@ -321,7 +321,7 @@ void MapLoader::RemoveRepeatedVertices(Poly *polygons, i32 count) {
     }
 }
 
-bool MapLoader::GetIntersection(Vec3 n1, Vec3 n2, Vec3 n3, f32 d1, f32 d2, f32 d3, VertexMap *vertex) {
+bool MapImporter::GetIntersection(Vec3 n1, Vec3 n2, Vec3 n3, f32 d1, f32 d2, f32 d3, VertexMap *vertex) {
     Vec3 u = n2.Cross(n3);
     f32 denom = n1.Dot(u);
     if(fabsf(denom) < FLT_EPSILON) return false;
@@ -331,7 +331,7 @@ bool MapLoader::GetIntersection(Vec3 n1, Vec3 n2, Vec3 n3, f32 d1, f32 d2, f32 d
     return true;
 }
 
-Vec3 MapLoader::GetCenterOfPolygon(Poly *polygon) {
+Vec3 MapImporter::GetCenterOfPolygon(Poly *polygon) {
     Vec3 center = {};
     for(i32 i = 0; i < polygon->verticesCount; ++i) {
         center = center + polygon->vertices[i].pos;
@@ -340,14 +340,14 @@ Vec3 MapLoader::GetCenterOfPolygon(Poly *polygon) {
     return center;
 }
 
-Plane MapLoader::GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c) {
+Plane MapImporter::GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c) {
     Plane p;
     p.n = ((b - a).Cross(c - a)).Normalized();
     p.d = p.n.Dot(a);
     return p;
 }
 
-void MapLoader::RemoveVertexAtIndex(Poly *poly, i32 index) {
+void MapImporter::RemoveVertexAtIndex(Poly *poly, i32 index) {
     for(i32 i = index; i < (poly->verticesCount - 1); ++i) {
         poly->vertices[i] = poly->vertices[i + 1];
     }

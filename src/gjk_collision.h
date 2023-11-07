@@ -4,8 +4,6 @@
 #include "math.h"
 #include "map_importer.h"
 
-#include <vector>
-
 struct ConvexHull {
     Vec3 *points;
     i32 count;

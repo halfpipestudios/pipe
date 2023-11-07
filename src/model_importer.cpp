@@ -293,12 +293,12 @@ void AnimationImporter::Read(char *path) {
     MemoryManager::Get()->BeginTemporalMemory();
     
     File file = PlatformManager::Get()->ReadFileToTemporalMemory(path);
-    ReadSkeletonFile(&skeleton, &animations, &numAnimations, (u8 *)file.data);
+    ReadSkeletonFile((u8 *)file.data);
     
     MemoryManager::Get()->EndTemporalMemory();
 }
 
-void AnimationImporter::ReadSkeletonFile(Skeleton *skeleton, AnimationClip **animations, u32 *num_animations, u8 *file) {
+void AnimationImporter::ReadSkeletonFile(u8 *file) {
 
     u32 magic = READ_U32(file);
     ASSERT(magic == TWEEN_MAGIC);
@@ -311,6 +311,7 @@ void AnimationImporter::ReadSkeletonFile(Skeleton *skeleton, AnimationClip **ani
     
     ASSERT(flags & TWEEN_ANIMATIONS);
 
+    skeleton = (Skeleton *)MemoryManager::Get()->AllocStaticMemory(sizeof(Skeleton), 8);
     ReadString(&file, skeleton->name);
     skeleton->numJoints = READ_U32(file);
     skeleton->joints = (Joint *)MemoryManager::Get()->AllocStaticMemory(sizeof(Joint)*skeleton->numJoints, 8);
@@ -321,13 +322,13 @@ void AnimationImporter::ReadSkeletonFile(Skeleton *skeleton, AnimationClip **ani
         ReadJoint(&file, joint);
     }
     
-    u32 animations_array_size = READ_U32(file);
-    AnimationClip *animations_array = (AnimationClip *)MemoryManager::Get()->AllocStaticMemory(sizeof(AnimationClip)*animations_array_size, 8);
+    numAnimations = READ_U32(file);
+    animations = (AnimationClip *)MemoryManager::Get()->AllocStaticMemory(sizeof(AnimationClip)*numAnimations, 8);
 
-    printf("Number of animations: %d\n", animations_array_size);
+    printf("Number of animations: %d\n", numAnimations);
 
-    for(u32 animation_index = 0; animation_index < animations_array_size; ++animation_index) {
-        AnimationClip *animation = animations_array + animation_index; 
+    for(u32 animation_index = 0; animation_index < numAnimations; ++animation_index) {
+        AnimationClip *animation = animations + animation_index; 
         animation->skeleton = skeleton;
 
         ReadString(&file, animation->name);
@@ -343,9 +344,6 @@ void AnimationImporter::ReadSkeletonFile(Skeleton *skeleton, AnimationClip **ani
         printf("Animation name: %s, duration: %f, keyframes: %d\n", animation->name, animation->duration, animation->numSamples);
 
     }
-    
-    *animations = animations_array;
-    *num_animations = animations_array_size;
 
     printf("Animation complete loading perfectly!\n");
 }

@@ -1,5 +1,6 @@
 #include "gjk_collision.h"
 #include <float.h>
+#include <stdio.h>
 
 
 Vec3 ConvexHull::FindFurthestPoint(Vec3 dir) {

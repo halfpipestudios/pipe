@@ -12,72 +12,74 @@ struct Plane {
     f32 d;
 };
 
-struct TextureAxis {
-    
-    Vec3 u, v;
-};
-
 struct Poly {
     VertexMap vertices[256];
     i32 verticesCount;
 };
 
-struct MapHeader {
-    u64 entityOffset;
-    u64 textureOffset;
-};
 
-struct EntityHeader {
-    u32 faceCount;
-    u64 faceSize;
-};
 
-struct EntityFace {
-    Plane plane;
-    TextureAxis textureAxis;
-    u32 texture;
-};
+struct MapImporter {
 
-struct TextureHeader {
-    u32 textureWidth;
-    u32 textureHeight;
-};
+    struct TextureAxis {
+        
+        Vec3 u, v;
+    };
 
-struct Entity {
-    EntityFace *faces;
-    i32 facesCount;
-};
+    struct MapHeader {
+        u64 entityOffset;
+        u64 textureOffset;
+    };
 
-struct EntityArray {
-    Entity *data;
-    u32 count;
-};
+    struct EntityHeader {
+        u32 faceCount;
+        u64 faceSize;
+    };
 
-struct ConvexHullArray {
-    ConvexHull *data;
-    u32 count;
-};
+    struct EntityFace {
+        Plane plane;
+        TextureAxis textureAxis;
+        u32 texture;
+    };
 
-struct VertexArray {
-    VertexMap *data;
-    u32 count;
-};
+    struct TextureHeader {
+        u32 textureWidth;
+        u32 textureHeight;
+    };
 
-struct TextureArray {
-    Texture *data;
-    u32 count;
-};
+    struct Entity {
+        EntityFace *faces;
+        i32 facesCount;
+    };
 
-struct Map {
-    Entity *entities;
-};
+    struct EntityArray {
+        Entity *data;
+        u32 count;
+    };
 
-struct EntitiesInfo{
-    u32 entityCount;
-    u32 facesCount;
-};
+    struct ConvexHullArray {
+        ConvexHull *data;
+        u32 count;
+    };
 
-struct MapLoader {
+    struct VertexArray {
+        VertexMap *data;
+        u32 count;
+    };
+
+    struct TextureArray {
+        Texture *data;
+        u32 count;
+    };
+
+    struct Map {
+        Entity *entities;
+    };
+
+    struct EntitiesInfo{
+        u32 entityCount;
+        u32 facesCount;
+    };
 
     void LoadMapFromFile(char *filepath);
     EntityArray GetEntities();

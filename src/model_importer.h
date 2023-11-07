@@ -65,12 +65,12 @@ struct AnimationImporter : public TweenImporter {
     
     void Read(char *path) override;
 
-    Skeleton skeleton;
+    Skeleton *skeleton;
     AnimationClip *animations;
     u32 numAnimations;
 
 private:
-    void ReadSkeletonFile(Skeleton *skeleton, AnimationClip **animations, u32 *num_animations, u8 *file);
+    void ReadSkeletonFile(u8 *file);
 };
 
 #endif 
