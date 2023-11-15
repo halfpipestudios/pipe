@@ -7,7 +7,6 @@
 #include "graphics.h"
 #include "allocators.h"
 
-
 struct D3D11VertexBuffer {
     ID3D11Buffer *buffer;
     u32 verticesCount;
@@ -21,6 +20,26 @@ struct D3D11IndexBuffer {
     DXGI_FORMAT format;
 };
 
+struct D3D11TextureArray {
+    ID3D11ShaderResourceView *srv;
+    ID3D11Texture2D *gpuTextureArray;
+    Texture    *cpuTextureArray;
+    u32 mipLevels;
+    u32 size;
+};
+
+struct D3D11FrameBuffer {
+    
+    f32 x, y, w, h;
+    DXGI_FORMAT format;
+    ID3D11Texture2D *texture;
+    ID3D11RenderTargetView   *renderTargetView;
+    ID3D11ShaderResourceView *shaderResourceView;
+    ID3D11DepthStencilView   *depthStencilView; 
+    
+    D3D11TextureArray textureBuffer;
+};
+
 struct D3D11Shader {
     ID3D11VertexShader *vertex;
     ID3D11PixelShader *fragment;
@@ -32,17 +51,21 @@ struct D3D11ConstBuffer {
     u32 index;
 };
 
-struct D3D11TextureArray {
-    ID3D11ShaderResourceView *srv;
-    ID3D11Texture2D *gpuTextureArray;
-    Texture    *cpuTextureArray;
-    u32 mipLevels;
-    u32 size;
-};
-
 struct D3D11VertexLine {
     Vec3 pos;
     Vec4 col;
+};
+
+struct D3D11Quad {
+    D3D112DVertex vertices[4];
+};
+
+struct D3D11QuadBatch {
+    D3D11Quad *quads;
+    u32       *indices;
+    
+    u32 used;
+    u32 size;
 };
 
 struct D3D11LineRenderer {
@@ -64,6 +87,20 @@ private:
     Vec4 Vec4Color(u32 color);
     D3D11Shader CreateD3D11Shader(ID3D11Device *device, char *vertpath, char *fragpath);
     void DestroyD3D11Shader(D3D11Shader *shader);
+};
+
+struct D3D11BatchRenderer {
+
+    ID3D11Buffer   *gpuVertexBuffer;
+    ID3D11Buffer   *gpuIndexBuffer;
+    
+    D3D11QuadBatch cpuQuadBuffer;
+
+    void Initialize(size_t bufferSize, ID3D11Device *device);
+    void Terminate();
+    
+    void Render(ID3D11DeviceContext *deviceContext);
+    void AddBatchVertex(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount, ID3D11DeviceContext *deviceContext);
 };
 
 struct D3D11Graphics : public Graphics {
@@ -89,14 +126,17 @@ struct D3D11Graphics : public Graphics {
     void SetDepthStencilState(bool value) override;
     void SetAlphaBlendState(bool value) override;
 
-    void ClearColorBuffer(f32 r, f32 g, f32 b) override;
-    void ClearDepthStencilBuffer() override;
+    void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) override;
+    void ClearDepthStencilBuffer(FrameBuffer frameBufferHandle) override;
+
     void Present(i32 vsync) override;
 
     Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
     Shader CreateShaderSkinVertex(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
+    Shader CreateShaderTGui(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
+    void BindShader(Shader shaderHandle) override;
 
     ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
     void DestroyConstBuffer(ConstBuffer constBufferHandle);
@@ -122,7 +162,16 @@ struct D3D11Graphics : public Graphics {
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
     void BindTextureBuffer(TextureBuffer textureBufferHandle) override;
 
+    FrameBuffer CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
+    void DestroyFrameBuffer(FrameBuffer frameBufferHandle) override;
+    void BindFrameBuffer(FrameBuffer frameBufferHandle) override;
+    TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) override;
+    void FlushFrameBuffer(FrameBuffer frameBufferHandle) override;
+
+    void SetViewport(u32 x, u32 y, u32 w, u32 h) override;
+
     void DrawLine(Vec3 a, Vec3 b, u32 color) override;
+    void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) override;
 
 private:
 
@@ -131,8 +180,10 @@ private:
     ObjectAllocator<D3D11VertexBuffer> vertexBufferStorage;
     ObjectAllocator<D3D11TextureArray> textureArrayStorage;
     ObjectAllocator<D3D11IndexBuffer> indexBufferStorage;
+    ObjectAllocator<D3D11FrameBuffer> frameBufferStorage;
 
     D3D11LineRenderer lineRenderer;
+    D3D11BatchRenderer batchRenderer;
 
 };
 

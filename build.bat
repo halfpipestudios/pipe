@@ -2,14 +2,37 @@
 
 if not exist .\build mkdir .\build
 
-set TARGET=pipe
+echo ----------------------------------------
+echo Building UI library ...
+echo ----------------------------------------
+echo  
+
+set TARGET=tgui
 set CFLAGS=/nologo /Od /Zi /EHsc
 set LIBS=User32.lib Ole32.lib Xinput.lib Xaudio2.lib d3d11.lib d3dcompiler.lib Dwmapi.lib
+set SOURCES=.\thirdparty\tgui\src\*.c
+set OBJS=.\build\stb_truetype.obj .\build\tgui.obj .\build\tgui_memory.obj .\build\tgui_gfx.obj .\build\tgui_os_win32.obj .\build\tgui_painter.obj .\build\tgui_geometry.obj .\build\tgui_docker.obj .\build\tgui_serializer.obj
+set OUT_DIR=/Fo.\build\ /Fe.\build\%TARGET% /Fm.\build\
+set INC_DIR=/I.\thirdparty /I.\thirdparty\tgui\include 
+set LNK_DIR=
+
+cl /c %CFLAGS% %INC_DIR% %SOURCES% %OUT_DIR% 
+lib /OUT:".\thirdparty\tgui\lib\tgui.lib"  %OBJS%
+
+
+echo ----------------------------------------
+echo Build game ...
+echo ----------------------------------------
+echo  
+
+set TARGET=pipe
+set CFLAGS=/nologo /Od /Zi /EHsc
+set LIBS=User32.lib Ole32.lib Xinput.lib Xaudio2.lib d3d11.lib d3dcompiler.lib Dwmapi.lib tgui.lib
 REM set SOURCES=.\src\main.cpp .\src\math.cpp .\src\memory.cpp .\src\input.cpp .\src\win32_platform.cpp .\src\platform_manager.cpp .\src\memory_manager.cpp
 set SOURCES=.\src\*.cpp
 set OUT_DIR=/Fo.\build\ /Fe.\build\%TARGET% /Fm.\build\
-set INC_DIR=/I.\ /I.\thirdparty
-set LNK_DIR=
+set INC_DIR=/I.\ /I.\thirdparty /I.\thirdparty\tgui\include
+set LNK_DIR=/LIBPATH:.\thirdparty\tgui\lib
 
 cl %CFLAGS% %INC_DIR% %SOURCES% %OUT_DIR% /link %LNK_DIR% %LIBS% /SUBSYSTEM:CONSOLE
 

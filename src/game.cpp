@@ -80,11 +80,9 @@ static void LoadModelToGpu(Model *model) {
 void Game::Initialize() {
 
     // Set Matrices
-    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
-                60, 
-                (f32)PlatformManager::Get()->GetWindow()->GetWidth() /
-                (f32)PlatformManager::Get()->GetWindow()->GetHeight(),
-                0.01f, 1000.0f));
+    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, 
+    (f32)PlatformManager::Get()->GetWindow()->GetWidth() / (f32)PlatformManager::Get()->GetWindow()->GetHeight(),
+    0.01f, 1000.0f));
 
     GraphicsManager::Get()->SetWorldMatrix(Mat4());
 

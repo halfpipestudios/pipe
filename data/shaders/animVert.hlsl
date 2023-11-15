@@ -56,6 +56,6 @@ PS_Input vs_main(VS_Input input) {
     o.nor = wNor;
     o.uv = input.uv;
     o.tex = 0; 
-
+    
     return o;
 }

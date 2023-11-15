@@ -298,7 +298,7 @@ void Entity::Render(Shader shader) {
         GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
     }
 
-   //DrawCylinder(collider, HaveFlag(ENTITY_COLLIDING) ? 0xffff0000 : 0xff00ff00);
+   // DrawCylinder(collider, HaveFlag(ENTITY_COLLIDING) ? 0xffff0000 : 0xff00ff00);
 }
 
 void Entity::Move(Input *input, Camera camera) {

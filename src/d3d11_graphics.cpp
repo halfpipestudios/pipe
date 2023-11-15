@@ -172,7 +172,7 @@ void D3D11Graphics::Initialize() {
     colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; 
     colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP; 
     colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR; //D3D11_FILTER_MIN_MAG_MIP_LINEAR | D3D11_FILTER_MIN_MAG_MIP_POINT
+    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT; //D3D11_FILTER_MIN_MAG_MIP_LINEAR | D3D11_FILTER_MIN_MAG_MIP_POINT
     colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
     if(FAILED(device->CreateSamplerState(&colorMapDesc, &samplerStateWrap))) {
         printf("Error: Failed Creating sampler state\n");
@@ -188,11 +188,15 @@ void D3D11Graphics::Initialize() {
     cpuMatrices.proj = Mat4();
     cpuMatrices.view = Mat4();
     cpuMatrices.world = Mat4();
+    
+    memset(&cpuTGuiBuffer, 0, sizeof(cpuTGuiBuffer));
 
     gpuMatrices = CreateConstBuffer((void *)&cpuMatrices, sizeof(cpuMatrices), 0, nullptr);
     gpuAnimMatrices = CreateConstBuffer((void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
+    gpuTGuiBuffer = CreateConstBuffer((void *)&cpuTGuiBuffer, sizeof(cpuTGuiBuffer), 2, nullptr);
 
     lineRenderer.Initialize(200, device);
+    batchRenderer.Initialize(200, device);
 }
 
 void  D3D11Graphics::Terminate() {
@@ -214,8 +218,10 @@ void  D3D11Graphics::Terminate() {
 
     DestroyConstBuffer(gpuMatrices);
     DestroyConstBuffer(gpuAnimMatrices);
+    DestroyConstBuffer(gpuTGuiBuffer);
 
     lineRenderer.Terminate();
+    batchRenderer.Terminate();
 }
 
 void  D3D11Graphics::SetRasterizerState(RasterizerState state) {
@@ -249,17 +255,26 @@ void D3D11Graphics::SetAlphaBlendState(bool value) {
         deviceContext->OMSetBlendState(alphaBlendDisable, 0, 0xffffffff);
 }
 
-void D3D11Graphics::ClearColorBuffer(f32 r, f32 g, f32 b) {
+void D3D11Graphics::ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) {
     float clearColor[] = { r, g, b, 1.0f };
-    deviceContext->ClearRenderTargetView(renderTargetView, clearColor);
+    if(frameBufferHandle == nullptr) {
+        deviceContext->ClearRenderTargetView(renderTargetView, clearColor);
+    } else {
+        D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+        deviceContext->ClearRenderTargetView(frameBuffer->renderTargetView, clearColor);
+    }
 }
 
-void D3D11Graphics::ClearDepthStencilBuffer() {
-    deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
+void D3D11Graphics::ClearDepthStencilBuffer(FrameBuffer frameBufferHandle) {
+    if(frameBufferHandle == nullptr) {
+        deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
+    } else {
+        D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+        deviceContext->ClearDepthStencilView(frameBuffer->depthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
+    }
 }
 
 void D3D11Graphics::Present(i32 vsync) {
-    lineRenderer.Render(deviceContext);
     swapChain->Present(vsync, 0);
 }
 
@@ -508,12 +523,98 @@ Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath) {
     return (Shader)shaderHandle;
 }
 
+Shader D3D11Graphics::CreateShaderTGui(char *vertpath, char *fragpath) {
+    D3D11Shader shader = {}; 
+
+    MemoryManager::Get()->BeginTemporalMemory();
+    File vertfile = PlatformManager::Get()->ReadFileToTemporalMemory(vertpath);
+    File fragfile = PlatformManager::Get()->ReadFileToTemporalMemory(fragpath);
+
+    ID3DBlob *vertexShaderCompiled = 0;
+    ID3DBlob *fragmentShaderCompiled = 0;
+    
+    HRESULT result = 0;
+    ID3DBlob *errorVertexShader = 0;
+    result = D3DCompile(vertfile.data, vertfile.size,
+                        0, 0, 0, "vs_main", "vs_5_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &vertexShaderCompiled,
+                        &errorVertexShader);
+    if(errorVertexShader != 0) {
+        char *errorString = (char *)errorVertexShader->GetBufferPointer();
+        printf("error compiling vertex shader (%s): %s", vertpath, errorString);
+        errorVertexShader->Release();
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    ID3DBlob *errorFragmentShader = 0;
+    result = D3DCompile(fragfile.data, fragfile.size,
+                        0, 0, 0, "fs_main", "ps_5_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &fragmentShaderCompiled,
+                        &errorFragmentShader);
+    if(errorFragmentShader) {
+        char *errorString = (char *)errorFragmentShader->GetBufferPointer();
+        printf("error compiling fragment shader (%s): %s", fragpath, errorString);
+        errorFragmentShader->Release();
+        ASSERT(!"INVALID_CODE_PATH")
+    }
+
+    // create the vertex and fragment shader
+    result = device->CreateVertexShader(
+            vertexShaderCompiled->GetBufferPointer(),
+            vertexShaderCompiled->GetBufferSize(), 0,
+            &shader.vertex);
+    result = device->CreatePixelShader(
+            fragmentShaderCompiled->GetBufferPointer(),
+            fragmentShaderCompiled->GetBufferSize(), 0,
+            &shader.fragment);
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+    // create input layout
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,
+         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+         0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+         0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
+    HRESULT layoutResult = device->CreateInputLayout(inputLayoutDesc,
+        totalLayoutElements,
+        vertexShaderCompiled->GetBufferPointer(),
+        vertexShaderCompiled->GetBufferSize(),
+        &shader.layout);
+
+    if(FAILED(layoutResult)) {
+        OutputDebugString("ERROR Creating Layout Input\n");
+        ASSERT(!"ERROR");
+    }
+
+    if(vertexShaderCompiled) vertexShaderCompiled->Release();
+    if(fragmentShaderCompiled) fragmentShaderCompiled->Release();
+
+    D3D11Shader *shaderHandle = shadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (Shader)shaderHandle;
+}
+
 void D3D11Graphics::DestroyShader(Shader shaderHandle) {
     D3D11Shader *shader = (D3D11Shader *)shaderHandle;
     if(shader->vertex) shader->vertex->Release();
     if(shader->fragment) shader->fragment->Release();
     if(shader->layout) shader->layout->Release();
     shadersStorage.Free(shader);
+}
+
+void D3D11Graphics::BindShader(Shader shaderHandle) {
+    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
+    deviceContext->VSSetShader(shader->vertex, 0, 0);
+    deviceContext->PSSetShader(shader->fragment, 0, 0);
+    deviceContext->IASetInputLayout(shader->layout);
 }
 
 ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) {
@@ -818,13 +919,153 @@ void D3D11Graphics::BindTextureBuffer(TextureBuffer textureBufferHandle) {
     deviceContext->PSSetShaderResources(0, 1, &textureArray->srv);
 }
 
+FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
+    
+    D3D11FrameBuffer frameBuffer = {};
+    
+    frameBuffer.x = x;
+    frameBuffer.y = y;
+    frameBuffer.w = width;
+    frameBuffer.h = height;
+    frameBuffer.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    
+    // create texture 2d
+    D3D11_TEXTURE2D_DESC texDesc;
+    texDesc.Width = width;
+    texDesc.Height = height;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 1;
+    texDesc.Format = frameBuffer.format;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.SampleDesc.Quality = 0;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.MiscFlags = 0;
+    if(FAILED(device->CreateTexture2D(&texDesc, 0, &frameBuffer.texture))) {
+        printf("Error creating FrameBuffer Texture\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create render target view
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+    rtvDesc.Format = frameBuffer.format;
+    rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvDesc.Texture2D.MipSlice = 0;
+    if(FAILED(device->CreateRenderTargetView(frameBuffer.texture, &rtvDesc, &frameBuffer.renderTargetView))) {
+        printf("Error creating FrameBuffer rtv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create shader resource view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    srvDesc.Format = frameBuffer.format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    if (FAILED(device->CreateShaderResourceView(frameBuffer.texture, &srvDesc, &frameBuffer.shaderResourceView))) {
+        printf("Error creating FrameBuffer srv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create the depth stencil texture
+    ID3D11Texture2D* depthStencilTexture = 0;
+    D3D11_TEXTURE2D_DESC depthStencilTextureDesc;
+    depthStencilTextureDesc.Width  = width;
+    depthStencilTextureDesc.Height = height;
+    depthStencilTextureDesc.MipLevels = 1;
+    depthStencilTextureDesc.ArraySize = 1;
+    depthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilTextureDesc.SampleDesc.Count = 1;
+    depthStencilTextureDesc.SampleDesc.Quality = 0;
+    depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilTextureDesc.CPUAccessFlags = 0;
+    depthStencilTextureDesc.MiscFlags = 0;
+ 
+    // create the depth stencil view
+    if(FAILED(device->CreateTexture2D(&depthStencilTextureDesc, NULL, &depthStencilTexture))) {
+        printf("Error creating FrameBuffer depthStencilTexture\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
+    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    descDSV.Texture2D.MipSlice = 0;
+
+    if(FAILED(device->CreateDepthStencilView(depthStencilTexture, &descDSV, &frameBuffer.depthStencilView))) {
+        printf("Error creating FrameBuffer dsv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    if (depthStencilTexture) {
+        depthStencilTexture->Release();
+    }
+
+    frameBuffer.textureBuffer = {};
+    
+    frameBuffer.textureBuffer.srv = frameBuffer.shaderResourceView;
+    frameBuffer.textureBuffer.gpuTextureArray = frameBuffer.texture;
+    frameBuffer.textureBuffer.mipLevels = 1;
+    frameBuffer.textureBuffer.size = 1;
+
+    D3D11FrameBuffer *frameBufferHandle = frameBufferStorage.Alloc();
+    *frameBufferHandle = frameBuffer;
+
+    return (FrameBuffer)frameBufferHandle;
+}
+
+void D3D11Graphics::DestroyFrameBuffer(FrameBuffer frameBufferHandle) {
+
+    D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+    
+    if(frameBuffer->texture) frameBuffer->texture->Release(); frameBuffer->texture = 0;
+    if(frameBuffer->renderTargetView) frameBuffer->renderTargetView->Release(); frameBuffer->renderTargetView = 0;
+    if(frameBuffer->shaderResourceView) frameBuffer->shaderResourceView->Release(); frameBuffer->shaderResourceView = 0;
+    if(frameBuffer->depthStencilView) frameBuffer->depthStencilView->Release(); frameBuffer->depthStencilView = 0;
+    
+    frameBufferStorage.Free(frameBuffer);
+}
+
+void D3D11Graphics::BindFrameBuffer(FrameBuffer frameBufferHandle) {
+    if(frameBufferHandle == nullptr) {
+        deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+    } else {
+        D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+        deviceContext->OMSetRenderTargets(1, &frameBuffer->renderTargetView, frameBuffer->depthStencilView);
+    }
+}
+
+TextureBuffer D3D11Graphics::FrameBufferGetTexture(FrameBuffer frameBufferHandle) {
+    D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+    return (TextureBuffer *)&frameBuffer->textureBuffer; 
+}
+
+
+void D3D11Graphics::FlushFrameBuffer(FrameBuffer frameBufferHandle) {
+    lineRenderer.Render(deviceContext);
+}
+
+void D3D11Graphics::SetViewport(u32 x, u32 y, u32 w, u32 h) {
+    D3D11_VIEWPORT viewport;
+    viewport.TopLeftX = (f32)x;
+    viewport.TopLeftY = (f32)y;
+    viewport.Width    = (f32)w;
+    viewport.Height   = (f32)h;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    deviceContext->RSSetViewports(1, &viewport);
+}
 
 void D3D11Graphics::DrawLine(Vec3 a, Vec3 b, u32 color) {
     lineRenderer.DrawLine(a, b, color, deviceContext);
 }
 
-
-
+void D3D11Graphics::Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) { 
+    batchRenderer.AddBatchVertex(vertices, vertexCount, indices, indexCount, deviceContext);
+    batchRenderer.Render(deviceContext);
+}
 
 
 // LINE RENDERER 
@@ -990,4 +1231,94 @@ void D3D11LineRenderer::DestroyD3D11Shader(D3D11Shader *shader) {
     if(shader->layout) shader->layout->Release();
 }
 
+void D3D11BatchRenderer::Initialize(size_t bufferSize, ID3D11Device *device) {
+    // NOTE: Initialize vertex buffer -------------------------------------
+    
+    HRESULT result = 0;
 
+    cpuQuadBuffer.used = 0;
+    cpuQuadBuffer.size = bufferSize;
+    
+    // Create the GPU buffer
+    D3D11_BUFFER_DESC vertexDesc;
+    ZeroMemory(&vertexDesc, sizeof(vertexDesc));
+    vertexDesc.Usage = D3D11_USAGE_DYNAMIC;
+    vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    vertexDesc.ByteWidth = cpuQuadBuffer.size * sizeof(D3D11Quad);
+    result = device->CreateBuffer(&vertexDesc, NULL, &gpuVertexBuffer);
+    if(FAILED(result)) {
+        printf("Error: cannot create Batch GPU buffer.\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    // Create the CPU buffer
+    cpuQuadBuffer.quads = (D3D11Quad *)MemoryManager::Get()->AllocStaticMemory(cpuQuadBuffer.size * sizeof(D3D11Quad), 1);
+    memset(cpuQuadBuffer.quads, 0, cpuQuadBuffer.size * sizeof(D3D11Quad));
+
+    // Create the GPU buffer
+    D3D11_BUFFER_DESC indexDesc;
+    ZeroMemory(&indexDesc, sizeof(indexDesc));
+    indexDesc.Usage = D3D11_USAGE_DYNAMIC;
+    indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    indexDesc.ByteWidth = cpuQuadBuffer.size * sizeof(u32) * 6;
+    result = device->CreateBuffer(&indexDesc, NULL, &gpuIndexBuffer);
+    if(FAILED(result)) {
+        printf("Error: cannot create Batch GPU buffer.\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    cpuQuadBuffer.indices = (u32 *)MemoryManager::Get()->AllocStaticMemory(cpuQuadBuffer.size * sizeof(u32) * 6, 1);
+    memset(cpuQuadBuffer.indices, 0, cpuQuadBuffer.size * sizeof(u32) * 6);
+
+}
+
+void D3D11BatchRenderer::Terminate() {
+    if(gpuVertexBuffer) gpuVertexBuffer->Release();
+    if(gpuIndexBuffer) gpuIndexBuffer->Release();
+}
+
+void D3D11BatchRenderer::Render(ID3D11DeviceContext *deviceContext) {
+
+    D3D11_MAPPED_SUBRESOURCE bufferData;
+    
+    ZeroMemory(&bufferData, sizeof(bufferData));
+    deviceContext->Map(gpuVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferData);
+    memcpy(bufferData.pData, cpuQuadBuffer.quads, cpuQuadBuffer.used * sizeof(D3D11Quad));
+    deviceContext->Unmap(gpuVertexBuffer, 0);
+
+
+    ZeroMemory(&bufferData, sizeof(bufferData));
+    deviceContext->Map(gpuIndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferData);
+    memcpy(bufferData.pData, cpuQuadBuffer.indices, cpuQuadBuffer.used * sizeof(u32) * 6);
+    deviceContext->Unmap(gpuIndexBuffer, 0);
+
+    u32 stride = sizeof(D3D112DVertex);
+    u32 offset = 0;
+    
+    deviceContext->IASetVertexBuffers(0, 1, &gpuVertexBuffer, &stride, &offset);
+    deviceContext->IASetIndexBuffer(gpuIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    deviceContext->DrawIndexed(cpuQuadBuffer.used * 6, 0, 0);
+    cpuQuadBuffer.used = 0;
+}
+
+void D3D11BatchRenderer::AddBatchVertex(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount, ID3D11DeviceContext *deviceContext) {
+    
+    u32 quadCount = (vertexCount / 4);
+
+    for(u32 quadIndex = 0; quadIndex < quadCount; ++quadIndex) {
+        
+        memcpy(cpuQuadBuffer.quads + cpuQuadBuffer.used, vertices + quadIndex * 4, sizeof(D3D11Quad));
+        memcpy(cpuQuadBuffer.indices + cpuQuadBuffer.used * 6, indices + quadIndex * 6, sizeof(u32) * 6);
+        
+        ++cpuQuadBuffer.used;
+
+        if(cpuQuadBuffer.used == cpuQuadBuffer.size) {
+            Render(deviceContext);
+        }
+
+    }
+}
