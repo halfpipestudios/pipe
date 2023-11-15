@@ -54,10 +54,7 @@ struct Entity {
     Physics lastPhysics;
     Cylinder collider;
 
-    inline void SetColliderPos() {
-        collider.c = physics.pos + Vec3(0, 0.75f, 0);
-    }
-
+    Vec3 velXZ;
 private:
     u32 flags;
 
