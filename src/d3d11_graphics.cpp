@@ -5,9 +5,10 @@
 
 #include <stdio.h>
 
-void D3D11Graphics::Initialize() {
 
-    i32 gMsaa = 4;
+static i32 gMsaa = 4;
+
+void D3D11Graphics::Initialize() {
 
     i32 deviceFlags = D3D11_CREATE_DEVICE_DEBUG; //D3D11_CREATE_DEVICE_DEBUG;
 
@@ -222,6 +223,57 @@ void  D3D11Graphics::Terminate() {
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
+}
+
+void D3D11Graphics::ResizeBuffers() {
+
+    UINT msaaQuality4x;
+    device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, gMsaa, &msaaQuality4x);
+    ASSERT(msaaQuality4x > 0);
+
+    u32 width = PlatformManager::Get()->GetWindow()->GetWidth();
+    u32 height = PlatformManager::Get()->GetWindow()->GetHeight();
+    // first remove the invalid stuff
+    if(renderTargetView) renderTargetView->Release(); renderTargetView = nullptr;
+    if(depthStencilView) depthStencilView->Release(); depthStencilView = nullptr;
+
+    swapChain->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    ID3D11Texture2D* backBuffer = nullptr;
+    swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
+    device->CreateRenderTargetView(backBuffer, 0, &renderTargetView);
+    if(backBuffer) backBuffer->Release(); backBuffer = nullptr;
+
+    // set up the viewport
+    D3D11_VIEWPORT viewport;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+    viewport.Width = (f32)width;
+    viewport.Height = (f32)height;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    deviceContext->RSSetViewports(1, &viewport);
+
+    // create the depth stencil texture
+    ID3D11Texture2D* depthStencilTexture = 0;
+    D3D11_TEXTURE2D_DESC depthStencilTextureDesc;
+    depthStencilTextureDesc.Width = width;
+    depthStencilTextureDesc.Height = height;
+    depthStencilTextureDesc.MipLevels = 1;
+    depthStencilTextureDesc.ArraySize = 1;
+    depthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilTextureDesc.SampleDesc.Count = gMsaa;
+    depthStencilTextureDesc.SampleDesc.Quality = msaaQuality4x - 1;
+    depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilTextureDesc.CPUAccessFlags = 0;
+    depthStencilTextureDesc.MiscFlags = 0;
+    HRESULT result = device->CreateTexture2D(&depthStencilTextureDesc, 0, &depthStencilTexture);
+ 
+    result = device->CreateDepthStencilView(depthStencilTexture, 0, &depthStencilView);
+    if (depthStencilTexture)
+    {
+        depthStencilTexture->Release();
+    }
 }
 
 void  D3D11Graphics::SetRasterizerState(RasterizerState state) {

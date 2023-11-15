@@ -24,8 +24,21 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     Win32Platform *platform = (Win32Platform *)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
     Input *input = &platform->input;
     switch(msg) {
+        case WM_CREATE: {
+
+        } break;
         case WM_CLOSE: {
             platform->running = false;
+        } break;
+        case WM_SIZE: {
+            u32 clientWidth = LOWORD(lParam);
+            u32 clientHeight = HIWORD(lParam);
+            
+            Win32Window *window = (Win32Window *)platform->GetWindow();
+            window->width = clientWidth;
+            window->height = clientHeight;
+            window->resize = true;
+
         } break;
 
         case WM_KEYDOWN:
@@ -83,6 +96,9 @@ void Win32Platform::Terminate()  {
 }
 
 // NOTE: window interface 
+bool Win32Platform::OnResize() {
+    return window.resize;
+}
 
 Window *Win32Platform::GetWindow() {
     return (Window *)&window;
@@ -110,6 +126,7 @@ static f32 Win32ProcessXInputStick(SHORT value, i32 deadZoneValue)
 void Win32Platform::PollEvents() {
 
     input.state[1] = input.state[0];
+    window.resize = false;
 
     HWND window = *(HWND *)GetWindow()->GetOsWindow();
     MSG msg;

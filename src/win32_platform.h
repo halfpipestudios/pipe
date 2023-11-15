@@ -17,6 +17,7 @@ struct Win32Window : public Window {
     HWND hwnd;
     i32 width;
     i32 height;
+    bool resize;
 };
 
 struct Win32Platform : public Platform {
@@ -24,6 +25,7 @@ struct Win32Platform : public Platform {
     void Terminate() override;
     
     // NOTE: window interface 
+    bool OnResize() override;
     Window *GetWindow() override;
     Input *GetInput() override;
     void PollEvents() override;

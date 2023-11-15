@@ -98,6 +98,8 @@ struct Graphics {
     virtual void Initialize() = 0;
     virtual void Terminate() = 0;
 
+    virtual void ResizeBuffers() = 0;
+
     virtual void SetRasterizerState(RasterizerState state) = 0;
     virtual void SetDepthStencilState(bool value) = 0;
     virtual void SetAlphaBlendState(bool value) = 0;

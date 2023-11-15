@@ -34,6 +34,7 @@ void TGuiDestroyTexture(void *texture) {
 void TGuiSetShaderWidthAndHeight(void *shader, tgui_u32 width, tgui_u32 height) {
     CBTGui *buffer = &GraphicsManager::Get()->cpuTGuiBuffer;
     ConstBuffer handle = GraphicsManager::Get()->gpuTGuiBuffer;
+
     buffer->res_X = width;
     buffer->res_y = height;
     GraphicsManager::Get()->UpdateConstBuffer(handle, buffer);
@@ -61,7 +62,7 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
     
     u32 w = PlatformManager::Get()->GetWindow()->GetWidth();
     u32 h = PlatformManager::Get()->GetWindow()->GetHeight();
-    
+ 
     if(tguiInput->resize_w != w || tguiInput->resize_h != h) {
         tguiInput->window_resize = true;
         tguiInput->resize_w = w;
@@ -121,6 +122,10 @@ int main() {
         f64 deltaTime = currentTime - lastTimer;
         lastTimer = currentTime;
 
+        if(PlatformManager::Get()->OnResize()) {
+            GraphicsManager::Get()->ResizeBuffers();
+        }
+
         PlatformManager::Get()->PollEvents();
         
         game.Update(deltaTime);
@@ -147,8 +152,10 @@ int main() {
         tgui_end();
 
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, 
-        (f32)PlatformManager::Get()->GetWindow()->GetWidth() / (f32)PlatformManager::Get()->GetWindow()->GetHeight(),
-        0.01f, 1000.0f));
+                                                               (f32)PlatformManager::Get()->GetWindow()->GetWidth() /
+                                                               (f32)PlatformManager::Get()->GetWindow()->GetHeight(),
+                                                               0.01f, 1000.0f));
+
 
         GraphicsManager::Get()->SetViewport(0, 0, PlatformManager::Get()->GetWindow()->GetWidth(), PlatformManager::Get()->GetWindow()->GetHeight());
         GraphicsManager::Get()->BindFrameBuffer(nullptr);

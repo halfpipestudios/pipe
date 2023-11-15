@@ -122,6 +122,8 @@ struct D3D11Graphics : public Graphics {
     void Initialize() override;
     void Terminate() override;
 
+    void ResizeBuffers() override;
+
     void SetRasterizerState(RasterizerState state) override;
     void SetDepthStencilState(bool value) override;
     void SetAlphaBlendState(bool value) override;

@@ -26,6 +26,7 @@ struct Platform {
     virtual void Terminate() = 0;
     
     // NOTE: window interface 
+    virtual bool OnResize() = 0;
     virtual Window *GetWindow() = 0;
     virtual Input *GetInput() = 0;
     virtual void PollEvents() = 0;
