@@ -24,23 +24,6 @@ private:
 
     Level level;
 
-#if 0
-    Map map;
-
-    Model orc;
-    AnimationSet orcAnimation;
-    Cylinder orcCollider;
-    Mat4 *orcFinalTransformMatrices;
-    u32 orcNumFinalTrasformMatrices;
-    
-    Model hero;
-    AnimationSet heroAnimation;
-    Cylinder heroCollider;
-    Mat4 *heroFinalTransformMatrices;
-    u32 heroNumFinalTrasformMatrices;
-
-    u32 colorC;
-#endif
 };
 
 #endif // _GAME_H_

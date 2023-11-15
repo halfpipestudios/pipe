@@ -107,7 +107,7 @@ void Level::Update(f32 dt) {
         entity = entity->next;
     }
 
-    camera.target = hero->collider.c;
+    camera.target = hero->transform.pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();
 }
@@ -186,10 +186,12 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationCl
     animation.Play("idle", 1, true);
     animation.Play("walking", 0, true);
     
-    SetColliderPos();
+    collider.c = physics.pos;
     collider.u = Vec3(0, 1, 0);
     collider.radii = 0.3f;
     collider.n = 0.75f;
+
+    velXZ = Vec3();
 
     finalTransformMatrices = nullptr;
     numFinalTrasformMatrices = 0;
@@ -217,12 +219,18 @@ void Entity::Update(Map *map, f32 dt) {
     RemoveFlag(ENTITY_COLLIDING);
 
     if(!HaveFlag(ENTITY_GROUNDED))
-        physics.acc += Vec3(0, -9.8 * 5, 0);
+        physics.acc += Vec3(0, -9.8 * 2.5, 0);
 
     physics.vel += physics.acc * dt;
 
-    f32 dammping = powf(0.001f, dt);
-    physics.vel = physics.vel * dammping;
+    if(HaveFlag(ENTITY_GROUNDED)) {
+        f32 dammping = powf(0.001f, dt);
+        physics.vel = physics.vel * dammping;
+    }
+    else {
+        f32 dammping = powf(0.5f, dt);
+        physics.vel = physics.vel * dammping;
+    }
 
     physics.pos += physics.vel * dt;
 
@@ -230,9 +238,8 @@ void Entity::Update(Map *map, f32 dt) {
     animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
     animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
 
-    SetColliderPos();
- 
-    /*
+    collider.c = physics.pos;
+
     Segment playerSegment;
     playerSegment.a =  lastPhysics.pos;
     playerSegment.b = physics.pos;
@@ -247,12 +254,10 @@ void Entity::Update(Map *map, f32 dt) {
             }
         }
     }
-
     if(tMin >= 0.0f && tMin <= 1.0f) {
         physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8);
-        SetColliderPos();
+        collider.c = physics.pos;
     }
-    */
 
     GJK gjk;
     for(i32 i = 0; i < map->covexHulls.count; ++i) {
@@ -264,12 +269,19 @@ void Entity::Update(Map *map, f32 dt) {
             Vec3 normal = collisionData.normal;
             physics.pos += normal * penetration; 
             physics.vel -= physics.vel.Dot(normal)*normal;
-            SetColliderPos();
+            collider.c = physics.pos;
         }
     }
 
     Segment groundSegment;
-    groundSegment.a = collider.c;
+    
+    Vec3 lastVelXZ = Vec3(physics.vel.x, 0.0f, physics.vel.z);
+    
+    if(lastVelXZ.LenSq() > 0.0f) {
+        velXZ = lastVelXZ.Normalized();
+    }
+
+    groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
     groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
     RemoveFlag(ENTITY_GROUNDED);
     for(i32 i = 0; i < map->entities.count; ++i) {
@@ -288,8 +300,9 @@ void Entity::Update(Map *map, f32 dt) {
 }
 
 void Entity::Render(Shader shader) {
-
-    GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
+    Transform renderTransform = transform;
+    renderTransform.pos.y -= 0.75f;
+    GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
     GraphicsManager::Get()->SetAnimMatrices(finalTransformMatrices, numFinalTrasformMatrices);
     
     for(u32 meshIndex = 0; meshIndex < model.numMeshes; ++meshIndex) {
@@ -298,7 +311,10 @@ void Entity::Render(Shader shader) {
         GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
     }
 
-   // DrawCylinder(collider, HaveFlag(ENTITY_COLLIDING) ? 0xffff0000 : 0xff00ff00);
+    Segment groundSegment;
+    groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
+    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
+    GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, HaveFlag(ENTITY_GROUNDED) ? 0xffff0000 : 0xff00ff00);
 }
 
 void Entity::Move(Input *input, Camera camera) {
@@ -318,7 +334,7 @@ void Entity::Move(Input *input, Camera camera) {
         physics.acc += right;
     }
     if((input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A)) && HaveFlag(ENTITY_GROUNDED)) {
-        physics.vel += Vec3(0, 40, 0);
+        physics.vel += Vec3(0, 15, 0);
     }
 
     physics.acc += worldFront * input->state[0].leftStickY;
@@ -326,6 +342,10 @@ void Entity::Move(Input *input, Camera camera) {
 
     //if(physics.acc.LenSq() > 0.0f) physics.acc.Normalize();
     physics.acc *= 40.0f;
+
+    if (!HaveFlag(ENTITY_GROUNDED)) {
+        physics.acc = physics.acc * 0.1f;
+    }
 
     transform.rot.y = camera.rot.y;
 }
