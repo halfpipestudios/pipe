@@ -53,6 +53,7 @@ struct AnimationState {
     bool enable;
     bool loop;
     bool smooth;
+    bool freeze;
 
     i32 root;
     
@@ -79,8 +80,16 @@ struct AnimationSet {
     void Play(const char *name, f32 weight, bool loop);
     void PlaySmooth(const char *name, f32 transitionTime);
     void Stop(const char *name);
-    bool IsAnimationFinish(const char *name);
     void UpdateWeight(const char *name, f32 weight);
+    void Pause(const char *name);
+    void Freeze(const char *name);
+    void Continue(const char *name);
+
+    f32 GetDuration(const char *name);
+    f32 GetTimer(const char *name);
+
+    bool IsAnimationFinish(const char *name);
+    bool IsFreeze(const char *name);
 
     void Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut);
     

@@ -45,7 +45,7 @@ struct Entity {
     void Update(Map *map, f32 dt);
     void Render(Shader shader);
 
-    void Move(Input *input, Camera camera);
+    void Move(Input *input, Camera camera, f32 dt);
     
     Entity *next;
 
@@ -55,6 +55,9 @@ struct Entity {
     Cylinder collider;
 
     Vec3 velXZ;
+    f32 jumpTimer;
+    bool jumpStarted;
+
 private:
     u32 flags;
 
@@ -68,7 +71,6 @@ private:
     inline void RemoveFlag(EntityFlags flag) { flags &= ~flag; }
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
-
 };
 
 struct Level {

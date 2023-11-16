@@ -100,7 +100,7 @@ void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    hero->Move(input, camera);
+    hero->Move(input, camera, dt);
     Entity *entity = entities;
     while(entity != nullptr) {
         entity->Update(&map, dt);
@@ -192,6 +192,8 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationCl
     collider.n = 0.75f;
 
     velXZ = Vec3();
+    jumpTimer = 0.0f;
+    jumpStarted = false;
 
     finalTransformMatrices = nullptr;
     numFinalTrasformMatrices = 0;
@@ -282,7 +284,8 @@ void Entity::Update(Map *map, f32 dt) {
     }
 
     groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
-    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
+    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.05), 0);
+    //groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
     RemoveFlag(ENTITY_GROUNDED);
     for(i32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *entity = &map->entities.data[i];
@@ -313,11 +316,12 @@ void Entity::Render(Shader shader) {
 
     Segment groundSegment;
     groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
-    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
+    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.05), 0);
+    // groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
     GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, HaveFlag(ENTITY_GROUNDED) ? 0xffff0000 : 0xff00ff00);
 }
 
-void Entity::Move(Input *input, Camera camera) {
+void Entity::Move(Input *input, Camera camera, f32 dt) {
 
     Vec3 worldFront = camera.GetWorldFront();
     Vec3 right = camera.right;
@@ -335,6 +339,14 @@ void Entity::Move(Input *input, Camera camera) {
     }
     if((input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A)) && HaveFlag(ENTITY_GROUNDED)) {
         physics.vel += Vec3(0, 15, 0);
+        animation.Play("jump", 1, false);
+        jumpStarted = true;
+    }
+
+    if(!animation.IsAnimationFinish("jump")) {
+        animation.Pause("walking");
+    } else {
+        animation.Continue("walking");
     }
 
     physics.acc += worldFront * input->state[0].leftStickY;
@@ -347,5 +359,20 @@ void Entity::Move(Input *input, Camera camera) {
         physics.acc = physics.acc * 0.1f;
     }
 
+    if(!animation.IsFreeze("jump") && !animation.IsAnimationFinish("jump") && (animation.GetTimer("jump") >= (animation.GetDuration("jump") * 0.5f))) {
+        animation.Freeze("jump");
+    }
+
+    if(HaveFlag(ENTITY_GROUNDED)) {
+        animation.Continue("jump");
+    }
+    
+    if(!HaveFlag(ENTITY_GROUNDED)) {
+        animation.Pause("walking");
+    } else if(animation.IsAnimationFinish("jump")) {
+        animation.Continue("walking");
+    }
+
     transform.rot.y = camera.rot.y;
+
 }

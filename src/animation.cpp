@@ -133,6 +133,23 @@ void AnimationSet::Stop(const char *name) {
     AnimationState *animation = FindAnimationByName(name);
     ASSERT(animation != nullptr);
     animation->enable = false;
+    animation->time = 0;
+}
+
+void AnimationSet::Pause(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    animation->enable = false;
+}
+
+void AnimationSet::Freeze(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    animation->freeze = true;
+}
+
+void AnimationSet::Continue(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    animation->enable = true;
+    animation->freeze = false;
 }
 
 void AnimationSet::PlaySmooth(const char *name, f32 transitionTime) {
@@ -163,6 +180,24 @@ bool AnimationSet::IsAnimationFinish(const char *name) {
     ASSERT(animation != nullptr);
     return animation->enable == false;
 
+}
+
+bool AnimationSet::IsFreeze(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    ASSERT(animation != nullptr);
+    return animation->freeze == true;
+}
+
+f32 AnimationSet::GetDuration(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    ASSERT(animation != nullptr);
+    return animation->animation->duration;
+}
+
+f32 AnimationSet::GetTimer(const char *name) {
+    AnimationState *animation = FindAnimationByName(name);
+    ASSERT(animation != nullptr);
+    return animation->time;
 }
 
 void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut) {
@@ -222,7 +257,10 @@ void AnimationSet::UpdateAnimationState(AnimationState *state, f32 dt, JointPose
     AnimationClip *animation = state->animation;
     
     // NOTE: update animation time
-    state->time += dt;
+    if(!state->freeze) {
+        state->time += dt;
+    }
+
     if(state->time >= animation->duration) {
         if(state->loop == true) {
             state->time = 0;
@@ -290,4 +328,3 @@ void AnimationSet::ZeroFinalLocalPose(JointPose *finalLocalPose) {
         local_pose->scale = Vec3(0, 0, 0);
     }
 }
-
