@@ -1,6 +1,7 @@
 @echo off
 
 if not exist .\build mkdir .\build
+if not exist .\thirdparty\tgui\lib mkdir .\thirdparty\tgui\lib
 
 echo ----------------------------------------
 echo Building UI library ...
