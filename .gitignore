@@ -1,3 +1,5 @@
 /.vs
 /build
 vc140.pdb
+tgui.dat
+/thirdparty/tgui/lib/tgui.lib
