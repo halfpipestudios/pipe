@@ -37,7 +37,7 @@ static void LoadModelToGpu(Model *model) {
 
 Entity *Level::AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations) {
     Entity *entity = entitiesAllocator.Alloc();
-    entity->Initialize(pos, rot, scale, model, animations, numAnimations);
+    entity->Initialize(pos, rot, scale, model, animations, numAnimations, &map);
     entity->next = entities;
     entities = entity;
     return entity;
@@ -69,7 +69,6 @@ void Level::Initialize(char *mapFilePath) {
                     modelImporter.model, animationImporter.animations, 
                     animationImporter.numAnimations);
 
-    orc->animation.Play("idle", 1, true);
 
     modelImporter.Read("./data/models/hero.twm");
     animationImporter.Read("./data/models/hero.twa");
@@ -77,6 +76,10 @@ void Level::Initialize(char *mapFilePath) {
     hero = AddEntity(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
                      modelImporter.model, animationImporter.animations, 
                      animationImporter.numAnimations);
+
+    StateMachineComponentDesc stmCompDesc = {};
+    stmCompDesc.camera = &camera;
+    hero->AddComponent<StateMachineComponent>(&stmCompDesc);
 
 
     camera.Initialize();
@@ -102,14 +105,14 @@ void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    hero->Move(input, camera, dt);
     Entity *entity = entities;
     while(entity != nullptr) {
         entity->Update(&map, dt);
         entity = entity->next;
     }
 
-    camera.target = hero->transform.pos;
+    GraphicsComponent *heroGraphics = hero->GetComponent<GraphicsComponent>();
+    camera.target = heroGraphics->transform.pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();
 }

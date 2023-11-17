@@ -7,22 +7,13 @@
 #include "animation.h"
 #include "camera.h"
 #include "math.h"
+#include "components.h"
 
-struct Map;
+#include <typeinfo>
+
+static ObjectAllocator<ComponentContainer> gComponetsAllocator;
+
 struct Input;
-
-struct Transform {
-    Vec3 pos;
-    Vec3 rot;
-    Vec3 scale;
-    inline Mat4 GetWorldMatrix() { return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); };
-};
-
-struct Physics {
-    Vec3 pos;
-    Vec3 vel;
-    Vec3 acc;
-};
 
 enum EntityFlags {
     ENTITY_STATIC    = 1 << 0,
@@ -32,86 +23,114 @@ enum EntityFlags {
     ENTITY_COLLIDING = 1 << 3,
 };
 
-struct Entity;
-
-struct EntityState {
-    virtual EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) = 0;
-    virtual void Enter(Entity *entity) = 0;
-    virtual void Exit(Entity *entity) = 0;
-};
-
-struct IdleState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct WalkingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct JumpingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct FallingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
 
 struct Entity {
 
-    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations);
+    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations, Map *map);
     void Terminate();
 
     void Update(Map *map, f32 dt);
     void Render(Shader shader);
 
-    void Move(Input *input, Camera camera, f32 dt);
+    template <typename T>
+    void AddComponent(void *initData = nullptr);
     
-    Entity *next;
+    template <typename T>
+    void RemoveComponent();
 
-    Transform transform;
-    Physics physics;
-    Physics lastPhysics;
-    Cylinder collider;
+    template <typename T>
+    T *GetComponent();
 
-    Vec3 velXZ;
-    f32 jumpTimer;
-    bool jumpStarted;
-
-    AnimationSet animation;
-private:
-    
     u32 flags;
-    EntityState *state;
-
-    Model model;
+    ComponentContainer *componentContainerList; 
+    Entity *next;
     
-    Mat4 *finalTransformMatrices;
-    u32 numFinalTrasformMatrices;
-
     inline void AddFlag(EntityFlags flag) { flags |= flag; }
     inline void RemoveFlag(EntityFlags flag) { flags &= ~flag; }
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
 
-    friend struct IdleState;
-    friend struct WalkingState;
-    friend struct JumpingState;
-    friend struct FallingState;
-    
-    static IdleState idleState;
-    static WalkingState walkingState;
-    static JumpingState jumpingState;
-    static FallingState fallingState;
 };
 
+
+template <typename T>
+void Entity::AddComponent(void *initData) {
+    ComponentContainer *container = gComponetsAllocator.Alloc();
+    memset(container, 0, sizeof(ComponentContainer));
+    
+    // Super Hack
+    //T *component = (T *)&container->component;
+    // T tmpComponent = {};
+    // memcpy(component, &tmpComponent, sizeof(T));
+    
+    T *component = new(&container->component) T;
+
+    component->Initialize(this, initData);
+
+    if(componentContainerList == nullptr) {
+        componentContainerList = container;
+    } else {
+        container->next = componentContainerList;
+        componentContainerList->prev = container;
+        componentContainerList = container; 
+    }
+}
+
+template <typename T>
+void Entity::RemoveComponent() {
+
+    ComponentContainer *containerToRemove = nullptr;
+    ComponentContainer *container = componentContainerList;
+    while(container) {
+
+        Component *component =  (Component *)&container->component;
+
+        if(typeid(*component) == typeid(T)) {
+            component->Terminate(this);
+            containerToRemove = container;
+            break;
+        }
+
+        container = container->next;
+    }
+
+    if(containerToRemove) {
+
+        if(containerToRemove->prev == nullptr) {
+            componentContainerList = containerToRemove->next;
+        } else if(containerToRemove->next ==  nullptr) {
+            containerToRemove->prev->next = nullptr;
+        } else {
+            containerToRemove->prev->next = containerToRemove->next;
+            containerToRemove->next->prev = containerToRemove->prev;
+        }
+
+        containerToRemove->next = nullptr;
+        containerToRemove->prev = nullptr;
+        gComponetsAllocator.Free(containerToRemove);
+    }
+}
+
+template <typename T>
+T *Entity::GetComponent() {
+
+    Component *component = nullptr;
+    ComponentContainer *container = componentContainerList;
+    while(container) {
+
+        Component *componentToFind = (Component *)&container->component;
+        if(typeid(*componentToFind) == typeid(T)) {
+            component = componentToFind;
+            break;
+        }
+
+        container = container->next;
+    }
+
+    ASSERT(component != nullptr);
+
+    return (T *)component;
+}
 
 
 

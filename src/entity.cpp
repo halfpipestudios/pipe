@@ -1,129 +1,168 @@
 #include "entity.h"
-#include "geometry.h"
 #include "level.h"
+#include "components.h"
 
 #include <stdio.h>
 #include <float.h>
 
-IdleState    Entity::idleState;
-WalkingState Entity::walkingState;
-JumpingState Entity::jumpingState;
-FallingState Entity::fallingState;
-
 // Idle State ...
 // ---------------------------------------------------------
 EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
+    ASSERT(stateMachineComp != nullptr);
     
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && entity->physics.vel.y < 0) {
-        return &entity->fallingState;
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+        return &stateMachineComp->fallingState;
     }
 
     if(input->KeyIsPress(KEY_W) || input->KeyIsPress(KEY_S) || input->KeyIsPress(KEY_A) || input->KeyIsPress(KEY_D)) {
-        return &entity->walkingState;
+        return &stateMachineComp->walkingState;
     }
     
     if((input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A))) {
-        return &entity->jumpingState;
+        return &stateMachineComp->jumpingState;
     }
 
-    printf("idle!!\n");
+    //printf("idle!!\n");
     
     return nullptr;
 }
 
 void IdleState::Enter(Entity *entity) {
-    if(entity->animation.IsAnimationFinish("idle")) {
-        entity->animation.Play("idle", 1, true);
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    if(animationComp->animation.IsAnimationFinish("idle")) {
+        animationComp->animation.Play("idle", 1, true);
     } else {
-        entity->animation.Continue("idle");
+        animationComp->animation.Continue("idle");
     }
 }
 
 void IdleState::Exit(Entity *entity) {
-    entity->animation.Stop("idle");
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    animationComp->animation.Stop("idle");
 }
 
 // Walking State ...
 // ---------------------------------------------------------
 EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
+    ASSERT(stateMachineComp != nullptr);
     
-    Vec2 vel2d = Vec2(entity->physics.vel.x, entity->physics.vel.z);
-    entity->animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+    animationComp->animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
 
 
     Vec3 worldFront = camera.GetWorldFront();
     Vec3 right = camera.right;
     if(input->KeyIsPress(KEY_W)) {
-        entity->physics.acc += worldFront;
+        physicsComp->physics.acc += worldFront;
     }
     if(input->KeyIsPress(KEY_S)) {
-        entity->physics.acc -= worldFront;
+        physicsComp->physics.acc -= worldFront;
     }
     if(input->KeyIsPress(KEY_A)) {
-        entity->physics.acc -= right;
+        physicsComp->physics.acc -= right;
     }
     if(input->KeyIsPress(KEY_D)) {
-        entity->physics.acc += right;
+        physicsComp->physics.acc += right;
     }
 
-    entity->physics.acc += worldFront * input->state[0].leftStickY;
-    entity->physics.acc += right      * input->state[0].leftStickX;
-    entity->physics.acc *= 40.0f;
+    physicsComp->physics.acc += worldFront * input->state[0].leftStickY;
+    physicsComp->physics.acc += right      * input->state[0].leftStickX;
+    physicsComp->physics.acc *= 40.0f;
 
     if((input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A))) {
-        return &entity->jumpingState;
+        return &stateMachineComp->jumpingState;
     }
 
-    if(entity->physics.vel.Len() < 0.01f) {
-        return &entity->idleState;
+    if(physicsComp->physics.vel.Len() < 0.01f) {
+        return &stateMachineComp->idleState;
     }
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && entity->physics.vel.y < 0) {
-        return &entity->fallingState;
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+        return &stateMachineComp->fallingState;
     }
     
-    printf("walking!!\n");
+    //printf("walking!!\n");
 
     return nullptr;
 }
 
 void WalkingState::Enter(Entity *entity) {
-    if(entity->animation.IsAnimationFinish("idle")) {
-        entity->animation.Play("idle", 1, true);
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    if(animationComp->animation.IsAnimationFinish("idle")) {
+        animationComp->animation.Play("idle", 1, true);
     } else {
-        entity->animation.Continue("idle");
+        animationComp->animation.Continue("idle");
     }
-    entity->animation.Play("walking", 0, true);
+    animationComp->animation.Play("walking", 0, true);
 }
 
 void WalkingState::Exit(Entity *entity) {
-    entity->animation.Pause("idle");
-    entity->animation.Stop("walking");
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    animationComp->animation.Pause("idle");
+    animationComp->animation.Stop("walking");
 }
 
 // Jumping State ...
 // ---------------------------------------------------------
 
 EntityState *JumpingState::Move(Entity *entity, Input *input, Camera camera, f32 dt) {
-    
-    entity->physics.acc = entity->physics.acc * 0.1f;
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && entity->physics.vel.y < 0) {
-        return &entity->fallingState;
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
+    ASSERT(stateMachineComp != nullptr);
+    
+    physicsComp->physics.acc = physicsComp->physics.acc * 0.1f;
+
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+        return &stateMachineComp->fallingState;
     }
 
     if(entity->HaveFlag(ENTITY_GROUNDED)) {
-        return &entity->idleState;
+        return &stateMachineComp->idleState;
     }
     
-    printf("jumping!!\n");
+    //printf("jumping!!\n");
 
     return nullptr;
 }
 
 void JumpingState::Enter(Entity *entity) {
-    entity->physics.vel += Vec3(0, 15, 0);
-    entity->animation.PlaySmooth("jump", 0.08f);
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    physicsComp->physics.vel += Vec3(0, 15, 0);
+    animationComp->animation.PlaySmooth("jump", 0.08f);
 }
 
 void JumpingState::Exit(Entity *entity) {
@@ -133,29 +172,43 @@ void JumpingState::Exit(Entity *entity) {
 // ---------------------------------------------------------
 EntityState *FallingState::Move(Entity *entity, Input *input, Camera camera, f32 dt) {
 
-    entity->physics.acc = entity->physics.acc * 0.1f;
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
+    ASSERT(stateMachineComp != nullptr);
+
+    physicsComp->physics.acc = physicsComp->physics.acc * 0.1f;
     
     if(entity->HaveFlag(ENTITY_GROUNDED)) {
 
-        Vec2 vel2d = Vec2(entity->physics.vel.x, entity->physics.vel.z);
+        Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
         if(vel2d.Len()) {
-            return &entity->walkingState;
+            return &stateMachineComp->walkingState;
         }
 
-        return &entity->idleState;
+        return &stateMachineComp->idleState;
     }
 
-    printf("falling!!\n");
+    //printf("falling!!\n");
     
     return nullptr;
 }
 
 void FallingState::Enter(Entity *entity) {
-    entity->animation.Play("idle", 1, true);
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    animationComp->animation.Play("idle", 1, true);
 }
 
 void FallingState::Exit(Entity *entity) {
-    entity->animation.Stop("idle");
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    animationComp->animation.Stop("idle");
 }
 
 // ---------------------------------------------------------
@@ -203,166 +256,80 @@ static void DrawCylinder(Cylinder cylinder, u32 color) {
 }
 
 
-void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations) {
+void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations, Map *map) {
     
     ClearFlags();
 
-    transform.pos = pos;
-    transform.rot = rot;
-    transform.scale = scale;
-
-    physics.pos = pos;
-    physics.vel = Vec3();
-    physics.acc = Vec3();
-    lastPhysics = physics;
-
-    this->model = model;
-    animation.Initialize(animations, numAnimations);
-    
-    state = &idleState;
-
-    collider.c = physics.pos;
-    collider.u = Vec3(0, 1, 0);
-    collider.radii = 0.3f;
-    collider.n = 0.75f;
-
-    velXZ = Vec3();
-    jumpTimer = 0.0f;
-    jumpStarted = false;
-
-    finalTransformMatrices = nullptr;
-    numFinalTrasformMatrices = 0;
-
     next = nullptr;
+    componentContainerList = nullptr;
+
+    GraphicsComponentDesc graphCompDesc = {};
+    graphCompDesc.pos = pos;
+    graphCompDesc.rot = rot;
+    graphCompDesc.scale = scale;
+    graphCompDesc.model = model;
+    AddComponent<GraphicsComponent>(&graphCompDesc);
+
+    PhysicsComponentDesc physCompDesc = {};
+    physCompDesc.pos = pos;
+    physCompDesc.vel = Vec3();
+    physCompDesc.acc = Vec3();
+    physCompDesc.map = map;
+    AddComponent<PhysicsComponent>(&physCompDesc);
+
+    AnimationComponentDesc animCompDesc = {};
+    animCompDesc.animations = animations;
+    animCompDesc.numAnimations = numAnimations;
+    AddComponent<AnimationComponent>(&animCompDesc);
+
+    CollisionComponentDesc collisionCompDesc = {};
+    collisionCompDesc.c = pos;
+    collisionCompDesc.u = Vec3(0, 1, 0);
+    collisionCompDesc.radii = 0.3f;
+    collisionCompDesc.n = 0.75f;
+    AddComponent<CollisionComponent>(&collisionCompDesc);
+
 }
 
 void Entity::Terminate() {
 
-    animation.Terminate();
+    ComponentContainer *container = componentContainerList;
+    while(container) {
 
-    finalTransformMatrices = nullptr;
-    numFinalTrasformMatrices = 0;
+        Component *component =  (Component *)&container->component;
+        component->Terminate(this);
 
-    for(u32 meshIndex = 0; meshIndex < model.numMeshes; ++meshIndex) {
-        Mesh *mesh = model.meshes + meshIndex;
-        GraphicsManager::Get()->DestroyTextureBuffer(mesh->texture);
-        GraphicsManager::Get()->DestroyVertexBuffer(mesh->vertexBuffer);
-        GraphicsManager::Get()->DestroyIndexBuffer(mesh->indexBuffer);
+        container = container->next;
     }
+
 }
 
 void Entity::Update(Map *map, f32 dt) {
 
     RemoveFlag(ENTITY_COLLIDING);
 
-    if(!HaveFlag(ENTITY_GROUNDED))
-        physics.acc += Vec3(0, -9.8 * 2.5, 0);
+    ComponentContainer *container = componentContainerList;
+    while(container) {
 
-    physics.vel += physics.acc * dt;
+        Component *component =  (Component *)&container->component;
+        component->Process(this, dt);
 
-    if(HaveFlag(ENTITY_GROUNDED)) {
-        f32 dammping = powf(0.001f, dt);
-        physics.vel = physics.vel * dammping;
-    }
-    else {
-        f32 dammping = powf(0.5f, dt);
-        physics.vel = physics.vel * dammping;
+        container = container->next;
     }
 
-    physics.pos += physics.vel * dt;
-
-    collider.c = physics.pos;
-
-    Segment playerSegment;
-    playerSegment.a =  lastPhysics.pos;
-    playerSegment.b = physics.pos;
-
-    f32 tMin = FLT_MAX; 
-    for(i32 i = 0; i < map->entities.count; ++i) {
-        MapImporter::Entity *entity = &map->entities.data[i];
-        f32 t = -1.0f;
-        if(playerSegment.HitEntity(entity, &t)) {
-           if(t < tMin) {
-                tMin = t;
-            }
-        }
+    Input *input = PlatformManager::Get()->GetInput();
+    if(input->KeyJustPress(KEY_K)) {
+        RemoveComponent<AnimationComponent>();
     }
-    if(tMin >= 0.0f && tMin <= 1.0f) {
-        physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8);
-        collider.c = physics.pos;
-    }
-
-    GJK gjk;
-    for(i32 i = 0; i < map->covexHulls.count; ++i) {
-        ConvexHull *hull = &map->covexHulls.data[i];
-        CollisionData collisionData = gjk.Intersect(hull, &collider);
-        if(collisionData.hasCollision) {
-            AddFlag(ENTITY_COLLIDING);
-            f32 penetration = collisionData.penetration;
-            Vec3 normal = collisionData.normal;
-            physics.pos += normal * penetration; 
-            physics.vel -= physics.vel.Dot(normal)*normal;
-            collider.c = physics.pos;
-        }
-    }
-
-    Segment groundSegment;
-    
-    Vec3 lastVelXZ = Vec3(physics.vel.x, 0.0f, physics.vel.z);
-    
-    if(lastVelXZ.LenSq() > 0.0f) {
-        velXZ = lastVelXZ.Normalized();
-    }
-
-    groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
-    //groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.05), 0);
-    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
-    RemoveFlag(ENTITY_GROUNDED);
-    for(i32 i = 0; i < map->entities.count; ++i) {
-        MapImporter::Entity *entity = &map->entities.data[i];
-        f32 t = -1.0f;
-        if(groundSegment.HitEntity(entity, &t)) {
-            AddFlag(ENTITY_GROUNDED);
-        }
-    }
-
-    transform.pos = physics.pos;
-
-    lastPhysics = physics;
-
-    physics.acc = Vec3();
-
-    animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
 }
 
 void Entity::Render(Shader shader) {
-    Transform renderTransform = transform;
-    renderTransform.pos.y -= 0.75f;
-    GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
-    GraphicsManager::Get()->SetAnimMatrices(finalTransformMatrices, numFinalTrasformMatrices);
-    
-    for(u32 meshIndex = 0; meshIndex < model.numMeshes; ++meshIndex) {
-        Mesh *mesh = model.meshes + meshIndex;
-        GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
-        GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
+    ComponentContainer *container = componentContainerList;
+    while(container) {
+
+        Component *component =  (Component *)&container->component;
+        component->Render(this, shader);
+
+        container = container->next;
     }
-
-    Segment groundSegment;
-    groundSegment.a = collider.c - (velXZ * (collider.radii + 0.05f));
-    //groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.05), 0);
-    groundSegment.b = groundSegment.a + Vec3(0, -(collider.n + 0.001), 0);
-    GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, HaveFlag(ENTITY_GROUNDED) ? 0xffff0000 : 0xff00ff00);
-}
-
-void Entity::Move(Input *input, Camera camera, f32 dt) {
-    
-    EntityState *newState = state->Move(this, input, camera, dt);
-    if(newState != nullptr) {
-        state->Exit(this);
-        newState->Enter(this);
-        state = newState;
-    }
-    
-    transform.rot.y = camera.rot.y;
-
 }
