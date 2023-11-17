@@ -52,6 +52,7 @@ struct Entity {
     Transform transform;
     Physics physics;
     Physics lastPhysics;
+
     Cylinder collider;
 
     Vec3 velXZ;
@@ -89,7 +90,7 @@ private:
 
     Entity *hero;
     Entity *orc;
-    
+ 
     Entity *entities;
     ObjectAllocator<Entity> entitiesAllocator;
 
