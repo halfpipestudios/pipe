@@ -7,6 +7,7 @@
 #include "map_importer.h"
 #include "model_importer.h"
 #include "camera.h"
+#include "entity.h"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
