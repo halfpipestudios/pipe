@@ -25,14 +25,16 @@ void GraphicsComponent::Terminate(Entity *entity) {
     }
 }
 
+
+void GraphicsComponent::Process(Entity *entity, f32 dt) { 
+    // TODO: the graphics component should not deepend on the physics component
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    transform.pos = physicsComp->physics.pos;
+}
+
 void GraphicsComponent::Render(Entity *entity, Shader shader) {
 
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
-
-    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
-
-    transform.pos = physicsComp->physics.pos;
 
     Transform renderTransform = transform;
     renderTransform.pos.y -= 0.75f;
@@ -147,12 +149,12 @@ void PhysicsComponent::Process(Entity *entity, f32 dt) {
 
 void CollisionComponent::Initialize(Entity *entity, void *initData) {
 
-    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    CollisionComponentDesc *collisionCompDesc = (CollisionComponentDesc *)initData;
 
-    collider.c = physicsComp->physics.pos;
-    collider.u = Vec3(0, 1, 0);
-    collider.radii = 0.3f;
-    collider.n = 0.75f; 
+    collider.c = collisionCompDesc->c;
+    collider.u = collisionCompDesc->u;
+    collider.radii = collisionCompDesc->radii;
+    collider.n = collisionCompDesc->n; 
 }
 
 

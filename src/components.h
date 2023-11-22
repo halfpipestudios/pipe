@@ -78,6 +78,7 @@ struct GraphicsComponent : public Component {
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
+    void Process(Entity *entity, f32 dt) override;
     void Render(Entity *entity, Shader shader) override;
 };
 

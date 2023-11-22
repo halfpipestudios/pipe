@@ -20,6 +20,11 @@ enum RasterizerState {
     RASTERIZER_STATE_WIREFRAME
 };
 
+enum SamplerState {
+    SAMPLER_POINT,
+    SAMPLER_LINEAR
+};
+
 struct CBMatrix {
     Mat4 proj;
     Mat4 view;
@@ -103,6 +108,7 @@ struct Graphics {
     virtual void SetRasterizerState(RasterizerState state) = 0;
     virtual void SetDepthStencilState(bool value) = 0;
     virtual void SetAlphaBlendState(bool value) = 0;
+    virtual void SetSamplerState(SamplerState state) = 0;
     
     virtual void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) = 0;
     virtual void ClearDepthStencilBuffer(FrameBuffer frameBufferHandle)  = 0;

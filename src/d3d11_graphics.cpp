@@ -173,10 +173,16 @@ void D3D11Graphics::Initialize() {
     colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP; 
     colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP; 
     colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT; //D3D11_FILTER_MIN_MAG_MIP_LINEAR | D3D11_FILTER_MIN_MAG_MIP_POINT
+    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    if(FAILED(device->CreateSamplerState(&colorMapDesc, &samplerStateWrap))) {
-        printf("Error: Failed Creating sampler state\n");
+    if(FAILED(device->CreateSamplerState(&colorMapDesc, &samplerStatePoint))) {
+        printf("Error: Failed Creating sampler state Point\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    if(FAILED(device->CreateSamplerState(&colorMapDesc, &samplerStateLinear))) {
+        printf("Error: Failed Creating sampler state Linear\n");
         ASSERT(!"INVALID_CODE_PATH");
     }
 
@@ -184,7 +190,7 @@ void D3D11Graphics::Initialize() {
     deviceContext->OMSetDepthStencilState(depthStencilOn, 1);
     deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
     deviceContext->RSSetState(fillRasterizerCullBack);
-    deviceContext->PSSetSamplers(0, 1, &samplerStateWrap);
+    deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
 
     cpuMatrices.proj = Mat4();
     cpuMatrices.view = Mat4();
@@ -215,7 +221,8 @@ void  D3D11Graphics::Terminate() {
     if(depthStencilOff) depthStencilOff->Release();
     if(alphaBlendEnable) alphaBlendEnable->Release();
     if(alphaBlendDisable) alphaBlendDisable->Release();
-    if(samplerStateWrap) samplerStateWrap->Release();
+    if(samplerStatePoint) samplerStatePoint->Release();
+    if(samplerStateLinear) samplerStateLinear->Release();
 
     DestroyConstBuffer(gpuMatrices);
     DestroyConstBuffer(gpuAnimMatrices);
@@ -289,6 +296,18 @@ void  D3D11Graphics::SetRasterizerState(RasterizerState state) {
         } break;
         case RASTERIZER_STATE_WIREFRAME: {
             deviceContext->RSSetState(wireFrameRasterizer);
+        } break;
+    }
+}
+
+
+void D3D11Graphics::SetSamplerState(SamplerState state) {
+    switch(state) {
+        case SAMPLER_POINT: {
+            deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
+        } break;
+        case SAMPLER_LINEAR: {
+            deviceContext->PSSetSamplers(0, 1, &samplerStateLinear);
         } break;
     }
 }

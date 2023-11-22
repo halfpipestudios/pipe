@@ -117,7 +117,8 @@ struct D3D11Graphics : public Graphics {
     ID3D11DepthStencilState* depthStencilOff;
     ID3D11BlendState* alphaBlendEnable;
     ID3D11BlendState* alphaBlendDisable;
-    ID3D11SamplerState *samplerStateWrap;
+    ID3D11SamplerState *samplerStateLinear;
+    ID3D11SamplerState *samplerStatePoint;
 
     void Initialize() override;
     void Terminate() override;
@@ -127,6 +128,7 @@ struct D3D11Graphics : public Graphics {
     void SetRasterizerState(RasterizerState state) override;
     void SetDepthStencilState(bool value) override;
     void SetAlphaBlendState(bool value) override;
+    void SetSamplerState(SamplerState state) override;
 
     void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) override;
     void ClearDepthStencilBuffer(FrameBuffer frameBufferHandle) override;
