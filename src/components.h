@@ -7,6 +7,8 @@
 #include "gjk_collision.h"
 #include "animation.h"
 
+#include "map_importer.h"
+
 
 struct Transform {
     Vec3 pos;
@@ -62,7 +64,7 @@ struct Component {
     virtual void Initialize(Entity *entity, void *initData) {}
     virtual void Terminate(Entity *entity) {}
     virtual void Process(Entity *entity, f32 dt) {}
-    virtual void Render(Entity *entity, Shader shader) {}
+    virtual void Render(Entity *entity) {}
 };
 
 struct GraphicsComponentDesc {
@@ -70,16 +72,18 @@ struct GraphicsComponentDesc {
     Vec3 rot;
     Vec3 scale;
     Model model;
+    Shader shader;
 };
 
 struct GraphicsComponent : public Component {
     Transform transform;
     Model model;
+    Shader shader;
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
     void Process(Entity *entity, f32 dt) override;
-    void Render(Entity *entity, Shader shader) override;
+    void Render(Entity *entity) override;
 };
 
 struct PhysicsComponentDesc {
@@ -87,6 +91,7 @@ struct PhysicsComponentDesc {
     Vec3 vel;
     Vec3 acc;
     Map *map;
+    Entity *entities;
 };
 
 struct PhysicsComponent : public Component {
@@ -94,24 +99,47 @@ struct PhysicsComponent : public Component {
     Physics lastPhysics;
     Vec3 velXZ;
     Map *map;
+    Entity *entities;
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
     void Process(Entity *entity, f32 dt) override;
+
+private:
+    void ProcessMap(Entity *entity);
+    void ProcessEntities(Entity *entity, f32 dt);
+};
+
+enum ColliderType {
+    COLLIDER_CYLINDER,
+    COLLIDER_CONVEXHULL
 };
 
 struct CollisionComponentDesc {
-    Vec3 c;
-    Vec3 u;
-    f32 radii;
-    f32 n;
+    ColliderType type;
+    union {
+        Cylinder cylinder;
+        struct Poly3D {
+            ConvexHull convexHull;
+            MapImporter::Entity entity;
+        } poly3D;
+    };
 };
 
 struct CollisionComponent : public Component {
-    Cylinder collider;
+    ColliderType type;
+    union {
+        Cylinder cylinder;
+        struct Poly3D {
+            ConvexHull convexHull;
+            MapImporter::Entity entity;
+        } poly3D;
+    };
 
+    CollisionComponent() {}
     void Initialize(Entity *entity, void *initData) override;
-    void Render(Entity *entity, Shader shader) override;
+    void Process(Entity *entity, f32 dt) override;
+    void Render(Entity *entity) override;
 };
 
 struct AnimationComponentDesc {
@@ -158,6 +186,20 @@ struct StateMachineComponent : public Component {
 
 };
 
+struct MovingPlatformComponentDesc {
+    Vec3 pos;
+    Vec3 a, b;
+};
+
+struct MovingPlatformComponent : public Component {
+    Vec3 pos;
+    Vec3 a, b;
+    f32 dtElapsed;
+
+    void Initialize(Entity *entity, void *initData) override;
+    void Process(Entity *entity, f32 dt) override;
+};
+
 // ----------------------------------------------------------------------------------
 
 union ComponentUnion {
@@ -167,6 +209,7 @@ union ComponentUnion {
     AnimationComponent animation;
     InputComponent input;
     StateMachineComponent stateMachine;
+    MovingPlatformComponent movPlatform;
 };
 
 struct ComponentContainer {

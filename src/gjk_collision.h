@@ -49,8 +49,11 @@ struct CollisionData {
 struct GJK {
     CollisionData Intersect(ConvexHull *a, ConvexHull *b);
     CollisionData Intersect(ConvexHull *a, Cylinder *b);
+    CollisionData Intersect(Cylinder *a, Cylinder *b);
 
 private: 
+
+    Point Support(Cylinder *a, Cylinder *b, Vec3 dir);
     Point Support(ConvexHull *a, Cylinder *b, Vec3 dir);
     Point Support(ConvexHull *a, ConvexHull *b, Vec3 dir);
     bool DoSimplex(Simplex &simplex, Vec3 &dir);
@@ -62,6 +65,7 @@ private:
 
     CollisionData EPA(Simplex &simplex, ConvexHull *a, ConvexHull *b);
     CollisionData EPA(Simplex &simplex, ConvexHull *a, Cylinder *b);
+    CollisionData EPA(Simplex &simplex, Cylinder *a, Cylinder *b);
 
     Plane GetPlaneFromThreePoints(Vec3 a, Vec3 b, Vec3 c);
     Vec3 ProjectPointOntoPlane(Plane &plane, Vec3 &point);

@@ -14,7 +14,7 @@ void Game::Initialize() {
                                                                "./data/shaders/texFrag.hlsl");
     animShader = GraphicsManager::Get()->CreateShaderSkinVertex("./data/shaders/animVert.hlsl",
                                                                 "./data/shaders/texFrag.hlsl");
-    level.Initialize("./data/maps/test.map");
+    level.Initialize("./data/maps/test.map", statShader, animShader);
 
 }
 
