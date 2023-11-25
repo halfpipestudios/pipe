@@ -171,17 +171,25 @@ void GraphicsComponent::Terminate(Entity *entity) {
 
 void GraphicsComponent::Render(Entity *entity) {
 
-    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
 
     TransformComponent renderTransform = *entity->GetComponent<TransformComponent>();
-    renderTransform.pos.y -= 0.75f;
+    
+    if(model.type == MODEL_TYPE_ANIMATED) {
+        renderTransform.pos.y -= 0.75f;
+        AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+        GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrices, animationComp->numFinalTrasformMatrices);
+    }
+
     GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
-    GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrices, animationComp->numFinalTrasformMatrices);
     
     for(u32 meshIndex = 0; meshIndex < model.numMeshes; ++meshIndex) {
         Mesh *mesh = model.meshes + meshIndex;
         GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
-        GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
+        if(mesh->indexBuffer) {
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
+        } else {
+            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, shader);
+        }
     }
 }
 

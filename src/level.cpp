@@ -7,6 +7,51 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+static Vertex gCubeVertices[] = {
+        // positions          // texture Coords
+   {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+   {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
+   {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+                                                            
+   {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}},
+   {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
+   {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f}},
+   {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}},
+                                                            
+   {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
+   {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
+   {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
+   {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
+   {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
+                                                            
+   {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
+                                                            
+   {{-0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 1.0f}},
+   {{ 0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 1.0f}},
+   {{ 0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 0.0f}},
+   {{ 0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 0.0f}},
+   {{-0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 0.0f}},
+   {{-0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 1.0f}},
+                                                            
+   {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 1.0f}},
+   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 1.0f}},
+   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 0.0f}},
+   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 0.0f}},
+   {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 0.0f}},
+   {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 1.0f}}
+};
+
 static Vec3 gCube[] = {
 
     // bottom
@@ -115,7 +160,7 @@ Entity *Level::AddEntity() {
     return entity;
 }
 
-Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b) {
+Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
     Entity *platform = AddEntity();
 
     TransformComponentDesc transformDesc = {};
@@ -123,6 +168,24 @@ Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b) {
     transformDesc.rot = Vec3();
     transformDesc.scale = scale;
     platform->AddComponent<TransformComponent>(&transformDesc);
+
+    // TODO: we dont need to load the model for each entity, reused it
+    // load the mesh
+    Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
+    mesh->texture = LoadTextureFromPath("cool.png");
+    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices));
+    mesh->indexBuffer = nullptr;
+
+    // load the model and add the mesh to the model
+    Model model = {};
+    model.type = MODEL_TYPE_STATIC;
+    model.numMeshes = 1;
+    model.meshes = mesh;
+
+    GraphicsComponentDesc graphCompDesc = {};
+    graphCompDesc.model = model;
+    graphCompDesc.shader = shader;
+    platform->AddComponent<GraphicsComponent>(&graphCompDesc);
 
     CollisionComponentDesc colliderDesc = {};
     colliderDesc.type = COLLIDER_CONVEXHULL;
@@ -183,10 +246,10 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     stmCompDesc.camera = &camera;
     hero->AddComponent<StateMachineComponent>(&stmCompDesc);
 
-    // Load Horizontal Platform
-    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3( 8,  3, 0), Vec3(12,  3, 0));
-    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10, 0), Vec3(14,  3, 0));
-    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10, 4), Vec3(14, 20, 4));
+    // Load Horizontal Platform      scale             from             to
+    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3( 8,  3, 0), Vec3(12,  3, 0), statShader);
+    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10, 0), Vec3(14,  3, 0), statShader);
+    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10, 4), Vec3(14, 20, 4), statShader);
 
     camera.Initialize();
 }

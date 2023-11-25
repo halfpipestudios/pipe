@@ -146,6 +146,7 @@ struct CollisionComponent : public Component {
         Cylinder cylinder;
         struct Poly3D {
             ConvexHull convexHull;
+            // TODO: not use a MapImporter::Entity here ...
             MapImporter::Entity entity;
         } poly3D;
     };
