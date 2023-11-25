@@ -221,10 +221,13 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shad
     prev = nullptr;
     componentContainerList = nullptr;
 
+    TransformComponentDesc transformDesc = {};
+    transformDesc.pos = pos;
+    transformDesc.rot = rot;
+    transformDesc.scale = scale;
+    AddComponent<TransformComponent>(&transformDesc);
+
     GraphicsComponentDesc graphCompDesc = {};
-    graphCompDesc.pos = pos;
-    graphCompDesc.rot = rot;
-    graphCompDesc.scale = scale;
     graphCompDesc.model = model;
     graphCompDesc.shader = shader;
     AddComponent<GraphicsComponent>(&graphCompDesc);

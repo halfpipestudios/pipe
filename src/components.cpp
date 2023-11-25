@@ -44,40 +44,28 @@ static Vec3 gCube[] = {
 
 static MapImporter::EntityFace gCubeFaces[] = {
     // bottom
-    { {{ 0, -1,  0}, 1.0f*32.0f}, {}, 0 },
+    { {{ 0, -1,  0}, 32.0f}, {}, 0 },
     // top
-    { {{ 0,  1,  0}, 0.5f*32.0f}, {}, 0 },
+    { {{ 0,  1,  0}, 32.0f}, {}, 0 },
     // left
-    { {{-1,  0,  0}, 1.0f*32.0f}, {}, 0 },
+    { {{-1,  0,  0}, 32.0f}, {}, 0 },
     // right
-    { {{ 1,  0,  0}, 1.0f*32.0f}, {}, 0 },
+    { {{ 1,  0,  0}, 32.0f}, {}, 0 },
     // front
-    { {{ 0,  0,  1}, 1.0f*32.0f}, {}, 0 },
+    { {{ 0,  0,  1}, 32.0f}, {}, 0 },
     // back
-    { {{ 0,  0, -1}, 1.0f*32.0f}, {}, 0 }
+    { {{ 0,  0, -1}, 32.0f}, {}, 0 }
 };
 
 
 
-void TransformCube(Vec3 *cube,  Vec3 p, Vec3 scale, f32 angle) {
+static void TransformCube(Vec3 *cube,  Vec3 p, Vec3 scale, f32 angle) {
     for(i32 i = 0; i < 24; ++i) {
         cube[i] = Mat4::TransformPoint(Mat4::Translate(p.x, p.y, p.z) * Mat4::RotateX(angle) * Mat4::Scale(scale), gCube[i]);
     }
 }
 
-void TransformEntity(MapImporter::Entity *mapEntity, Vec3 movement) {
-    for(i32 i = 0; i < mapEntity->facesCount; ++i) {
-        MapImporter::EntityFace *face = mapEntity->faces + i;
-
-        f32 displacement = movement.Dot(face->plane.n);
-        if(displacement != 0.0f) {
-            face->plane.d = gCubeFaces[i].plane.d + (displacement*32.0f);
-        }
-
-    }
-}
-
-void DrawCube(Vec3 *cube, u32 color) {
+static void DrawCube(Vec3 *cube, u32 color) {
     for(i32 faceIndex = 0; faceIndex < 6; ++faceIndex) {
         
         Vec3 *vertices = &cube[faceIndex * 4];
@@ -88,6 +76,21 @@ void DrawCube(Vec3 *cube, u32 color) {
 
             GraphicsManager::Get()->DrawLine(a, b, color);
         }
+    }
+}
+
+static void TransformEntity(MapImporter::Entity *mapEntity, Vec3 scale, Vec3 movement) {
+    for(i32 i = 0; i < mapEntity->facesCount; ++i) {
+        MapImporter::EntityFace *face = mapEntity->faces + i;
+
+        f32 d = fabsf(face->plane.n.Dot(scale)) / 2;
+        f32 displacement = movement.Dot(face->plane.n);
+        if(displacement != 0.0f) {
+            face->plane.d = (gCubeFaces[i].plane.d * d) + (displacement*32.0f);
+        } else {
+            face->plane.d = (gCubeFaces[i].plane.d * d);
+        }
+
     }
 }
 
@@ -133,13 +136,24 @@ static void DrawCylinder(Cylinder cylinder, u32 color) {
 
 }
 
+// TransformComponent --------------------------------------------------
+void TransformComponent::Initialize(Entity *entity, void *initData) {
+    TransformComponentDesc *compDesc = (TransformComponentDesc *)initData;
+    pos = compDesc->pos;
+    rot = compDesc->rot;
+    scale = compDesc->scale;
+}
+
+void TransformComponent::Process(Entity *entity, f32 dt) { 
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    if(physicsComp) pos = physicsComp->physics.pos;
+}
+
+
 // GraphicsComponent ---------------------------------------------------
 
 void GraphicsComponent::Initialize(Entity *entity, void *initData) {
     GraphicsComponentDesc *compDesc = (GraphicsComponentDesc *)initData;
-    transform.pos = compDesc->pos;
-    transform.rot = compDesc->rot;
-    transform.scale = compDesc->scale;
     model = compDesc->model;
     shader = compDesc->shader;
 }
@@ -155,18 +169,11 @@ void GraphicsComponent::Terminate(Entity *entity) {
     }
 }
 
-
-void GraphicsComponent::Process(Entity *entity, f32 dt) { 
-    // TODO: the graphics component should not deepend on the physics component
-    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
-    transform.pos = physicsComp->physics.pos;
-}
-
 void GraphicsComponent::Render(Entity *entity) {
 
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
 
-    Transform renderTransform = transform;
+    TransformComponent renderTransform = *entity->GetComponent<TransformComponent>();
     renderTransform.pos.y -= 0.75f;
     GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
     GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrices, animationComp->numFinalTrasformMatrices);
@@ -264,7 +271,9 @@ void PhysicsComponent::ProcessEntities(Entity *entity, f32 dt) {
         velXZ = lastVelXZ.Normalized();
     }
     groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
+    // NOTE: moving platform need a larger segment
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.01), 0);
+    //groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
     
     Entity *testEntity = entities;
     while(testEntity) {
@@ -300,13 +309,15 @@ void PhysicsComponent::ProcessEntities(Entity *entity, f32 dt) {
                 // move the player realtive to the platofrm position
                 MovingPlatformComponent *movPlatComp = testEntity->GetComponent<MovingPlatformComponent>();
                 if(movPlatComp != nullptr) {
+                    TransformComponent *transformComp = testEntity->GetComponent<TransformComponent>();
 
                     f32 t = (sinf(movPlatComp->dtElapsed) + 1.0f) * 0.5f;
                     Vec3 newPlatforPos = movPlatComp->a + (movPlatComp->b - movPlatComp->a) * t;
 
-                    Vec3 offset = newPlatforPos - movPlatComp->pos;
+                    Vec3 offset = newPlatforPos - transformComp->pos;
                      
                     physics.pos  = physics.pos + offset;
+                    collisionComp->cylinder.c = physics.pos;
                 }
 
             }
@@ -378,8 +389,8 @@ void CollisionComponent::Initialize(Entity *entity, void *initData) {
 void CollisionComponent::Process(Entity *entity, f32 dt) {
     switch(type) {
         case COLLIDER_CONVEXHULL: {
-            MovingPlatformComponent *movComp = entity->GetComponent<MovingPlatformComponent>();
-            TransformEntity(&poly3D.entity, movComp->pos);
+            TransformComponent *transformComp = entity->GetComponent<TransformComponent>();
+            TransformEntity(&poly3D.entity, transformComp->scale, transformComp->pos);
         } break;
     }
 }
@@ -451,7 +462,7 @@ void StateMachineComponent::Terminate(Entity *entity) {
 
 void StateMachineComponent::Process(Entity *entity, f32 dt) {
 
-    GraphicsComponent *graphicsComp = entity->GetComponent<GraphicsComponent>();
+    TransformComponent *transformComp = entity->GetComponent<TransformComponent>();
     
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -462,7 +473,7 @@ void StateMachineComponent::Process(Entity *entity, f32 dt) {
         state = newState;
     }
 
-    graphicsComp->transform.rot.y = camera->rot.y;
+    transformComp->rot.y = camera->rot.y;
 }
 
 
@@ -471,7 +482,6 @@ void StateMachineComponent::Process(Entity *entity, f32 dt) {
 void MovingPlatformComponent::Initialize(Entity *entity, void *initData) {
 
     MovingPlatformComponentDesc *movCompDesc = (MovingPlatformComponentDesc *)initData;
-    pos = movCompDesc->pos;
     a = movCompDesc->a;
     b = movCompDesc->b;
     dtElapsed = 0.0f;
@@ -480,11 +490,13 @@ void MovingPlatformComponent::Initialize(Entity *entity, void *initData) {
 
 void MovingPlatformComponent::Process(Entity *entity, f32 dt) {
 
-    f32 t = (sinf(dtElapsed) + 1.0f) * 0.5f;
-    pos = a + (b - a) * t;
-
+    TransformComponent *transformComp = entity->GetComponent<TransformComponent>();
     CollisionComponent *collisionComp = entity->GetComponent<CollisionComponent>();
-    TransformCube(collisionComp->poly3D.convexHull.points, pos, Vec3(2, 1, 2), 0);
+
+    f32 t = (sinf(dtElapsed) + 1.0f) * 0.5f;
+    transformComp->pos = a + (b - a) * t;
+
+    TransformCube(collisionComp->poly3D.convexHull.points, transformComp->pos, transformComp->scale, 0);
 
     dtElapsed += dt; 
 

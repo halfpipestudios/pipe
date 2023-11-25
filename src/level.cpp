@@ -44,17 +44,17 @@ static Vec3 gCube[] = {
 
 static MapImporter::EntityFace gCubeFaces[] = {
     // bottom
-    { {{ 0, -1,  0}, 0.5f*32.0f}, {}, 0 },
+    { {{ 0, -1,  0}, 32.0f}, {}, 0 },
     // top
-    { {{ 0,  1,  0}, 0.5f*32.0f}, {}, 0 },
+    { {{ 0,  1,  0}, 32.0f}, {}, 0 },
     // left
-    { {{-1,  0,  0}, 1.0f*32.0f}, {}, 0 },
+    { {{-1,  0,  0}, 32.0f}, {}, 0 },
     // right
-    { {{ 1,  0,  0}, 1.0f*32.0f}, {}, 0 },
+    { {{ 1,  0,  0}, 32.0f}, {}, 0 },
     // front
-    { {{ 0,  0,  1}, 1.0f*32.0f}, {}, 0 },
+    { {{ 0,  0,  1}, 32.0f}, {}, 0 },
     // back
-    { {{ 0,  0, -1}, 1.0f*32.0f}, {}, 0 }
+    { {{ 0,  0, -1}, 32.0f}, {}, 0 }
 };
 
 Vec3 *CreateCube() {
@@ -115,6 +115,32 @@ Entity *Level::AddEntity() {
     return entity;
 }
 
+Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b) {
+    Entity *platform = AddEntity();
+
+    TransformComponentDesc transformDesc = {};
+    transformDesc.pos = a;
+    transformDesc.rot = Vec3();
+    transformDesc.scale = scale;
+    platform->AddComponent<TransformComponent>(&transformDesc);
+
+    CollisionComponentDesc colliderDesc = {};
+    colliderDesc.type = COLLIDER_CONVEXHULL;
+    colliderDesc.poly3D.convexHull.points = CreateCube();
+    colliderDesc.poly3D.convexHull.count  = ARRAY_LENGTH(gCube);
+    colliderDesc.poly3D.entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
+    memcpy(colliderDesc.poly3D.entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
+    colliderDesc.poly3D.entity.facesCount = 6;
+    platform->AddComponent<CollisionComponent>(&colliderDesc);
+
+    MovingPlatformComponentDesc movCompDesc = {};
+    movCompDesc.a = a;
+    movCompDesc.b = b;
+    platform->AddComponent<MovingPlatformComponent>(&movCompDesc);
+
+    return platform;
+}
+
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
     entities = nullptr;
     entitiesEnd = nullptr;
@@ -158,40 +184,9 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     hero->AddComponent<StateMachineComponent>(&stmCompDesc);
 
     // Load Horizontal Platform
-    platformHor = AddEntity();
-
-    CollisionComponentDesc colliderDesc = {};
-    colliderDesc.type = COLLIDER_CONVEXHULL;
-    colliderDesc.poly3D.convexHull.points = CreateCube();
-    colliderDesc.poly3D.convexHull.count  = ARRAY_LENGTH(gCube);
-    colliderDesc.poly3D.entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
-    memcpy(colliderDesc.poly3D.entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
-    colliderDesc.poly3D.entity.facesCount = 6;
-    platformHor->AddComponent<CollisionComponent>(&colliderDesc);
-
-    MovingPlatformComponentDesc movCompDesc = {};
-    movCompDesc.a = Vec3(8, 3, 0);
-    movCompDesc.b = Vec3(12, 3, 0);
-    movCompDesc.pos = movCompDesc.a;
-    platformHor->AddComponent<MovingPlatformComponent>(&movCompDesc);
-
-    // Load Vertical Platform
-    platformVer = AddEntity();
-
-    colliderDesc = {};
-    colliderDesc.type = COLLIDER_CONVEXHULL;
-    colliderDesc.poly3D.convexHull.points = CreateCube();
-    colliderDesc.poly3D.convexHull.count  = ARRAY_LENGTH(gCube);
-    colliderDesc.poly3D.entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
-    memcpy(colliderDesc.poly3D.entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
-    colliderDesc.poly3D.entity.facesCount = 6;
-    platformVer->AddComponent<CollisionComponent>(&colliderDesc);
-
-    movCompDesc = {};
-    movCompDesc.a = Vec3(14, 10, 0);
-    movCompDesc.b = Vec3(14,  3, 0);
-    movCompDesc.pos = movCompDesc.a;
-    platformVer->AddComponent<MovingPlatformComponent>(&movCompDesc);
+    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3( 8,  3, 0), Vec3(12,  3, 0));
+    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10, 0), Vec3(14,  3, 0));
+    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10, 4), Vec3(14, 20, 4));
 
     camera.Initialize();
 }
@@ -222,8 +217,8 @@ void Level::Update(f32 dt) {
         entity = entity->next;
     }
 
-    GraphicsComponent *heroGraphics = hero->GetComponent<GraphicsComponent>();
-    camera.target = heroGraphics->transform.pos;
+    TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
+    camera.target = heroTransform->pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();
 }

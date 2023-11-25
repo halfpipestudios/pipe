@@ -33,7 +33,8 @@ private:
     Entity *hero;
     Entity *orc;
     Entity *platformHor;
-    Entity *platformVer;
+    Entity *platformVer0;
+    Entity *platformVer1;
  
     Entity *entitiesEnd;
     Entity *entities;
@@ -41,6 +42,7 @@ private:
 
     Entity *AddEntity();
     Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations);
+    Entity *AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b);
 };
 
 #endif // _LEVEL_H_

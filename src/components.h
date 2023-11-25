@@ -10,12 +10,14 @@
 #include "map_importer.h"
 
 
+/*
 struct Transform {
     Vec3 pos;
     Vec3 rot;
     Vec3 scale;
     inline Mat4 GetWorldMatrix() { return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); };
 };
+*/
 
 struct Physics {
     Vec3 pos;
@@ -67,22 +69,34 @@ struct Component {
     virtual void Render(Entity *entity) {}
 };
 
-struct GraphicsComponentDesc {
+struct TransformComponentDesc {
     Vec3 pos;
     Vec3 rot;
     Vec3 scale;
+};
+
+struct TransformComponent : public Component {
+    Vec3 pos;
+    Vec3 rot;
+    Vec3 scale;
+    inline Mat4 GetWorldMatrix() { return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); };
+
+    void Initialize(Entity *entity, void *initData) override;
+    void Process(Entity *entity, f32 dt) override;
+};
+
+struct GraphicsComponentDesc {
     Model model;
     Shader shader;
 };
 
 struct GraphicsComponent : public Component {
-    Transform transform;
+    // Transform transform;
     Model model;
     Shader shader;
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
-    void Process(Entity *entity, f32 dt) override;
     void Render(Entity *entity) override;
 };
 
@@ -187,12 +201,10 @@ struct StateMachineComponent : public Component {
 };
 
 struct MovingPlatformComponentDesc {
-    Vec3 pos;
     Vec3 a, b;
 };
 
 struct MovingPlatformComponent : public Component {
-    Vec3 pos;
     Vec3 a, b;
     f32 dtElapsed;
 
@@ -203,6 +215,7 @@ struct MovingPlatformComponent : public Component {
 // ----------------------------------------------------------------------------------
 
 union ComponentUnion {
+    TransformComponent transform;
     GraphicsComponent graphic;
     PhysicsComponent physics;
     CollisionComponent collision;
