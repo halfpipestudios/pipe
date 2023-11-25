@@ -250,7 +250,8 @@ f32 Vec3::Len() {
 void Vec3::Normalize() {
     f32 lenSqr = LenSq();
     if(lenSqr == 0.0f) {
-        ASSERT(!"ERROR trying to normalize a zero len vector");
+        //ASSERT(!"ERROR trying to normalize a zero len vector");
+        return;
     }
 
     f32 len = sqrtf(lenSqr);

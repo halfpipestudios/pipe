@@ -19,7 +19,8 @@ EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt
         return &stateMachineComp->fallingState;
     }
 
-    if(input->KeyIsPress(KEY_W) || input->KeyIsPress(KEY_S) || input->KeyIsPress(KEY_A) || input->KeyIsPress(KEY_D)) {
+    if(input->KeyIsPress(KEY_W) || input->KeyIsPress(KEY_S) || input->KeyIsPress(KEY_A) || input->KeyIsPress(KEY_D) || 
+       input->state[0].leftStickY != 0.0f || input->state[0].leftStickX != 0.0f) {
         return &stateMachineComp->walkingState;
     }
     

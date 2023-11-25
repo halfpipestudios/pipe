@@ -1,5 +1,6 @@
 #include "level.h"
 #include "geometry.h"
+#include "steering_behaviors.h"
 
 #include <float.h>
 #include <stdio.h>
@@ -228,10 +229,17 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     modelImporter.Read("./data/models/orc.twm");
     animationImporter.Read("./data/models/orc.twa");
     LoadModelToGpu(&modelImporter.model);
-    orc = AddEntity(Vec3(6, 2, 0), Vec3(), Vec3(1, 1, 1),
+    orc = AddEntity(Vec3(10, 4, 8), Vec3(), Vec3(1, 1, 1),
                     modelImporter.model, animShader,
                     animationImporter.animations, 
                     animationImporter.numAnimations);
+
+    AIComponentDesc aiCompDesc = {};
+    aiCompDesc.behavior = STEERING_BEHAVIOR_SEEK;
+    aiCompDesc.timeToTarget = 0.5f;
+    aiCompDesc.arrivalRadii = 0;
+    aiCompDesc.active = true;
+    orc->AddComponent<AIComponent>(&aiCompDesc);
 
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");
@@ -247,11 +255,15 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     hero->AddComponent<StateMachineComponent>(&stmCompDesc);
 
     // Load Horizontal Platform      scale             from             to
-    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3( 8,  3, 0), Vec3(12,  3, 0), statShader);
-    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10, 0), Vec3(14,  3, 0), statShader);
-    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10, 4), Vec3(14, 20, 4), statShader);
+    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
+    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
+    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
 
     camera.Initialize();
+
+    TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
+    gBlackBoard.target = &heroTransform->pos;
+    
 }
 
 void Level::Terminate() {

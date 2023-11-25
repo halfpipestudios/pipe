@@ -146,7 +146,10 @@ void TransformComponent::Initialize(Entity *entity, void *initData) {
 
 void TransformComponent::Process(Entity *entity, f32 dt) { 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
-    if(physicsComp) pos = physicsComp->physics.pos;
+    if(physicsComp) {
+        pos = physicsComp->physics.pos;
+        rot.y = physicsComp->physics.orientation;
+    }
 }
 
 
@@ -201,6 +204,8 @@ void PhysicsComponent::Initialize(Entity *entity, void *initData) {
     physics.pos = compDesc->pos;
     physics.vel = compDesc->vel;
     physics.acc = compDesc->acc;
+    physics.orientation = 0.0f;
+    physics.angularVel = 0.0f;
     velXZ = Vec3(physics.vel.x, 0, physics.vel.z);
     map = compDesc->map;
     entities = compDesc->entities;
@@ -266,27 +271,40 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
         }
     }
 
+    groundSegment.a = collisionComp->cylinder.c;
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
+    for(i32 i = 0; i < map->entities.count; ++i) {
+        MapImporter::Entity *mapEntity = &map->entities.data[i];
+        f32 t = -1.0f;
+        if(groundSegment.HitEntity(mapEntity, &t)) {
+            entity->AddFlag(ENTITY_GROUNDED);
+        }
+    }
+
 }
 
 void PhysicsComponent::ProcessEntities(Entity *entity, f32 dt) {
 
     GJK gjk;
     CollisionComponent *collisionComp = entity->GetComponent<CollisionComponent>();
-
-    Segment groundSegment;
-    Vec3 lastVelXZ = Vec3(physics.vel.x, 0.0f, physics.vel.z);
-    if(lastVelXZ.LenSq() > 0.0f) {
-        velXZ = lastVelXZ.Normalized();
-    }
-    groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
-    // NOTE: moving platform need a larger segment
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.01), 0);
-    //groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
     
     Entity *testEntity = entities;
     while(testEntity) {
 
         if(testEntity != entity) {
+
+            Segment groundSegment;
+            Vec3 lastVelXZ = Vec3(physics.vel.x, 0.0f, physics.vel.z);
+            if(lastVelXZ.LenSq() > 0.0f) {
+                velXZ = lastVelXZ.Normalized();
+            }
+            groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
+            groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1), 0);
+
+            Segment centerGroundSegment;
+            centerGroundSegment.a = collisionComp->cylinder.c;
+            centerGroundSegment.b = centerGroundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1), 0);
+
 
             CollisionComponent *testCollisionComp = testEntity->GetComponent<CollisionComponent>();
      
@@ -310,26 +328,20 @@ void PhysicsComponent::ProcessEntities(Entity *entity, f32 dt) {
             }
 
             f32 t = -1.0f;
-            if(groundSegment.HitCollider(testCollisionComp, &t)) {
+            if(groundSegment.HitCollider(testCollisionComp, &t) ||
+               centerGroundSegment.HitCollider(testCollisionComp, &t)) {
                 entity->AddFlag(ENTITY_GROUNDED);
 
                 // TODO: move this to other place
                 // move the player realtive to the platofrm position
                 MovingPlatformComponent *movPlatComp = testEntity->GetComponent<MovingPlatformComponent>();
                 if(movPlatComp != nullptr) {
-                    TransformComponent *transformComp = testEntity->GetComponent<TransformComponent>();
-
-                    f32 t = (sinf(movPlatComp->dtElapsed) + 1.0f) * 0.5f;
-                    Vec3 newPlatforPos = movPlatComp->a + (movPlatComp->b - movPlatComp->a) * t;
-
-                    Vec3 offset = newPlatforPos - transformComp->pos;
-                     
-                    physics.pos  = physics.pos + offset;
+                    physics.pos  = physics.pos + movPlatComp->movement;
                     collisionComp->cylinder.c = physics.pos;
                 }
-
             }
         }
+
 
         testEntity = testEntity->prev;
     }
@@ -340,11 +352,12 @@ void PhysicsComponent::Process(Entity *entity, f32 dt) {
 
     CollisionComponent *collisionComp = entity->GetComponent<CollisionComponent>();
 
+    // NOTE: Apply gravity
     if(!entity->HaveFlag(ENTITY_GROUNDED))
         physics.acc += Vec3(0, -9.8 * 2.5, 0);
-
+ 
     physics.vel += physics.acc * dt;
-
+    // NOTE: Apply drag
     if(entity->HaveFlag(ENTITY_GROUNDED)) {
         f32 dammping = powf(0.001f, dt);
         physics.vel = physics.vel * dammping;
@@ -353,20 +366,21 @@ void PhysicsComponent::Process(Entity *entity, f32 dt) {
         f32 dammping = powf(0.5f, dt);
         physics.vel = physics.vel * dammping;
     }
-
-    physics.pos += physics.vel * dt;
-
-    collisionComp->cylinder.c = physics.pos;
-
-    entity->RemoveFlag(ENTITY_GROUNDED);
-    entity->RemoveFlag(ENTITY_COLLIDING);
     
+    physics.pos += physics.vel * dt;
+    collisionComp->cylinder.c = physics.pos;
+    physics.orientation += physics.angularVel * dt;
+
+    // NOTE: Collision detection
+    entity->RemoveFlag(ENTITY_GROUNDED);
+    entity->RemoveFlag(ENTITY_COLLIDING); 
     ProcessMap(entity);
     ProcessEntities(entity, dt);
 
     lastPhysics = physics;
 
     physics.acc = Vec3();
+    physics.angularVel = 0;
 
 }
 
@@ -405,21 +419,28 @@ void CollisionComponent::Process(Entity *entity, f32 dt) {
 
 
 void CollisionComponent::Render(Entity *entity) {
-
+#if 0
     switch(type) {
         case COLLIDER_CYLINDER: {
             PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+            
             Segment groundSegment;
+            
             groundSegment.a = cylinder.c - (physicsComp->velXZ * (cylinder.radii + 0.05f));
-            groundSegment.b = groundSegment.a + Vec3(0, -(cylinder.n + 0.001), 0);
+            groundSegment.b = groundSegment.a + Vec3(0, -(cylinder.n + 0.1), 0);
             GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, entity->HaveFlag(ENTITY_GROUNDED) ? 0xffff0000 : 0xff00ff00);
+
+            groundSegment.a = cylinder.c;
+            groundSegment.b = groundSegment.a + Vec3(0, -(cylinder.n + 0.1), 0);            
+            GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, entity->HaveFlag(ENTITY_GROUNDED) ? 0xffff0000 : 0xff00ff00);
+            
             DrawCylinder(cylinder, entity->HaveFlag(ENTITY_COLLIDING) ? 0xFFFF00FF : 0xFF00FFFF);
         } break;
         case COLLIDER_CONVEXHULL: {
             DrawCube(poly3D.convexHull.points, entity->HaveFlag(ENTITY_COLLIDING) ? 0xFFFF00FF : 0xFF00FFFF);
         } break;
     }
-
+#endif
 }
 
 
@@ -470,7 +491,7 @@ void StateMachineComponent::Terminate(Entity *entity) {
 
 void StateMachineComponent::Process(Entity *entity, f32 dt) {
 
-    TransformComponent *transformComp = entity->GetComponent<TransformComponent>();
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -481,7 +502,7 @@ void StateMachineComponent::Process(Entity *entity, f32 dt) {
         state = newState;
     }
 
-    transformComp->rot.y = camera->rot.y;
+    physicsComp->physics.orientation = camera->rot.y;
 }
 
 
@@ -501,12 +522,43 @@ void MovingPlatformComponent::Process(Entity *entity, f32 dt) {
     TransformComponent *transformComp = entity->GetComponent<TransformComponent>();
     CollisionComponent *collisionComp = entity->GetComponent<CollisionComponent>();
 
+    Vec3 lastPos = transformComp->pos;
+
     f32 t = (sinf(dtElapsed) + 1.0f) * 0.5f;
     transformComp->pos = a + (b - a) * t;
 
+    movement = transformComp->pos - lastPos;
+
     TransformCube(collisionComp->poly3D.convexHull.points, transformComp->pos, transformComp->scale, 0);
+    TransformEntity(&collisionComp->poly3D.entity, transformComp->scale, transformComp->pos);
 
     dtElapsed += dt; 
 
 }
 
+// AIComponent -------------------------------------------------------------
+
+void AIComponent::Initialize(Entity *entity, void *initData) {
+    AIComponentDesc *compDesc = (AIComponentDesc *)initData;
+    behavior = compDesc->behavior;
+    timeToTarget = compDesc->timeToTarget;
+    arrivalRadii = compDesc->arrivalRadii;
+    active = compDesc->active;
+}
+
+void AIComponent::Process(Entity *entity, f32 dt) {
+    
+    PhysicsComponent *phyComp = entity->GetComponent<PhysicsComponent>();
+
+    Steering steering = {};
+
+    switch(behavior) {
+        case STEERING_BEHAVIOR_FACE: { steering = Face(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_SEEK: { steering = Seek(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_FLEE: { steering = Flee(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+    }
+    
+    phyComp->physics.acc += steering.linear;
+    phyComp->physics.angularVel += steering.angular;
+
+}

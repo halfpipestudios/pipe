@@ -6,23 +6,17 @@
 #include "graphics.h"
 #include "gjk_collision.h"
 #include "animation.h"
+#include "steering_behaviors.h"
 
 #include "map_importer.h"
-
-
-/*
-struct Transform {
-    Vec3 pos;
-    Vec3 rot;
-    Vec3 scale;
-    inline Mat4 GetWorldMatrix() { return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); };
-};
-*/
 
 struct Physics {
     Vec3 pos;
     Vec3 vel;
     Vec3 acc;
+
+    f32 orientation;
+    f32 angularVel;
 };
 
 struct Entity;
@@ -207,10 +201,30 @@ struct MovingPlatformComponentDesc {
 
 struct MovingPlatformComponent : public Component {
     Vec3 a, b;
+    Vec3 movement;
     f32 dtElapsed;
 
     void Initialize(Entity *entity, void *initData) override;
     void Process(Entity *entity, f32 dt) override;
+};
+
+struct AIComponentDesc {
+    SteeringBehavior behavior;
+    f32 timeToTarget;
+    f32 arrivalRadii;
+    f32 active;
+};
+
+struct AIComponent : public Component {
+
+    SteeringBehavior behavior;
+    f32 timeToTarget;
+    f32 arrivalRadii;
+    f32 active;
+    
+    void Initialize(Entity *entity, void *initData) override;
+    void Process(Entity *entity, f32 dt) override;
+
 };
 
 // ----------------------------------------------------------------------------------
@@ -224,6 +238,7 @@ union ComponentUnion {
     InputComponent input;
     StateMachineComponent stateMachine;
     MovingPlatformComponent movPlatform;
+    AIComponent ai;
 };
 
 struct ComponentContainer {
