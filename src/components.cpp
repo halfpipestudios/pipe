@@ -524,7 +524,50 @@ void AnimationComponent::ClearAnimationEndGroup(void) {
 
 // InputComponent --------------------------------------------------------
 
-void InputComponent::Update(Entity *entity) {
+void InputComponent::Initialize(Entity *entity, void *initData) {
+    InputComponentDesc *compDesc = (InputComponentDesc *)initData;
+    input = compDesc->input;
+    camera = compDesc->camera;
+}
+
+void InputComponent::Terminate(Entity *entity) {
+
+}
+
+void InputComponent::Process(Entity *entity, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    Vec3 worldFront = camera->GetWorldFront();
+    Vec3 right = camera->right;
+    if(input->KeyIsPress(KEY_W)) {
+        physicsComp->physics.acc += worldFront;
+    }
+    if(input->KeyIsPress(KEY_S)) {
+        physicsComp->physics.acc -= worldFront;
+    }
+    if(input->KeyIsPress(KEY_A)) {
+        physicsComp->physics.acc -= right;
+    }
+    if(input->KeyIsPress(KEY_D)) {
+        physicsComp->physics.acc += right;
+    }
+
+    if(entity->HaveFlag(ENTITY_GROUNDED) && (input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A))) {
+        physicsComp->physics.vel += Vec3(0, 15, 0);
+    }
+    
+    f32 acc = 40.0f;
+    f32 drag = 1.0f;
+
+    if(!entity->HaveFlag(ENTITY_GROUNDED)) {
+        drag = 0.1f;
+    }
+
+    physicsComp->physics.acc += worldFront * input->state[0].leftStickY;
+    physicsComp->physics.acc += right      * input->state[0].leftStickX;
+    physicsComp->physics.acc *= acc * drag;
 
 
 }

@@ -255,6 +255,11 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     StateMachineComponentDesc stmCompDesc = {};
     stmCompDesc.camera = &camera;
     hero->AddComponent<StateMachineComponent>(&stmCompDesc);
+    
+    InputComponentDesc inputCompDesc = {};
+    inputCompDesc.input = PlatformManager::Get()->GetInput(); 
+    inputCompDesc.camera = &camera; 
+    hero->AddComponent<InputComponent>(&inputCompDesc);
 
     // Load Horizontal Platform      scale             from             to
     platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);

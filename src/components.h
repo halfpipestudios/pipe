@@ -190,8 +190,19 @@ struct AnimationComponent : public Component {
     void Process(Entity *entity, f32 dt) override;
 };
 
+struct InputComponentDesc {
+    Input *input;
+    Camera *camera;
+};
+
 struct InputComponent : public Component {
-    void Update(Entity *entity);
+    
+    Input *input;
+    Camera *camera;
+
+    void Initialize(Entity *entity, void *initData) override;
+    void Terminate(Entity *entity) override;
+    void Process(Entity *entity, f32 dt) override;
 };
 
 struct StateMachineComponentDesc {
