@@ -18,7 +18,7 @@ struct Map {
 
 struct Level {
     
-    void Initialize(char *mapFilePath);
+    void Initialize(char *mapFilePath, Shader statShader, Shader animShader);
     void Terminate();
 
     void Update(f32 dt);
@@ -32,11 +32,17 @@ private:
 
     Entity *hero;
     Entity *orc;
+    Entity *platformHor;
+    Entity *platformVer0;
+    Entity *platformVer1;
  
+    Entity *entitiesEnd;
     Entity *entities;
     ObjectAllocator<Entity> entitiesAllocator;
 
-    Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations);
+    Entity *AddEntity();
+    Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations);
+    Entity *AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
 };
 
 #endif // _LEVEL_H_

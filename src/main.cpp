@@ -113,7 +113,6 @@ int main() {
     game.Initialize();
 
     f64 lastTimer = PlatformManager::Get()->GetTimeInSeconds();
-    u32 FPS = 0;
     while(PlatformManager::Get()->IsRunning()) {
         
         MemoryManager::Get()->ClearFrameMemory();
@@ -136,7 +135,7 @@ int main() {
         i32 tguiWindowH = tgui_window_height(window1); 
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)tguiWindowW/(f32)tguiWindowH, 0.01f, 1000.0f));
 
-        GraphicsManager::Get()->SetSamplerState(SAMPLER_LINEAR);
+        GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
         GraphicsManager::Get()->SetViewport(0, 0, 1024, 1024);
         GraphicsManager::Get()->BindFrameBuffer(gameFrameBuffer);
         GraphicsManager::Get()->ClearColorBuffer(gameFrameBuffer, 0.5f, 0.0f, 1.0f);
@@ -158,7 +157,7 @@ int main() {
                                                                0.01f, 1000.0f));
 
 
-        GraphicsManager::Get()->SetSamplerState(SAMPLER_POINT);
+        GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_POINT);
         GraphicsManager::Get()->SetViewport(0, 0, PlatformManager::Get()->GetWindow()->GetWidth(), PlatformManager::Get()->GetWindow()->GetHeight());
         GraphicsManager::Get()->BindFrameBuffer(nullptr);
         GraphicsManager::Get()->ClearColorBuffer(nullptr, 1, 0, 1);

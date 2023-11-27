@@ -303,10 +303,10 @@ void  D3D11Graphics::SetRasterizerState(RasterizerState state) {
 
 void D3D11Graphics::SetSamplerState(SamplerState state) {
     switch(state) {
-        case SAMPLER_POINT: {
+        case SAMPLER_STATE_POINT: {
             deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
         } break;
-        case SAMPLER_LINEAR: {
+        case SAMPLER_STATE_LINEAR: {
             deviceContext->PSSetSamplers(0, 1, &samplerStateLinear);
         } break;
     }

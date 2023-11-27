@@ -1,6 +1,13 @@
 #include "geometry.h"
+#include "components.h"
 
 bool Segment::HitEntity(MapImporter::Entity *entity, f32 *tOut) {
+
+    if(entity->faces <= 0) {
+        *tOut = -1.0f;
+        return false;
+    }
+
     Vec3 d = b - a;
     // Set initial interval to being the whole segment. For a ray, tlast should be
     // sety to FLT_MAX. For a line tfirst should be set to - FLT_MAX
@@ -39,4 +46,25 @@ bool Segment::HitEntity(MapImporter::Entity *entity, f32 *tOut) {
     }
     *tOut = tFirst;
     return 1;
+}
+
+bool Segment::HitCylinder(Cylinder *cylinder, f32 *tOut) {
+    *tOut = -1.0f;
+    return false;
+}
+
+bool Segment::HitCollider(CollisionComponent *collider, f32  *tOut) {
+
+    switch(collider->type) {
+        case COLLIDER_CYLINDER: {
+            return HitCylinder(&collider->cylinder, tOut);
+        } break;
+
+        case COLLIDER_CONVEXHULL: {
+            return HitEntity(&collider->poly3D.entity, tOut);
+        } break;
+    }
+
+    *tOut = -1.0f;
+    return false;
 }

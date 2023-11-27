@@ -21,8 +21,8 @@ enum RasterizerState {
 };
 
 enum SamplerState {
-    SAMPLER_POINT,
-    SAMPLER_LINEAR
+    SAMPLER_STATE_POINT,
+    SAMPLER_STATE_LINEAR
 };
 
 struct CBMatrix {

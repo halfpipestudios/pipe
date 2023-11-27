@@ -26,11 +26,11 @@ enum EntityFlags {
 
 struct Entity {
 
-    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations, Map *map);
+    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations, Map *map, Entity *entities);
     void Terminate();
 
     void Update(Map *map, f32 dt);
-    void Render(Shader shader);
+    void Render();
 
     template <typename T>
     void AddComponent(void *initData = nullptr);
@@ -44,6 +44,7 @@ struct Entity {
     u32 flags;
     ComponentContainer *componentContainerList; 
     Entity *next;
+    Entity *prev;
     
     inline void AddFlag(EntityFlags flag) { flags |= flag; }
     inline void RemoveFlag(EntityFlags flag) { flags &= ~flag; }
@@ -127,7 +128,7 @@ T *Entity::GetComponent() {
         container = container->next;
     }
 
-    ASSERT(component != nullptr);
+    //ASSERT(component != nullptr);
 
     return (T *)component;
 }

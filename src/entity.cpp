@@ -19,7 +19,8 @@ EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt
         return &stateMachineComp->fallingState;
     }
 
-    if(input->KeyIsPress(KEY_W) || input->KeyIsPress(KEY_S) || input->KeyIsPress(KEY_A) || input->KeyIsPress(KEY_D)) {
+    if(input->KeyIsPress(KEY_W) || input->KeyIsPress(KEY_S) || input->KeyIsPress(KEY_A) || input->KeyIsPress(KEY_D) || 
+       input->state[0].leftStickY != 0.0f || input->state[0].leftStickX != 0.0f) {
         return &stateMachineComp->walkingState;
     }
     
@@ -199,61 +200,23 @@ void FallingState::Exit(Entity *entity) {
 
 // ---------------------------------------------------------
 
-static void DrawCylinder(Cylinder cylinder, u32 color) {
-    Vec3 vertices[40] = {};
-
-    // Top face
-    f32 increment = (2.0f * PI) / 20;
-    f32 angle = 0.0f;
-    for(i32 i = 0; i < 20; ++i) {
-        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
-        angle += increment;
-    }
-
-    // Bottom face
-    angle = 0.0f;
-    for(i32 i = 20; i < 40; ++i) {
-        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c - cylinder.u * cylinder.n;
-        angle += increment;
-    }
-
-    // Rendering code
-    for(i32 i = 0; i < 20; ++i) {
-        Vec3 a = vertices[i];
-        Vec3 b = vertices[(i + 1) % 20];
-
-        GraphicsManager::Get()->DrawLine(a, b, color);
-    }
-
-    for(i32 i = 0; i < 20; ++i) {
-        Vec3 a = vertices[20 + i];
-        Vec3 b = vertices[20 + (i + 1) % 20];
-
-        GraphicsManager::Get()->DrawLine(a, b, color);
-    }
-
-    for(i32 i = 0; i < 20; ++i) {
-        Vec3 a = vertices[i];
-        Vec3 b = vertices[20 + i];
-
-        GraphicsManager::Get()->DrawLine(a, b, color);
-    }
-
-}
-
-
-void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationClip *animations, u32 numAnimations, Map *map) {
+void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations, Map *map, Entity *entities) {
     
     ClearFlags();
 
     next = nullptr;
+    prev = nullptr;
     componentContainerList = nullptr;
 
+    TransformComponentDesc transformDesc = {};
+    transformDesc.pos = pos;
+    transformDesc.rot = rot;
+    transformDesc.scale = scale;
+    AddComponent<TransformComponent>(&transformDesc);
+
     GraphicsComponentDesc graphCompDesc = {};
-    graphCompDesc.pos = pos;
-    graphCompDesc.rot = rot;
-    graphCompDesc.scale = scale;
     graphCompDesc.model = model;
+    graphCompDesc.shader = shader;
     AddComponent<GraphicsComponent>(&graphCompDesc);
 
     PhysicsComponentDesc physCompDesc = {};
@@ -261,6 +224,7 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationCl
     physCompDesc.vel = Vec3();
     physCompDesc.acc = Vec3();
     physCompDesc.map = map;
+    physCompDesc.entities = entities;
     AddComponent<PhysicsComponent>(&physCompDesc);
 
     AnimationComponentDesc animCompDesc = {};
@@ -269,10 +233,11 @@ void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, AnimationCl
     AddComponent<AnimationComponent>(&animCompDesc);
 
     CollisionComponentDesc collisionCompDesc = {};
-    collisionCompDesc.c = pos;
-    collisionCompDesc.u = Vec3(0, 1, 0);
-    collisionCompDesc.radii = 0.3f;
-    collisionCompDesc.n = 0.75f;
+    collisionCompDesc.type = COLLIDER_CYLINDER;
+    collisionCompDesc.cylinder.c = pos;
+    collisionCompDesc.cylinder.u = Vec3(0, 1, 0);
+    collisionCompDesc.cylinder.radii = 0.3f;
+    collisionCompDesc.cylinder.n = 0.75f;
     AddComponent<CollisionComponent>(&collisionCompDesc);
 
 }
@@ -309,12 +274,12 @@ void Entity::Update(Map *map, f32 dt) {
     }
 }
 
-void Entity::Render(Shader shader) {
+void Entity::Render() {
     ComponentContainer *container = componentContainerList;
     while(container) {
 
         Component *component =  (Component *)&container->component;
-        component->Render(this, shader);
+        component->Render(this);
 
         container = container->next;
     }
