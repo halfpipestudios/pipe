@@ -240,6 +240,8 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     aiCompDesc.arrivalRadii = 0;
     aiCompDesc.active = true;
     orc->AddComponent<AIComponent>(&aiCompDesc);
+    
+    orc->GetComponent<AnimationComponent>()->animation.UpdateWeightScale("walking", 1);
 
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");

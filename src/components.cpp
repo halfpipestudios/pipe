@@ -174,7 +174,6 @@ void GraphicsComponent::Terminate(Entity *entity) {
 
 void GraphicsComponent::Render(Entity *entity) {
 
-
     TransformComponent renderTransform = *entity->GetComponent<TransformComponent>();
     
     if(model.type == MODEL_TYPE_ANIMATED) {
@@ -449,8 +448,13 @@ void CollisionComponent::Render(Entity *entity) {
 void AnimationComponent::Initialize(Entity *entity, void *initData) {
     AnimationComponentDesc *compDesc = (AnimationComponentDesc *)initData;
     animation.Initialize(compDesc->animations, compDesc->numAnimations);
+    
     finalTransformMatrices = nullptr;
     numFinalTrasformMatrices = 0;
+
+    leavingAnimation = {};
+    startAnimation   = {};
+    endAnimation     = {};
 }
 
 void AnimationComponent::Terminate(Entity *entity) {
@@ -460,11 +464,63 @@ void AnimationComponent::Terminate(Entity *entity) {
 }
 
 void AnimationComponent::Process(Entity *entity, f32 dt) {
+    
+    if(leavingAnimation.size > 0) {
+        for(u32 nameIndex = 0; nameIndex < leavingAnimation.size; ++nameIndex) {
+            animation.UpdateWeightScale(leavingAnimation.names[nameIndex], 0);
+        }
+        ClearAnimationLeavingGroup();
+    }
+
+    if(startAnimation.size > 0) {
+        for(u32 nameIndex = 0; nameIndex < startAnimation.size; ++nameIndex) {
+            animation.UpdateWeightScale(startAnimation.names[nameIndex], (1.0f - tBlend));
+        }
+    }
+
+    if(endAnimation.size > 0) {
+        for(u32 nameIndex = 0; nameIndex < endAnimation.size; ++nameIndex) {
+            animation.UpdateWeightScale(endAnimation.names[nameIndex], tBlend);
+        }
+    }
 
     animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
-
 }
 
+inline static void AddAnimationToGroup(AnimationGroup *group, const char *name) {
+    ASSERT(group->size < MAX_ANIMATION_GROUP_SIZE);
+    group->names[group->size++] = (char *)name;
+}
+
+void AnimationComponent::AddAnimationToLeavingGroup(const char *name) {
+    AddAnimationToGroup(&leavingAnimation, name);
+}
+
+void AnimationComponent::AddAnimationToStartGroup(const char *name, bool loop) {
+    AddAnimationToGroup(&startAnimation, name);
+    animation.SetLoop(name, loop);
+}
+
+void AnimationComponent::AddAnimationToEndGroup(const char *name, bool loop) {
+    AddAnimationToGroup(&endAnimation, name);
+    animation.SetLoop(name, loop);
+}
+
+void AnimationComponent::SetBlendFactor(f32 tBlend) {
+    this->tBlend = tBlend;
+}
+
+void AnimationComponent::ClearAnimationLeavingGroup(void) {
+    leavingAnimation.size = 0;
+}
+
+void AnimationComponent::ClearAnimationStartGroup(void) {
+    startAnimation.size = 0;
+}
+
+void AnimationComponent::ClearAnimationEndGroup(void) {
+    endAnimation.size = 0;
+}
 
 // InputComponent --------------------------------------------------------
 

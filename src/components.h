@@ -156,10 +156,34 @@ struct AnimationComponentDesc {
     u32 numAnimations;
 };
 
+#define MAX_ANIMATION_GROUP_SIZE 8
+struct AnimationGroup {
+    char *names[MAX_ANIMATION_GROUP_SIZE];
+    u32 size;
+};
+
 struct AnimationComponent : public Component {
+    
     AnimationSet animation;
     Mat4 *finalTransformMatrices;
     u32 numFinalTrasformMatrices;
+    
+    f32 tBlend;
+
+    AnimationGroup leavingAnimation;
+    
+    AnimationGroup startAnimation;
+    AnimationGroup endAnimation;
+
+    void AddAnimationToLeavingGroup(const char *name);
+    void AddAnimationToStartGroup(const char *name, bool loop = true);
+    void AddAnimationToEndGroup(const char *name, bool loop = true);
+    
+    void ClearAnimationLeavingGroup(void);
+    void ClearAnimationStartGroup(void);
+    void ClearAnimationEndGroup(void);
+    
+    void SetBlendFactor(f32 tBlend);
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;

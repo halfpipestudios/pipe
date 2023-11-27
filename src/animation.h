@@ -44,15 +44,12 @@ struct AnimationClip {
 
 struct AnimationState {
     AnimationClip *animation;
-
+    
     f32 time;
     f32 weight;
+    f32 scale;
     
-    f32 transitionTime;
-
     bool loop;
-    bool smooth;
-    bool freeze;
 
     i32 root;
     
@@ -68,30 +65,28 @@ private:
 };
 
 struct AnimationSet {
-    
+
     Skeleton *skeleton;
     AnimationState *states;
     u32 numStates;
+    
     f32 totalWeight;
 
     void Initialize(AnimationClip *animations, u32 numAnimations);
     void Terminate(void);
     
-    void Play(const char *name, f32 weight, bool loop);
-    void PlaySmooth(const char *name, f32 transitionTime);
-    void Stop(const char *name);
-    void UpdateWeight(const char *name, f32 weight);
-    void Freeze(const char *name);
+    void SetWeight(const char *name, f32 weight);
+    void UpdateWeightScale(const char *name, f32 scale);
 
     f32 GetDuration(const char *name);
     f32 GetTimer(const char *name);
 
     bool IsAnimationFinish(const char *name);
-    bool IsFreeze(const char *name);
 
     void Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut);
     
     void SetRootJoint(const char *name, const char *joint);
+    void SetLoop(const char *name, bool loop);
 
 private:
     

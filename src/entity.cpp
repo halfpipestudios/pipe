@@ -8,7 +8,7 @@
 // Idle State ...
 // ---------------------------------------------------------
 EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt) {
-
+ 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
 
@@ -28,22 +28,30 @@ EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt
         return &stateMachineComp->jumpingState;
     }
 
-    //printf("idle!!\n");
-    
+
     return nullptr;
 }
 
 void IdleState::Enter(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-    animationComp->animation.Play("idle", 1, true);
+    
+    animationComp->AddAnimationToStartGroup("idle");
+    animationComp->AddAnimationToEndGroup("idle");
+
+    animationComp->SetBlendFactor(1.0f);
+
+    printf("Idle!\n");
 }
 
 void IdleState::Exit(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
+    
+    animationComp->AddAnimationToLeavingGroup("idle");
+
+    animationComp->ClearAnimationStartGroup();
+    animationComp->ClearAnimationEndGroup();
 }
 
 // Walking State ...
@@ -61,8 +69,7 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
     
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 t = CLAMP(vel2d.Len() * 0.25f, 0.0f , 1.0f);
-    animationComp->animation.UpdateWeight("idle", 1-t);
-    animationComp->animation.UpdateWeight("walking", t);
+    animationComp->SetBlendFactor(t);
 
     Vec3 worldFront = camera.GetWorldFront();
     Vec3 right = camera.right;
@@ -103,14 +110,25 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
 void WalkingState::Enter(Entity *entity) {
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-    animationComp->animation.Play("walking", 1, true);
+    
+    animationComp->AddAnimationToStartGroup("idle");
+    animationComp->AddAnimationToEndGroup("walking");
+
+    animationComp->SetBlendFactor(1.0f);
+
+    printf("Walking!\n");
 
 }
 
 void WalkingState::Exit(Entity *entity) {
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-    animationComp->animation.Stop("walking");
+    
+    animationComp->AddAnimationToLeavingGroup("idle");
+    animationComp->AddAnimationToLeavingGroup("walking");
+
+    animationComp->ClearAnimationStartGroup();
+    animationComp->ClearAnimationEndGroup();
 }
 
 // Jumping State ...
@@ -134,8 +152,6 @@ EntityState *JumpingState::Move(Entity *entity, Input *input, Camera camera, f32
         return &stateMachineComp->idleState;
     }
     
-    //printf("jumping!!\n");
-
     return nullptr;
 }
 
@@ -143,16 +159,32 @@ void JumpingState::Enter(Entity *entity) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
+    physicsComp->physics.vel += Vec3(0, 15, 0);
 
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
 
-    physicsComp->physics.vel += Vec3(0, 15, 0);
+    //animationComp->AddAnimationToStartGroup("idle");
+    //animationComp->AddAnimationToEndGroup("idle");
+    
+    animationComp->AddAnimationToStartGroup("jump");
+    animationComp->AddAnimationToEndGroup("jump");
 
-    animationComp->animation.Play("jump", 1, false);
+    animationComp->SetBlendFactor(1.0f);
+    
+    printf("Jump\n");
 }
 
 void JumpingState::Exit(Entity *entity) {
+
+    AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
+    ASSERT(animationComp != nullptr);
+
+    animationComp->AddAnimationToLeavingGroup("idle");
+    animationComp->AddAnimationToLeavingGroup("jump");
+
+    animationComp->ClearAnimationStartGroup();
+    animationComp->ClearAnimationEndGroup();
 }
 
 // Falling State ...
@@ -170,32 +202,36 @@ EntityState *FallingState::Move(Entity *entity, Input *input, Camera camera, f32
     if(entity->HaveFlag(ENTITY_GROUNDED)) {
 
         Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
-        if(vel2d.Len()) {
+        if(vel2d.Len() > 0.005f) {
             return &stateMachineComp->walkingState;
         }
 
         return &stateMachineComp->idleState;
     }
 
-    //printf("falling!!\n");
-    
     return nullptr;
 }
 
 void FallingState::Enter(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
 
-    animationComp->animation.Play("idle", 1, true);
+    animationComp->AddAnimationToStartGroup("idle");
+    animationComp->AddAnimationToEndGroup("idle");
 
+    animationComp->SetBlendFactor(1.0f);
+
+    printf("Fall\n");
 }
 
 void FallingState::Exit(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
 
+    animationComp->AddAnimationToLeavingGroup("idle");
+
+    animationComp->ClearAnimationStartGroup();
+    animationComp->ClearAnimationEndGroup();
 }
 
 // ---------------------------------------------------------
