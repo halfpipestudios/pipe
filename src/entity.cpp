@@ -36,20 +36,13 @@ void IdleState::Enter(Entity *entity) {
 
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-
-    if(animationComp->animation.IsAnimationFinish("idle")) {
-        animationComp->animation.Play("idle", 1, true);
-    } else {
-        animationComp->animation.Continue("idle");
-    }
+    animationComp->animation.Play("idle", 1, true);
 }
 
 void IdleState::Exit(Entity *entity) {
 
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-
-    animationComp->animation.Stop("idle");
 }
 
 // Walking State ...
@@ -66,8 +59,9 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
     ASSERT(stateMachineComp != nullptr);
     
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
-    animationComp->animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
-
+    f32 t = CLAMP(vel2d.Len() * 0.25f, 0.0f , 1.0f);
+    animationComp->animation.UpdateWeight("idle", 1-t);
+    animationComp->animation.UpdateWeight("walking", t);
 
     Vec3 worldFront = camera.GetWorldFront();
     Vec3 right = camera.right;
@@ -106,24 +100,15 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
 }
 
 void WalkingState::Enter(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
+    animationComp->animation.Play("walking", 1, true);
 
-    if(animationComp->animation.IsAnimationFinish("idle")) {
-        animationComp->animation.Play("idle", 1, true);
-    } else {
-        animationComp->animation.Continue("idle");
-    }
-    animationComp->animation.Play("walking", 0, true);
 }
 
 void WalkingState::Exit(Entity *entity) {
-
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
-
-    animationComp->animation.Pause("idle");
     animationComp->animation.Stop("walking");
 }
 
@@ -162,7 +147,8 @@ void JumpingState::Enter(Entity *entity) {
     ASSERT(animationComp != nullptr);
 
     physicsComp->physics.vel += Vec3(0, 15, 0);
-    animationComp->animation.PlaySmooth("jump", 0.08f);
+
+    animationComp->animation.Play("jump", 1, false);
 }
 
 void JumpingState::Exit(Entity *entity) {
@@ -201,6 +187,7 @@ void FallingState::Enter(Entity *entity) {
     ASSERT(animationComp != nullptr);
 
     animationComp->animation.Play("idle", 1, true);
+
 }
 
 void FallingState::Exit(Entity *entity) {
@@ -208,7 +195,6 @@ void FallingState::Exit(Entity *entity) {
     AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
     ASSERT(animationComp != nullptr);
 
-    animationComp->animation.Stop("idle");
 }
 
 // ---------------------------------------------------------

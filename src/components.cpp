@@ -176,8 +176,6 @@ void AnimationComponent::Initialize(Entity *entity, void *initData) {
     animation.Initialize(compDesc->animations, compDesc->numAnimations);
     finalTransformMatrices = nullptr;
     numFinalTrasformMatrices = 0;
-
-    animation.Play("idle", 1, true);
 }
 
 void AnimationComponent::Terminate(Entity *entity) {

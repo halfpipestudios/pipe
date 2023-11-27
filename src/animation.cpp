@@ -100,7 +100,6 @@ void AnimationSet::Initialize(AnimationClip *animations, u32 numAnimations) {
         animationState->animation = animation;
         animationState->time = 0;
         animationState->weight = 0;
-        animationState->enable = false;
         animationState->loop = false;
         animationState->root = 0;
         
@@ -121,9 +120,12 @@ void AnimationSet::Terminate(void) {
 void AnimationSet::Play(const char *name, f32 weight, bool loop) {
     AnimationState *animation = FindAnimationByName(name);
     ASSERT(animation != nullptr);
-    animation->time = 0;
+
+    if(animation->time >= animation->animation->duration) {
+        animation->time = 0;
+    }
+
     animation->weight = weight;
-    animation->enable = true;
     animation->loop = loop;
     animation->smooth = false;
     animation->transitionTime = 0;
@@ -132,13 +134,7 @@ void AnimationSet::Play(const char *name, f32 weight, bool loop) {
 void AnimationSet::Stop(const char *name) {
     AnimationState *animation = FindAnimationByName(name);
     ASSERT(animation != nullptr);
-    animation->enable = false;
-    animation->time = 0;
-}
-
-void AnimationSet::Pause(const char *name) {
-    AnimationState *animation = FindAnimationByName(name);
-    animation->enable = false;
+    animation->weight = 0;
 }
 
 void AnimationSet::Freeze(const char *name) {
@@ -146,18 +142,11 @@ void AnimationSet::Freeze(const char *name) {
     animation->freeze = true;
 }
 
-void AnimationSet::Continue(const char *name) {
-    AnimationState *animation = FindAnimationByName(name);
-    animation->enable = true;
-    animation->freeze = false;
-}
-
 void AnimationSet::PlaySmooth(const char *name, f32 transitionTime) {
     AnimationState *animation = FindAnimationByName(name);
     ASSERT(animation != nullptr);
     animation->time = 0;
     animation->weight = 1;
-    animation->enable = true;
     animation->loop = false;
     animation->smooth = true;
     animation->transitionTime = transitionTime;    
@@ -178,7 +167,7 @@ void AnimationSet::SetRootJoint(const char *name, const char *joint) {
 bool AnimationSet::IsAnimationFinish(const char *name) {
     AnimationState *animation = FindAnimationByName(name);
     ASSERT(animation != nullptr);
-    return animation->enable == false;
+    return animation->time >= animation->animation->duration;
 
 }
 
@@ -200,6 +189,39 @@ f32 AnimationSet::GetTimer(const char *name) {
     return animation->time;
 }
 
+static inline void InitializeFinalLocalPose(JointPose *finalLocalPose, Skeleton *skeleton) {
+    for(u32 jointIndex = 0; jointIndex < skeleton->numJoints; ++jointIndex) { 
+        JointPose *local_pose = finalLocalPose + jointIndex;
+        local_pose->position = Vec3(0, 0, 0);
+        local_pose->rotation = Quat(0, 0, 0, 0);
+        local_pose->scale = Vec3(1, 1, 1);
+    }
+
+}
+
+static inline void AddToFinalLocalPose(AnimationSet *animationSet, AnimationState *state, JointPose *finalLocalPose, JointPose *intermidiateLocalPose, Skeleton *skeleton) {
+    if(animationSet->totalWeight < 0.0001f) return;
+    for(u32 jointIndex = 0; jointIndex < skeleton->numJoints; ++jointIndex) { 
+        if(skeleton->JointIsInHierarchy(jointIndex, state->root)) {
+            JointPose *sample_local_pose = intermidiateLocalPose + jointIndex;
+            JointPose *local_pose = finalLocalPose + jointIndex;
+            local_pose->position = local_pose->position + (sample_local_pose->position * state->weight) / animationSet->totalWeight;
+            local_pose->rotation = local_pose->rotation + (sample_local_pose->rotation * state->weight) / animationSet->totalWeight;
+            //local_pose->scale    = local_pose->scale    + (sample_local_pose->scale * state->weight)    / animationSet->totalWeight;
+        }
+    }
+}
+
+static inline void UpdateAnimationSetTotalWeight(AnimationSet *set) {
+    set->totalWeight = 0;
+    AnimationState *state = set->states;
+    while(state != nullptr) {
+        set->totalWeight += state->weight;
+        state = state->next;
+    }
+
+}
+
 void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut) {
     
     Mat4 *finalTransformMatrices = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*skeleton->numJoints, 8);
@@ -207,13 +229,13 @@ void AnimationSet::Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFina
     MemoryManager::Get()->BeginTemporalMemory();
     JointPose *finalLocalPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*skeleton->numJoints, 8);
 
-    ZeroFinalLocalPose(finalLocalPose);
+    InitializeFinalLocalPose(finalLocalPose, skeleton);
+
+    UpdateAnimationSetTotalWeight(this);
     
     AnimationState *state = states;
     while(state != nullptr) {
-        if(state->enable) {
-            UpdateAnimationState(state, dt, finalLocalPose);
-        }
+        UpdateAnimationState(state, dt, finalLocalPose);
         state = state->next;
     }
 
@@ -265,7 +287,7 @@ void AnimationSet::UpdateAnimationState(AnimationState *state, f32 dt, JointPose
         if(state->loop == true) {
             state->time = 0;
         } else {
-            state->enable = false;
+            state->weight = 0;
             return;
         }
     }
@@ -291,21 +313,8 @@ void AnimationSet::UpdateAnimationState(AnimationState *state, f32 dt, JointPose
     JointPose *intermidiateLocalPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*skeleton->numJoints, 8);
 
     state->SampleAnimationPose(intermidiateLocalPose);
-
-    for(u32 jointIndex = 0; jointIndex < skeleton->numJoints; ++jointIndex) { 
-        if(skeleton->JointIsInHierarchy(jointIndex, state->root)) {
-            
-            JointPose *sample_local_pose = intermidiateLocalPose + jointIndex;
-            JointPose *local_pose = finalLocalPose + jointIndex;
-            
-            local_pose->position = Vec3::Lerp(local_pose->position, sample_local_pose->position, state->weight);
-            local_pose->rotation = Quat::Slerp(local_pose->rotation, sample_local_pose->rotation, state->weight);
-            local_pose->scale = Vec3::Lerp(local_pose->scale, sample_local_pose->scale, state->weight);
-            
-            int breakHere = 0;
-        }
-    }
-
+    AddToFinalLocalPose(this, state, finalLocalPose, intermidiateLocalPose, skeleton);
+    
     MemoryManager::Get()->EndTemporalMemory();
 }
 
@@ -318,13 +327,4 @@ AnimationState *AnimationSet::FindAnimationByName(const char *name) {
         state = state->next;
     }
     return nullptr;
-}
-
-void AnimationSet::ZeroFinalLocalPose(JointPose *finalLocalPose) {
-    for(u32 jointIndex = 0; jointIndex < skeleton->numJoints; ++jointIndex) { 
-        JointPose *local_pose  = finalLocalPose + jointIndex;
-        local_pose->position = Vec3(0, 0, 0);
-        local_pose->rotation = Quat(0, 0, 0, 0);
-        local_pose->scale = Vec3(0, 0, 0);
-    }
 }

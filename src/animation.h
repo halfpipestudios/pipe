@@ -50,7 +50,6 @@ struct AnimationState {
     
     f32 transitionTime;
 
-    bool enable;
     bool loop;
     bool smooth;
     bool freeze;
@@ -73,6 +72,7 @@ struct AnimationSet {
     Skeleton *skeleton;
     AnimationState *states;
     u32 numStates;
+    f32 totalWeight;
 
     void Initialize(AnimationClip *animations, u32 numAnimations);
     void Terminate(void);
@@ -81,9 +81,7 @@ struct AnimationSet {
     void PlaySmooth(const char *name, f32 transitionTime);
     void Stop(const char *name);
     void UpdateWeight(const char *name, f32 weight);
-    void Pause(const char *name);
     void Freeze(const char *name);
-    void Continue(const char *name);
 
     f32 GetDuration(const char *name);
     f32 GetTimer(const char *name);
@@ -98,7 +96,6 @@ struct AnimationSet {
 private:
     
     void UpdateAnimationState(AnimationState *state, f32 dt, JointPose *finalLocalPose);
-    void ZeroFinalLocalPose(JointPose *finalLocalPose);
     void CalculateFinalTransformMatrices(JointPose *finalLocalPose, Mat4 *finalTransformMatrices);
     
     AnimationState *FindAnimationByName(const char *name);
