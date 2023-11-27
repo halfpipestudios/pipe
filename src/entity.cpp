@@ -15,17 +15,19 @@ EntityState *IdleState::Move(Entity *entity, Input *input, Camera camera, f32 dt
     StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
     ASSERT(stateMachineComp != nullptr);
     
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+    f32 e = 0.01f;
+
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
         return &stateMachineComp->fallingState;
     }
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > 0) {
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
         return &stateMachineComp->jumpingState;
     }
 
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
 
-    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > 0.01f) {
+    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
         return &stateMachineComp->walkingState;
     }
 
@@ -71,7 +73,9 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
     f32 t = CLAMP(vel2d.Len() * 0.25f, 0.0f , 1.0f);
     animationComp->SetBlendFactor(t);
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > 0) {
+    f32 e = 0.01f;
+
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
         return &stateMachineComp->jumpingState;
     }
 
@@ -79,7 +83,7 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
         return &stateMachineComp->idleState;
     }
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
         return &stateMachineComp->fallingState;
     }
     
@@ -129,15 +133,17 @@ EntityState *JumpingState::Move(Entity *entity, Input *input, Camera camera, f32
         animationComp->AddAnimationToEndGroup("idle");
     }
 
-    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < 0) {
+    f32 e = 0.01f;
+
+    if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
         return &stateMachineComp->fallingState;
     }
 
-    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > 0.01f) {
+    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
         return &stateMachineComp->walkingState;
     }
 
-    if(physicsComp->physics.vel.Len() < 0.001f) {
+    if(physicsComp->physics.vel.Len() < e) {
         return &stateMachineComp->idleState;
     }
     
@@ -183,13 +189,13 @@ EntityState *FallingState::Move(Entity *entity, Input *input, Camera camera, f32
     StateMachineComponent *stateMachineComp = entity->GetComponent<StateMachineComponent>();
     ASSERT(stateMachineComp != nullptr);
 
-    physicsComp->physics.acc = physicsComp->physics.acc * 0.1f;
+    f32 e = 0.01f;
 
-    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > 0.01f) {
+    if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
         return &stateMachineComp->walkingState;
     }
 
-    if(physicsComp->physics.vel.Len() < 0.001f) {
+    if(physicsComp->physics.vel.Len() < e) {
         return &stateMachineComp->idleState;
     }
 
