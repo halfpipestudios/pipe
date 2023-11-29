@@ -69,7 +69,6 @@ EntityState *WalkingState::Move(Entity *entity, Input *input, Camera camera, f32
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     animationComp->animation.UpdateWeight("walking", CLAMP(vel2d.Len()*0.25f, 0, 1));
 
-
     Vec3 worldFront = camera.GetWorldFront();
     Vec3 right = camera.right;
     if(input->KeyIsPress(KEY_W)) {

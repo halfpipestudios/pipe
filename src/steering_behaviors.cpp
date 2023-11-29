@@ -23,6 +23,7 @@ Steering Face(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 t
     dir.Normalize();
 
     // get the angle of this direction
+    // TODO: remove this offset
     f32 targetOrientation = atan2f(dir.z, dir.x) - PI*0.5;
     if(targetOrientation < 0) targetOrientation += 2*PI;
 
@@ -47,8 +48,10 @@ Steering Seek(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 t
     acc = CLAMP(acc / timeToTarget, -maxAcceleration, maxAcceleration);
 
     // Get the direction to travel
+    // TODO: remove this offset
     steering.linear.x = cosf(phyComp->physics.orientation + PI*0.5);
     steering.linear.y = 0.0f;
+    // TODO: remove this offset
     steering.linear.z = sinf(phyComp->physics.orientation + PI*0.5);
 
     //Give full acceleration along this direction

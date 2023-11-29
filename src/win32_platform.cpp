@@ -323,6 +323,7 @@ void Win32Window::Initialize(i32 w, i32 h) {
     // ::DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 
 
+
 }
 
 void Win32Window::Terminate() {
