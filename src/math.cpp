@@ -699,4 +699,27 @@ Mat4 Quat::ToMat4() {
     return result;
 }
 
+Quat Quat::operator*(float f) {
+    Quat result; 
+    result.w = this->w * f;
+    result.x = this->x * f;
+    result.y = this->y * f;
+    result.z = this->z * f;
+    return result;
+}
+
+Quat Quat::operator/(float f) {
+    Quat result = *this * (1.0f/f); 
+    return result;
+}
+
+Quat Quat::operator+(Quat &q) {
+    Quat result; 
+    result.w = this->w + q.w;
+    result.x = this->x + q.x;
+    result.y = this->y + q.y;
+    result.z = this->z + q.z;
+    return result;
+}
+
 // -----------------------------------------

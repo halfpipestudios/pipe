@@ -21,7 +21,6 @@ struct Skeleton {
     bool JointIsInHierarchy(i32 index, i32 parentIndex);
 };
 
-// NOTE: the size of all JointPose array is the number of joints of the parent skeleton
 struct JointPose {
     Vec3 position;
     Quat rotation;
@@ -34,76 +33,48 @@ struct AnimationSample {
 };
 
 struct AnimationClip {
+    char name[MAX_NAME_SIZE];
     Skeleton *skeleton;
     
-    char name[MAX_NAME_SIZE];
     f32 duration;
     AnimationSample *samples;
     u32 numSamples;
 };
 
-struct AnimationState {
-    AnimationClip *animation;
+struct AnimationClipSet {
+    Skeleton *skeleton;
+    AnimationClip *clips;
+    u32 numClips;
 
-    f32 time;
-    f32 weight;
-    
-    f32 transitionTime;
+    AnimationClip *FindAnimationClipByName(const char *name);
+};
 
-    bool enable;
-    bool loop;
-    bool smooth;
-    bool freeze;
+struct Animation {
+    AnimationClip *clip;
 
     i32 root;
+    f32 time;
+    f32 duration;
+    bool loop;
     
-    AnimationState *next;
+    JointPose *currentPose;
 
-    void SampleAnimationPose(JointPose *pose);
+    void Initialize(AnimationClip *clip, i32 root, bool loop);
+    void Update(f32 dt);
+
+    void SampleAnimationPose();
+    void SampleAnimationPose(f32 time);
+
+    // NOTE: This function must be call after calling Update(f32 dt) function
+    inline JointPose *GetCurrentPose() { return currentPose; }
+    inline bool Finished() { return time >= duration; }
 
 private:
 
     void SamplePrevAndNextAnimationPose(AnimationSample *prev, AnimationSample *next, f32 time);
-    void MixSamples(JointPose *dst, JointPose *a, JointPose *b, f32 t);
-
 };
 
-struct AnimationSet {
-    
-    Skeleton *skeleton;
-    AnimationState *states;
-    u32 numStates;
-
-    void Initialize(AnimationClip *animations, u32 numAnimations);
-    void Terminate(void);
-    
-    void Play(const char *name, f32 weight, bool loop);
-    void PlaySmooth(const char *name, f32 transitionTime);
-    void Stop(const char *name);
-    void UpdateWeight(const char *name, f32 weight);
-    void Pause(const char *name);
-    void Freeze(const char *name);
-    void Continue(const char *name);
-
-    f32 GetDuration(const char *name);
-    f32 GetTimer(const char *name);
-
-    bool IsAnimationFinish(const char *name);
-    bool IsFreeze(const char *name);
-
-    void Update(f32 dt, Mat4 **finalTransformMatricesOut, u32 *numFinaltrasformMatricesOut);
-    
-    void SetRootJoint(const char *name, const char *joint);
-
-private:
-    
-    void UpdateAnimationState(AnimationState *state, f32 dt, JointPose *finalLocalPose);
-    void ZeroFinalLocalPose(JointPose *finalLocalPose);
-    void CalculateFinalTransformMatrices(JointPose *finalLocalPose, Mat4 *finalTransformMatrices);
-    
-    AnimationState *FindAnimationByName(const char *name);
-
-    static ObjectAllocator<AnimationState> animationStateAllocator;
-};
+void JointPoseMixSamples(JointPose *dst, JointPose *a, JointPose *b, u32 numJoints, f32 t);
+void CalculateFinalTransformMatrices(JointPose *finalLocalPose, Mat4 *finalTransformMatrices, Skeleton *skeleton);
 
 #endif // _ANIMATION_H_

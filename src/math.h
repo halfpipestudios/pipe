@@ -236,6 +236,11 @@ struct Quat {
     Mat4 ToMat4();
 
     static Quat Slerp(Quat a, Quat b, f32 t);
+
+    Quat operator*(float f);
+    Quat operator/(float f);
+    Quat operator+(Quat &q);
+
 };
 
 #endif

@@ -11,7 +11,7 @@
 void TweenImporter::ReadString(u8 **file, char *buffer) {
     u32 len = READ_U32(*file);
     if(len > MAX_NAME_SIZE) {
-        len = MAX_NAME_SIZE;
+        len = MAX_NAME_SIZE-1;
     }
     memcpy(buffer, *file, len);
     buffer[len] = '\0';
