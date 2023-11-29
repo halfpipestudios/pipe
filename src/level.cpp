@@ -137,10 +137,10 @@ static void LoadModelToGpu(Model *model) {
     }
 }
 
-Entity *Level::AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations) {
+Entity *Level::AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader) {
     Entity *entity = entitiesAllocator.Alloc();
     if(entitiesEnd == nullptr) entitiesEnd = entity;
-    entity->Initialize(pos, rot, scale, model, shader, animations, numAnimations, &map, entitiesEnd);
+    entity->Initialize(pos, rot, scale, model, shader, &map, entitiesEnd, &animationsSets[1]);
     entity->next = entities;
     if(entities != nullptr) {
         entities->prev = entity;
@@ -223,43 +223,51 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     
     // NOTE Load entities ------------------------------------------------------------------------------------
     ModelImporter modelImporter;
-    AnimationImporter animationImporter;
     
+    // Load all level animations
+    
+    numAnimationsSets = 2;
+    animationsSets = (AnimationClipSet *)MemoryManager::Get()->AllocStaticMemory(sizeof(AnimationClipSet) * numAnimationsSets, 1);
+    
+    AnimationImporter animationImporter;
+    animationImporter.Read("./data/models/orc.twa");
+    animationsSets[0].clips    = animationImporter.animations;
+    animationsSets[0].numClips = animationImporter.numAnimations;
+    animationsSets[0].skeleton = animationImporter.skeleton;
+
+    animationImporter.Read("./data/models/hero.twa");
+    animationsSets[1].clips    = animationImporter.animations;
+    animationsSets[1].numClips = animationImporter.numAnimations;
+    animationsSets[1].skeleton = animationImporter.skeleton;
+
     // Load Orc
     modelImporter.Read("./data/models/orc.twm");
-    animationImporter.Read("./data/models/orc.twa");
     LoadModelToGpu(&modelImporter.model);
     orc = AddEntity(Vec3(10, 4, 8), Vec3(), Vec3(1, 1, 1),
-                    modelImporter.model, animShader,
-                    animationImporter.animations, 
-                    animationImporter.numAnimations);
-
+                    modelImporter.model, animShader);
+    
     AIComponentDesc aiCompDesc = {};
-    aiCompDesc.behavior = STEERING_BEHAVIOR_SEEK;
+    aiCompDesc.behavior = STEERING_BEHAVIOR_FACE;
     aiCompDesc.timeToTarget = 0.5f;
     aiCompDesc.arrivalRadii = 0;
     aiCompDesc.active = true;
     orc->AddComponent<AIComponent>(&aiCompDesc);
     
-    orc->GetComponent<AnimationComponent>()->animation.UpdateWeightScale("walking", 1);
-
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");
-    animationImporter.Read("./data/models/hero.twa");
     LoadModelToGpu(&modelImporter.model);
     hero = AddEntity(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
-                     modelImporter.model, animShader,
-                     animationImporter.animations, 
-                     animationImporter.numAnimations);
+                     modelImporter.model, animShader);
 
-    StateMachineComponentDesc stmCompDesc = {};
-    stmCompDesc.camera = &camera;
-    hero->AddComponent<StateMachineComponent>(&stmCompDesc);
-    
     InputComponentDesc inputCompDesc = {};
     inputCompDesc.input = PlatformManager::Get()->GetInput(); 
     inputCompDesc.camera = &camera; 
     hero->AddComponent<InputComponent>(&inputCompDesc);
+    
+    PlayerAnimationComponentDesc playerAnimCompuDesc = {};
+    playerAnimCompuDesc.camera = &camera;
+    playerAnimCompuDesc.animationSet = &animationsSets[1];
+    hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
 
     // Load Horizontal Platform      scale             from             to
     platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);

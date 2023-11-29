@@ -26,7 +26,7 @@ enum EntityFlags {
 
 struct Entity {
 
-    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations, Map *map, Entity *entities);
+    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, Map *map, Entity *entities, AnimationClipSet *animationSet);
     void Terminate();
 
     void Update(Map *map, f32 dt);

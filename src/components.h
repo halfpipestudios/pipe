@@ -19,42 +19,12 @@ struct Physics {
     f32 angularVel;
 };
 
+// ----------------------------------------------------------------------------------
+
 struct Entity;
 struct Map;
 struct Camera;
-
-struct EntityState {
-    virtual EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) = 0;
-    virtual void Enter(Entity *entity) = 0;
-    virtual void Exit(Entity *entity) = 0;
-};
-
-struct IdleState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct WalkingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct JumpingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-struct FallingState : public EntityState {
-    EntityState *Move(Entity *entity, Input *input, Camera camera, f32 dt) override;
-    void Enter(Entity *entity) override;
-    void Exit(Entity *entity) override;
-};
-
-
-// ----------------------------------------------------------------------------------
+struct PlayerAnimationComponent;
 
 struct Component {
     virtual void Initialize(Entity *entity, void *initData) {}
@@ -151,43 +121,111 @@ struct CollisionComponent : public Component {
     void Render(Entity *entity) override;
 };
 
-struct AnimationComponentDesc {
-    AnimationClip *animations;
-    u32 numAnimations;
+struct PlayerAnimationState;
+
+struct PlayerAnimationTransition {
+    bool inTransition = false;
+    f32 duration;
+    f32 time;
+    PlayerAnimationState *src;
+    PlayerAnimationState *des; 
+    JointPose *currentPose;
+
+    void Start(PlayerAnimationState *src, PlayerAnimationState *des, f32 duration);
+    void Update(Entity *entity, f32 dt);
+    bool InProgress();
+    bool Finished();
+    PlayerAnimationState *GetNextState();
+    JointPose *GetCurrentPose();
 };
 
-#define MAX_ANIMATION_GROUP_SIZE 8
-struct AnimationGroup {
-    char *names[MAX_ANIMATION_GROUP_SIZE];
-    u32 size;
+struct PlayerAnimationComponent;
+
+struct PlayerAnimationState {
+    virtual void Initialize(PlayerAnimationComponent *component) = 0;
+    
+    virtual PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt) = 0;
+    virtual JointPose *SampleJointPose(Entity *entity, f32 dt) = 0;
+    virtual void Enter(Entity *entity) = 0;
+    virtual void Exit(Entity *entity) = 0;
+
+    PlayerAnimationComponent *anim;
+    
+    static PlayerAnimationTransition transition;
 };
 
-struct AnimationComponent : public Component {
-    
-    AnimationSet animation;
-    Mat4 *finalTransformMatrices;
-    u32 numFinalTrasformMatrices;
-    
-    f32 tBlend;
+struct PlayerAnimationIdleState : public PlayerAnimationState {
 
-    AnimationGroup leavingAnimation;
+    void Initialize(PlayerAnimationComponent *component) override;
     
-    AnimationGroup startAnimation;
-    AnimationGroup endAnimation;
+    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    JointPose *SampleJointPose(Entity *entity, f32 dt) override;
+    void Enter(Entity *entity) override;
+    void Exit(Entity *entity) override;
+    
+    Animation idleAnimation;
+};
 
-    void AddAnimationToLeavingGroup(const char *name);
-    void AddAnimationToStartGroup(const char *name, bool loop = true);
-    void AddAnimationToEndGroup(const char *name, bool loop = true);
+struct PlayerAnimationWalkState : public PlayerAnimationState {
+
+    void Initialize(PlayerAnimationComponent *component) override;
     
-    void ClearAnimationLeavingGroup(void);
-    void ClearAnimationStartGroup(void);
-    void ClearAnimationEndGroup(void);
+    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    JointPose *SampleJointPose(Entity *entity, f32 dt) override;
+    void Enter(Entity *entity) override;
+    void Exit(Entity *entity) override;
+
+    Animation walkAnimation;
+    Animation idleAnimation;
+};
+
+struct PlayerAnimationJumpState : public PlayerAnimationState {
+
+    void Initialize(PlayerAnimationComponent *component) override;
+
+    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    JointPose *SampleJointPose(Entity *entity, f32 dt) override;
+    void Enter(Entity *entity) override;
+    void Exit(Entity *entity) override;
     
-    void SetBlendFactor(f32 tBlend);
+    Animation jumpAnimation;
+};
+
+struct PlayerAnimationFallState : public PlayerAnimationState {
+
+    void Initialize(PlayerAnimationComponent *component) override;
+    
+    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    JointPose *SampleJointPose(Entity *entity, f32 dt) override;
+    void Enter(Entity *entity) override;
+    void Exit(Entity *entity) override;
+    
+    Animation fallAnimation;
+};
+
+struct PlayerAnimationComponentDesc {
+    Camera *camera;
+    AnimationClipSet *animationSet;
+};
+
+struct PlayerAnimationComponent : public Component {
+    
+    Camera *camera;
+    AnimationClipSet *animationSet;
+    PlayerAnimationState *state;
+
+    Mat4 *finalTransformMatrix;
+    u32 numFinalTransformMatrix;
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
     void Process(Entity *entity, f32 dt) override;
+
+    PlayerAnimationIdleState idle;
+    PlayerAnimationWalkState walk;
+    PlayerAnimationJumpState jump;
+    PlayerAnimationFallState fall;
+
 };
 
 struct InputComponentDesc {
@@ -203,31 +241,6 @@ struct InputComponent : public Component {
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;
     void Process(Entity *entity, f32 dt) override;
-};
-
-struct StateMachineComponentDesc {
-    Camera *camera;
-};
-
-struct StateMachineComponent : public Component {
-
-    EntityState *state;
-    Camera *camera;
-
-    friend struct IdleState;
-    friend struct WalkingState;
-    friend struct JumpingState;
-    friend struct FallingState;
-    
-    IdleState idleState;
-    WalkingState walkingState;
-    JumpingState jumpingState;
-    FallingState fallingState;
-
-    void Initialize(Entity *entity, void *initData) override;
-    void Terminate(Entity *entity) override;
-    void Process(Entity *entity, f32 dt) override;
-
 };
 
 struct MovingPlatformComponentDesc {
@@ -269,11 +282,10 @@ union ComponentUnion {
     GraphicsComponent graphic;
     PhysicsComponent physics;
     CollisionComponent collision;
-    AnimationComponent animation;
     InputComponent input;
-    StateMachineComponent stateMachine;
     MovingPlatformComponent movPlatform;
     AIComponent ai;
+    PlayerAnimationComponent playerAmin;
 };
 
 struct ComponentContainer {

@@ -178,8 +178,10 @@ void GraphicsComponent::Render(Entity *entity) {
     
     if(model.type == MODEL_TYPE_ANIMATED) {
         renderTransform.pos.y -= 0.75f;
-        AnimationComponent *animationComp = entity->GetComponent<AnimationComponent>();
-        GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrices, animationComp->numFinalTrasformMatrices);
+        PlayerAnimationComponent *animationComp = entity->GetComponent<PlayerAnimationComponent>();
+        if(animationComp != nullptr) {
+            GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrix, animationComp->numFinalTransformMatrix);
+        }
     }
 
     GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
@@ -442,86 +444,6 @@ void CollisionComponent::Render(Entity *entity) {
 #endif
 }
 
-
-// AnimationComponent ---------------------------------------------------
-
-void AnimationComponent::Initialize(Entity *entity, void *initData) {
-    AnimationComponentDesc *compDesc = (AnimationComponentDesc *)initData;
-    animation.Initialize(compDesc->animations, compDesc->numAnimations);
-    
-    finalTransformMatrices = nullptr;
-    numFinalTrasformMatrices = 0;
-
-    leavingAnimation = {};
-    startAnimation   = {};
-    endAnimation     = {};
-}
-
-void AnimationComponent::Terminate(Entity *entity) {
-    animation.Terminate();
-    finalTransformMatrices = nullptr;
-    numFinalTrasformMatrices = 0;
-}
-
-void AnimationComponent::Process(Entity *entity, f32 dt) {
-    
-    if(leavingAnimation.size > 0) {
-        for(u32 nameIndex = 0; nameIndex < leavingAnimation.size; ++nameIndex) {
-            animation.UpdateWeightScale(leavingAnimation.names[nameIndex], 0);
-        }
-        ClearAnimationLeavingGroup();
-    }
-
-    if(startAnimation.size > 0) {
-        for(u32 nameIndex = 0; nameIndex < startAnimation.size; ++nameIndex) {
-            animation.UpdateWeightScale(startAnimation.names[nameIndex], (1.0f - tBlend));
-        }
-    }
-
-    if(endAnimation.size > 0) {
-        for(u32 nameIndex = 0; nameIndex < endAnimation.size; ++nameIndex) {
-            animation.UpdateWeightScale(endAnimation.names[nameIndex], tBlend);
-        }
-    }
-
-    animation.Update(dt, &finalTransformMatrices, &numFinalTrasformMatrices);
-}
-
-inline static void AddAnimationToGroup(AnimationGroup *group, const char *name) {
-    ASSERT(group->size < MAX_ANIMATION_GROUP_SIZE);
-    group->names[group->size++] = (char *)name;
-}
-
-void AnimationComponent::AddAnimationToLeavingGroup(const char *name) {
-    AddAnimationToGroup(&leavingAnimation, name);
-}
-
-void AnimationComponent::AddAnimationToStartGroup(const char *name, bool loop) {
-    AddAnimationToGroup(&startAnimation, name);
-    animation.SetLoop(name, loop);
-}
-
-void AnimationComponent::AddAnimationToEndGroup(const char *name, bool loop) {
-    AddAnimationToGroup(&endAnimation, name);
-    animation.SetLoop(name, loop);
-}
-
-void AnimationComponent::SetBlendFactor(f32 tBlend) {
-    this->tBlend = tBlend;
-}
-
-void AnimationComponent::ClearAnimationLeavingGroup(void) {
-    leavingAnimation.size = 0;
-}
-
-void AnimationComponent::ClearAnimationStartGroup(void) {
-    startAnimation.size = 0;
-}
-
-void AnimationComponent::ClearAnimationEndGroup(void) {
-    endAnimation.size = 0;
-}
-
 // InputComponent --------------------------------------------------------
 
 void InputComponent::Initialize(Entity *entity, void *initData) {
@@ -571,37 +493,6 @@ void InputComponent::Process(Entity *entity, f32 dt) {
 
 
 }
-
-// StateMachineComponent -------------------------------------------------
-
-void StateMachineComponent::Initialize(Entity *entity, void *initData) {
-
-    StateMachineComponentDesc *compDesc = (StateMachineComponentDesc *)initData;
-
-    state = (EntityState *)&idleState;
-    camera = compDesc->camera;
-}
-
-void StateMachineComponent::Terminate(Entity *entity) {
-
-}
-
-void StateMachineComponent::Process(Entity *entity, f32 dt) {
-
-    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
-    
-    Input *input = PlatformManager::Get()->GetInput();
-
-    EntityState *newState = state->Move(entity, input, *camera, dt);
-    if(newState != nullptr) {
-        state->Exit(entity);
-        newState->Enter(entity);
-        state = newState;
-    }
-
-    physicsComp->physics.orientation = camera->rot.y;
-}
-
 
 // MovingPlatformComponent -------------------------------------------------
 
@@ -658,4 +549,328 @@ void AIComponent::Process(Entity *entity, f32 dt) {
     phyComp->physics.acc += steering.linear;
     phyComp->physics.angularVel += steering.angular;
 
+}
+
+// Player Animaton State ------------------------------------
+// ----------------------------------------------------------
+
+PlayerAnimationTransition PlayerAnimationState::transition;
+
+// Idle Animation state -------------------------------
+
+void PlayerAnimationIdleState::Initialize(PlayerAnimationComponent *component) {
+    anim = component;
+    AnimationClipSet *set = component->animationSet;
+    idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
+}
+
+JointPose *PlayerAnimationIdleState::SampleJointPose(Entity *entity, f32 dt) {
+    idleAnimation.Update(dt);
+    return idleAnimation.GetCurrentPose();
+
+}
+
+PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+    
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+    f32 e = 0.01f;
+    if(!transition.InProgress()) {
+        if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
+            transition.Start(this, &anim->walk, 0.2f);
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+            transition.Start(this, &anim->fall, 0.2f);
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
+            transition.Start(this, &anim->jump, 0.2f);
+        }
+    }
+
+    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
+    if(transition.InProgress()) {
+        transition.Update(entity, dt);
+        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
+        if(transition.Finished()) {
+            return transition.GetNextState();
+        }
+    } else {
+        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    }
+
+    return nullptr;
+
+}
+
+void PlayerAnimationIdleState::Enter(Entity *entity) {
+    printf("Idle Animation!\n");
+}
+
+void PlayerAnimationIdleState::Exit(Entity *entity) {
+}
+
+// Walk Animation state -------------------------------
+
+void PlayerAnimationWalkState::Initialize(PlayerAnimationComponent *component) {
+    anim = component;
+    AnimationClipSet *set = component->animationSet;
+    idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
+    walkAnimation.Initialize(set->FindAnimationClipByName("walking"), -1, true);
+}
+
+JointPose *PlayerAnimationWalkState::SampleJointPose(Entity *entity, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+
+    idleAnimation.Update(dt);
+    walkAnimation.Update(dt);
+
+    f32 t = CLAMP(vel2d.Len() * 0.25f, 0, 1);
+    u32 numJoints = anim->animationSet->skeleton->numJoints;
+    JointPose *finalPose = (JointPose *)MemoryManager::Get()->AllocFrameMemory(sizeof(JointPose)*numJoints, 8);
+    JointPoseMixSamples(finalPose, idleAnimation.GetCurrentPose(), walkAnimation.GetCurrentPose(), numJoints, t);
+
+    return finalPose;
+}
+
+PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+    f32 e = 0.01f;
+    if(!transition.InProgress()) {
+        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
+            transition.Start(this, &anim->jump, 0.2f);
+        } else if(physicsComp->physics.vel.Len() < 0.01f) {
+            transition.Start(this, &anim->idle, 0.2f);
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+            transition.Start(this, &anim->fall, 0.2f);
+        }
+    }
+
+    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
+    if(transition.InProgress()) {
+        transition.Update(entity, dt);
+        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
+        if(transition.Finished()) {
+            return transition.GetNextState();
+        }
+    } else {
+        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    }
+
+    return nullptr;
+
+}
+
+void PlayerAnimationWalkState::Enter(Entity *entity) {
+    printf("Walking Animation!\n");
+}
+
+void PlayerAnimationWalkState::Exit(Entity *entity) {
+}
+
+// Jump Animation state -------------------------------
+
+void PlayerAnimationJumpState::Initialize(PlayerAnimationComponent *component) {
+    anim = component;
+    AnimationClipSet *set = component->animationSet;
+    jumpAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, false);
+}
+
+JointPose *PlayerAnimationJumpState::SampleJointPose(Entity *entity, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+
+    jumpAnimation.Update(dt);
+    if(jumpAnimation.time > 0.42f) {
+        jumpAnimation.SampleAnimationPose(0.42f);
+    }
+
+    return jumpAnimation.GetCurrentPose();
+}
+
+PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+
+    f32 e = 0.01f;
+
+    if(!transition.InProgress()) {
+        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+            transition.Start(this, &anim->fall, 0.2f);
+        } else if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
+            transition.Start(this, &anim->walk, 0.2f);
+        } else if(physicsComp->physics.vel.Len() < e) {
+            transition.Start(this, &anim->idle, 0.2f);
+        }
+    }
+
+    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
+    if(transition.InProgress()) {
+        transition.Update(entity, dt);
+        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
+        if(transition.Finished()) {
+            return transition.GetNextState();
+        }
+    } else {
+        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    }
+    
+    return nullptr;
+}
+
+void PlayerAnimationJumpState::Enter(Entity *entity) {
+    printf("Jumping Animation!\n");
+}
+
+void PlayerAnimationJumpState::Exit(Entity *entity) {
+    jumpAnimation.time = 0;
+}
+
+// Fall Animation state -------------------------------
+
+void PlayerAnimationFallState::Initialize(PlayerAnimationComponent *component) {
+    anim = component;
+    AnimationClipSet *set = component->animationSet;
+    fallAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, true);
+}
+
+JointPose *PlayerAnimationFallState::SampleJointPose(Entity *entity, f32 dt) {
+    fallAnimation.Update(dt);
+    fallAnimation.SampleAnimationPose(0.42f);
+    return fallAnimation.GetCurrentPose();
+
+}
+
+PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicsComp != nullptr);
+    
+    Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
+    f32 e = 0.01f;
+
+    if(!transition.InProgress()) {
+        if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
+            transition.Start(this, &anim->walk, 0.2f);
+        } else if(physicsComp->physics.vel.Len() < e) {
+            transition.Start(this, &anim->idle, 0.2f);
+        }
+    }
+
+    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
+    if(transition.InProgress()) {
+        transition.Update(entity, dt);
+        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
+        if(transition.Finished()) {
+            return transition.GetNextState();
+        }
+    } else {
+        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    }
+
+    return nullptr;
+}
+
+void PlayerAnimationFallState::Enter(Entity *entity) {
+    printf("Falling Animation!\n");
+}
+
+void PlayerAnimationFallState::Exit(Entity *entity) {
+}
+
+// Player Animaton Component -------------------------------
+// ---------------------------------------------------------
+    
+void PlayerAnimationComponent::Initialize(Entity *entity, void *initData) {
+    
+    PlayerAnimationComponentDesc *desc = (PlayerAnimationComponentDesc *)initData;
+    camera = desc->camera;
+    animationSet = desc->animationSet;
+
+    numFinalTransformMatrix = animationSet->skeleton->numJoints;
+
+    idle.Initialize(this);
+    walk.Initialize(this);
+    jump.Initialize(this);
+    fall.Initialize(this);
+
+    state = &idle;
+}
+
+void PlayerAnimationComponent::Terminate(Entity *entity) {
+}
+
+void PlayerAnimationComponent::Process(Entity *entity, f32 dt) {
+    Input *input = PlatformManager::Get()->GetInput();
+    
+    PlayerAnimationState *newState = state->Update(entity, input, *camera, dt);
+    if(newState != nullptr) {
+        state->Exit(entity);
+        newState->Enter(entity);
+        state = newState;
+    }
+    
+    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
+    physicsComp->physics.orientation = camera->rot.y;
+}
+
+// Player Animaton Transition -------------------------------
+// ----------------------------------------------------------
+
+void PlayerAnimationTransition::Start(PlayerAnimationState *src, PlayerAnimationState *des, f32 duration) {
+    ASSERT(inTransition == false);
+    this->inTransition = true;
+    this->duration = duration;
+    this->time = 0;
+    this->src = src;
+    this->des = des;
+}
+
+void PlayerAnimationTransition::Update(Entity *entity, f32 dt) {
+    
+    ASSERT(inTransition == true);
+    ASSERT(duration > 0);
+
+    f32 t = time / duration;
+
+    JointPose *srcPose = src->SampleJointPose(entity, dt);
+    JointPose *desPose = des->SampleJointPose(entity, dt);
+    
+    ASSERT(src->anim->animationSet->skeleton->numJoints == des->anim->animationSet->skeleton->numJoints)
+    u32 numJoints = src->anim->animationSet->skeleton->numJoints;
+    currentPose = (JointPose *)MemoryManager::Get()->AllocFrameMemory(sizeof(JointPose)*numJoints, 8);
+
+    JointPoseMixSamples(currentPose, srcPose, desPose, numJoints, t);
+
+    time += dt;
+
+    if(time > duration) inTransition = false;
+
+}
+
+bool PlayerAnimationTransition::InProgress() {
+    return inTransition == true && time <= duration;
+}
+
+bool PlayerAnimationTransition::Finished() {
+    return inTransition == false && time > duration;
+}
+
+JointPose *PlayerAnimationTransition::GetCurrentPose() {
+    return currentPose;
+}
+
+PlayerAnimationState *PlayerAnimationTransition::GetNextState() {
+    ASSERT(Finished());
+    ASSERT(des != nullptr);
+    return des;
 }

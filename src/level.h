@@ -41,8 +41,11 @@ private:
     ObjectAllocator<Entity> entitiesAllocator;
 
     Entity *AddEntity();
-    Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, AnimationClip *animations, u32 numAnimations);
+    Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader);
     Entity *AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
+    
+    AnimationClipSet *animationsSets;
+    u32 numAnimationsSets;
 };
 
 #endif // _LEVEL_H_
