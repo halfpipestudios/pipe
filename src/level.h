@@ -20,11 +20,11 @@ struct Map {
 
 struct Level {
     
-    void Initialize(char *mapFilePath, Shader statShader, Shader animShader);
+    void Initialize(char *mapFilePath, Shader mapShader, Shader animShader);
     void Terminate();
 
     void Update(f32 dt);
-    void Render(Shader statShader, Shader animShader);
+    void Render(Shader mapShader);
 
 private:
 
@@ -34,6 +34,7 @@ private:
 
     Entity *hero;
     Entity *orc;
+    Entity *orc1;
     Entity *platformHor;
     Entity *platformVer0;
     Entity *platformVer1;

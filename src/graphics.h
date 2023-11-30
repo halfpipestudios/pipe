@@ -115,7 +115,7 @@ struct Graphics {
     virtual void Present(i32 vsync) = 0;
 
     virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
-    virtual Shader CreateShaderSkinVertex(char *vertpath, char *fragpath) = 0;
+    virtual Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderTGui(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
@@ -131,9 +131,7 @@ struct Graphics {
 
     virtual void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) = 0;
 
-    virtual VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) = 0;
-    virtual VertexBuffer CreateVertexBuffer(SkinVertex *vertices, u32 count) = 0;
-    virtual VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) = 0;
+    virtual VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) = 0;
     virtual void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) = 0;
     virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) = 0;
 

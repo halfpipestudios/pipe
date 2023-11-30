@@ -19,8 +19,9 @@ struct Game {
 
 private:
  
-    Shader statShader;
+    Shader mapShader;
     Shader animShader;
+    Shader statShader;
 
     Level level;
 

@@ -114,7 +114,7 @@ int main() {
 
     f64 lastTimer = PlatformManager::Get()->GetTimeInSeconds();
     while(PlatformManager::Get()->IsRunning()) {
-        
+
         MemoryManager::Get()->ClearFrameMemory();
 
         f64 currentTime = PlatformManager::Get()->GetTimeInSeconds();
@@ -144,6 +144,7 @@ int main() {
         game.Render();
 
         GraphicsManager::Get()->FlushFrameBuffer(gameFrameBuffer);
+
         
         TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
         

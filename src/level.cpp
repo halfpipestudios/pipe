@@ -132,7 +132,7 @@ static void LoadModelToGpu(Model *model) {
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex; 
         mesh->texture = LoadTextureFromPath(mesh->material);
-        mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices);
+        mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices, sizeof(SkinVertex));
         mesh->indexBuffer = GraphicsManager::Get()->CreateIndexBuffer(mesh->indices, mesh->numIndices);
     }
 }
@@ -174,7 +174,7 @@ Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
     // load the mesh
     Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
     mesh->texture = LoadTextureFromPath("cool.png");
-    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices));
+    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
     mesh->indexBuffer = nullptr;
 
     // load the model and add the mesh to the model
@@ -217,7 +217,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     
     map.covexHulls = mapImporter.GetConvexHulls();
     map.entities = mapImporter.GetEntities();
-    map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
+    map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
     map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     map.scale = 1.0f/32.0f;
 
@@ -268,6 +268,25 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     playerAnimCompuDesc.camera = &camera;
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     orc->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
+
+    // Load Orc1
+    modelImporter.Read("./data/models/orc.twm");
+    LoadModelToGpu(&modelImporter.model);
+    orc1 = AddEntity(Vec3(10, 4, 10), Vec3(), Vec3(1, 1, 1),
+                     modelImporter.model, animShader);
+    
+    aiCompDesc = {};
+    aiCompDesc.behavior = STEERING_BEHAVIOR_SEEK;
+    aiCompDesc.timeToTarget = 1.0f;
+    aiCompDesc.arrivalRadii = 2.0f;
+    aiCompDesc.active = true;
+    aiCompDesc.bhTree = nullptr;
+    orc1->AddComponent<AIComponent>(&aiCompDesc);
+
+    playerAnimCompuDesc = {};
+    playerAnimCompuDesc.camera = &camera;
+    playerAnimCompuDesc.animationSet = &animationsSets[1];
+    orc1->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
     
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");
@@ -329,11 +348,11 @@ void Level::Update(f32 dt) {
     camera.SetViewMatrix();
 }
 
-void Level::Render(Shader statShader, Shader animShader) {
+void Level::Render(Shader mapShader) {
     
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(map.scale, map.scale, map.scale));
     GraphicsManager::Get()->BindTextureBuffer(map.texture);
-    GraphicsManager::Get()->DrawVertexBuffer(map.vertexBuffer, statShader);
+    GraphicsManager::Get()->DrawVertexBuffer(map.vertexBuffer, mapShader);
 
     Entity *entity = entities;
     while(entity != nullptr) {

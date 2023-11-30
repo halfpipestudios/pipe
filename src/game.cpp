@@ -10,16 +10,20 @@ void Game::Initialize() {
                 0.01f, 1000.0f));
     
     GraphicsManager::Get()->SetWorldMatrix(Mat4());
-    statShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/texVert.hlsl",
-                                                               "./data/shaders/texFrag.hlsl");
-    animShader = GraphicsManager::Get()->CreateShaderSkinVertex("./data/shaders/animVert.hlsl",
-                                                                "./data/shaders/texFrag.hlsl");
+    mapShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/mapVert.hlsl",
+                                                              "./data/shaders/mapFrag.hlsl");
+    animShader = GraphicsManager::Get()->CreateShaderVertexSkin("./data/shaders/animVert.hlsl",
+                                                                "./data/shaders/mapFrag.hlsl");
+    statShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/staticVert.hlsl",
+                                                            "./data/shaders/staticFrag.hlsl");
+
     level.Initialize("./data/maps/current.map", statShader, animShader);
 
 }
 
 void Game::Terminate() {
     level.Terminate();
+    GraphicsManager::Get()->DestroyShader(mapShader);
     GraphicsManager::Get()->DestroyShader(statShader);
     GraphicsManager::Get()->DestroyShader(animShader);
 }
@@ -30,7 +34,7 @@ void Game::Update(f32 dt) {
 
 
 void Game::Render() { 
-    level.Render(statShader, animShader);
+    level.Render(mapShader);
 }
 
 

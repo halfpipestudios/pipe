@@ -136,9 +136,10 @@ struct D3D11Graphics : public Graphics {
     void Present(i32 vsync) override;
 
     Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
-    Shader CreateShaderSkinVertex(char *vertpath, char *fragpath) override;
+    Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
     Shader CreateShaderTGui(char *vertpath, char *fragpath) override;
+
     void DestroyShader(Shader shaderHandle) override;
     void BindShader(Shader shaderHandle) override;
 
@@ -152,9 +153,7 @@ struct D3D11Graphics : public Graphics {
 
     void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) override;
 
-    VertexBuffer CreateVertexBuffer(Vertex *vertices, u32 count) override;
-    VertexBuffer CreateVertexBuffer(SkinVertex *vertices, u32 count) override;
-    VertexBuffer CreateVertexBuffer(VertexMap *vertices, u32 count) override;
+    VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) override;
     void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
     void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
 
