@@ -8,6 +8,8 @@
 #include "camera.h"
 #include "entity.h"
 
+#include "behavior_tree.h"
+
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
     MapImporter::EntityArray entities;
@@ -43,6 +45,8 @@ private:
     Entity *AddEntity();
     Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader);
     Entity *AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
+
+    BehaviorTree bhTree;
     
     AnimationClipSet *animationsSets;
     u32 numAnimationsSets;

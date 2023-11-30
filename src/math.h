@@ -86,7 +86,7 @@ struct Vec3 {
     Vec3 Normalized();
 
 
-    static Vec3 Vec3::Lerp(Vec3 a, Vec3 b, f32 t);
+    static Vec3 Lerp(Vec3 a, Vec3 b, f32 t);
 
 };
 

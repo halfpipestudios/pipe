@@ -256,11 +256,15 @@ struct MovingPlatformComponent : public Component {
     void Process(Entity *entity, f32 dt) override;
 };
 
+struct BehaviorTree;
+
 struct AIComponentDesc {
     SteeringBehavior behavior;
     f32 timeToTarget;
     f32 arrivalRadii;
     f32 active;
+
+    BehaviorTree *bhTree;
 };
 
 struct AIComponent : public Component {
@@ -269,6 +273,8 @@ struct AIComponent : public Component {
     f32 timeToTarget;
     f32 arrivalRadii;
     f32 active;
+
+    BehaviorTree *bhTree = nullptr;
     
     void Initialize(Entity *entity, void *initData) override;
     void Process(Entity *entity, f32 dt) override;

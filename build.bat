@@ -27,7 +27,7 @@ echo ----------------------------------------
 echo  
 
 set TARGET=pipe
-set CFLAGS=/nologo /Od /Zi /EHsc
+set CFLAGS=/std:c++17 /W2 /nologo /Od /Zi /EHsc
 set LIBS=User32.lib Ole32.lib Xinput.lib Xaudio2.lib d3d11.lib d3dcompiler.lib Dwmapi.lib tgui.lib
 REM set SOURCES=.\src\main.cpp .\src\math.cpp .\src\memory.cpp .\src\input.cpp .\src\win32_platform.cpp .\src\platform_manager.cpp .\src\memory_manager.cpp
 set SOURCES=.\src\*.cpp

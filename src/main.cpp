@@ -107,7 +107,7 @@ int main() {
 
     tgui_try_to_load_data_file();
     
-    FrameBuffer gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1024, 1024);
+    FrameBuffer gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1280, 720);
     
     Game game;
     game.Initialize();
@@ -136,7 +136,7 @@ int main() {
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)tguiWindowW/(f32)tguiWindowH, 0.01f, 1000.0f));
 
         GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
-        GraphicsManager::Get()->SetViewport(0, 0, 1024, 1024);
+        GraphicsManager::Get()->SetViewport(0, 0, 1280, 720);
         GraphicsManager::Get()->BindFrameBuffer(gameFrameBuffer);
         GraphicsManager::Get()->ClearColorBuffer(gameFrameBuffer, 0.5f, 0.0f, 1.0f);
         GraphicsManager::Get()->ClearDepthStencilBuffer(gameFrameBuffer);

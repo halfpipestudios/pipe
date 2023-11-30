@@ -44,10 +44,10 @@ void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
         maxDist = MAX(maxDist - zoomSpeed, 1.0f);
     }
 
-    if (rot.x >  (89.0f/180.0f) * PI)
-        rot.x =  (89.0f/180.0f) * PI;
-    if (rot.x < -(89.0f/180.0f) * PI)
-        rot.x = -(89.0f/180.0f) * PI;
+    if (rot.x >  (89.0f/180.0f) * (f32)PI)
+        rot.x =  (89.0f/180.0f) * (f32)PI;
+    if (rot.x < -(89.0f/180.0f) * (f32)PI)
+        rot.x = -(89.0f/180.0f) * (f32)PI;
 
     front = {0, 0, 1};
     front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
@@ -63,7 +63,7 @@ void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
     cameraSegment.b = target - (front * maxDist);
 
     f32 tMin = FLT_MAX;
-    for(i32 i = 0; i < map->entities.count; ++i) {
+    for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *entity = &map->entities.data[i];
         f32 t = -1.0f;
         if(cameraSegment.HitEntity(entity, &t)) {

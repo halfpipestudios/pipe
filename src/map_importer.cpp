@@ -326,7 +326,7 @@ bool MapImporter::GetIntersection(Vec3 n1, Vec3 n2, Vec3 n3, f32 d1, f32 d2, f32
     f32 denom = n1.Dot(u);
     if(fabsf(denom) < FLT_EPSILON) return false;
     Vec3 pos = (d1 * u + n1.Cross(d3 * n2 - d2 * n3)) / denom;
-    Vec4 col = {0.9, 0.7, 1, 1.0f};
+    Vec4 col = {0.9f, 0.7f, 1.0f, 1.0f};
     *vertex = {pos, {}, {}, 0};
     return true;
 }
@@ -336,7 +336,7 @@ Vec3 MapImporter::GetCenterOfPolygon(Poly *polygon) {
     for(i32 i = 0; i < polygon->verticesCount; ++i) {
         center = center + polygon->vertices[i].pos;
     }
-    center = center / polygon->verticesCount;
+    center = center / (f32)polygon->verticesCount;
     return center;
 }
 

@@ -994,10 +994,10 @@ FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height
     
     D3D11FrameBuffer frameBuffer = {};
     
-    frameBuffer.x = x;
-    frameBuffer.y = y;
-    frameBuffer.w = width;
-    frameBuffer.h = height;
+    frameBuffer.x = (f32)x;
+    frameBuffer.y = (f32)y;
+    frameBuffer.w = (f32)width;
+    frameBuffer.h = (f32)height;
     frameBuffer.format = DXGI_FORMAT_R8G8B8A8_UNORM;
     
     // create texture 2d

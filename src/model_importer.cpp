@@ -237,7 +237,7 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
                 // NOTE: Initiallize weights
                 for(u32 i = 0; i < MAX_BONES_INFLUENCE; ++i) {
                     vertex->weights[i] = 0;
-                    vertex->boneIds[i] = -1.0f;
+                    vertex->boneIds[i] = -1;
                 }
             }
         }

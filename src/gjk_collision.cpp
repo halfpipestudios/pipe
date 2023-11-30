@@ -419,7 +419,7 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, ConvexHull *b) {
 			faces[numFaces][3].p = (looseEdges[i][0].p - looseEdges[i][1].p).Cross(looseEdges[i][0].p - p.p).Normalized();
 
 			//Check for wrong normal to maintain CCW winding
-			f32 bias = 0.000001; //in case dot result is only slightly < 0 (because origin is on face)
+			f32 bias = 0.000001f; //in case dot result is only slightly < 0 (because origin is on face)
 			if (faces[numFaces][0].p.Dot(faces[numFaces][3].p) + bias < 0) {
 				Point temp = faces[numFaces][0];
 				faces[numFaces][0] = faces[numFaces][1];
@@ -563,7 +563,7 @@ CollisionData GJK::EPA(Simplex &simplex, ConvexHull *a, Cylinder *b) {
 			faces[numFaces][3].p = (looseEdges[i][0].p - looseEdges[i][1].p).Cross(looseEdges[i][0].p - p.p).Normalized();
 
 			//Check for wrong normal to maintain CCW winding
-			f32 bias = 0.000001; //in case dot result is only slightly < 0 (because origin is on face)
+			f32 bias = 0.000001f; //in case dot result is only slightly < 0 (because origin is on face)
 			if (faces[numFaces][0].p.Dot(faces[numFaces][3].p) + bias < 0) {
 				Point temp = faces[numFaces][0];
 				faces[numFaces][0] = faces[numFaces][1];
@@ -707,7 +707,7 @@ CollisionData GJK::EPA(Simplex &simplex, Cylinder *a, Cylinder *b) {
 			faces[numFaces][3].p = (looseEdges[i][0].p - looseEdges[i][1].p).Cross(looseEdges[i][0].p - p.p).Normalized();
 
 			//Check for wrong normal to maintain CCW winding
-			f32 bias = 0.000001; //in case dot result is only slightly < 0 (because origin is on face)
+			f32 bias = 0.000001f; //in case dot result is only slightly < 0 (because origin is on face)
 			if (faces[numFaces][0].p.Dot(faces[numFaces][3].p) + bias < 0) {
 				Point temp = faces[numFaces][0];
 				faces[numFaces][0] = faces[numFaces][1];

@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "camera.h"
 #include "level.h"
+#include "behavior_tree.h"
 
 #include <float.h>
 #include <stdio.h>
@@ -98,7 +99,7 @@ static void DrawCylinder(Cylinder cylinder, u32 color) {
     Vec3 vertices[40] = {};
 
     // Top face
-    f32 increment = (2.0f * PI) / 20;
+    f32 increment = (2.0f * (f32)PI) / 20;
     f32 angle = 0.0f;
     for(i32 i = 0; i < 20; ++i) {
         vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
@@ -148,7 +149,7 @@ void TransformComponent::Process(Entity *entity, f32 dt) {
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     if(physicsComp) {
         pos = physicsComp->physics.pos;
-        rot.y = physicsComp->physics.orientation;
+        rot.y = physicsComp->physics.orientation - (f32)PI*0.5f;
     }
 }
 
@@ -182,7 +183,18 @@ void GraphicsComponent::Render(Entity *entity) {
         if(animationComp != nullptr) {
             GraphicsManager::Get()->SetAnimMatrices(animationComp->finalTransformMatrix, animationComp->numFinalTransformMatrix);
         }
+        else {
+
+            // TODO: refactor this. this is just to not animate the entities with
+            // no AnimationComponent
+            Mat4 identity[100];
+            for(i32 i = 0; i < 100; ++i) {
+                identity[i] = Mat4();
+            }
+            GraphicsManager::Get()->SetAnimMatrices(identity, 100);
+        }
     }
+
 
     GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
     
@@ -205,7 +217,7 @@ void PhysicsComponent::Initialize(Entity *entity, void *initData) {
     physics.pos = compDesc->pos;
     physics.vel = compDesc->vel;
     physics.acc = compDesc->acc;
-    physics.orientation = 0.0f;
+    physics.orientation = 0;
     physics.angularVel = 0.0f;
     velXZ = Vec3(physics.vel.x, 0, physics.vel.z);
     map = compDesc->map;
@@ -226,7 +238,7 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     playerSegment.b = physics.pos;
 
     f32 tMin = FLT_MAX; 
-    for(i32 i = 0; i < map->entities.count; ++i) {
+    for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
         if(playerSegment.HitEntity(mapEntity, &t)) {
@@ -236,12 +248,12 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
         }
     }
     if(tMin >= 0.0f && tMin <= 1.0f) {
-        physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8);
+        physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8f);
         collisionComp->cylinder.c = physics.pos;
     }
 
     GJK gjk;
-    for(i32 i = 0; i < map->covexHulls.count; ++i) {
+    for(u32 i = 0; i < map->covexHulls.count; ++i) {
         ConvexHull *hull = &map->covexHulls.data[i];
         CollisionData collisionData = gjk.Intersect(hull, &collisionComp->cylinder);
         if(collisionData.hasCollision) {
@@ -263,8 +275,8 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     }
 
     groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
-    for(i32 i = 0; i < map->entities.count; ++i) {
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001f), 0);
+    for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
         if(groundSegment.HitEntity(mapEntity, &t)) {
@@ -273,8 +285,8 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     }
 
     groundSegment.a = collisionComp->cylinder.c;
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001), 0);
-    for(i32 i = 0; i < map->entities.count; ++i) {
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001f), 0);
+    for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
         if(groundSegment.HitEntity(mapEntity, &t)) {
@@ -300,11 +312,11 @@ void PhysicsComponent::ProcessEntities(Entity *entity, f32 dt) {
                 velXZ = lastVelXZ.Normalized();
             }
             groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
-            groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1), 0);
+            groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1f), 0);
 
             Segment centerGroundSegment;
             centerGroundSegment.a = collisionComp->cylinder.c;
-            centerGroundSegment.b = centerGroundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1), 0);
+            centerGroundSegment.b = centerGroundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.1f), 0);
 
 
             CollisionComponent *testCollisionComp = testEntity->GetComponent<CollisionComponent>();
@@ -532,18 +544,29 @@ void AIComponent::Initialize(Entity *entity, void *initData) {
     timeToTarget = compDesc->timeToTarget;
     arrivalRadii = compDesc->arrivalRadii;
     active = compDesc->active;
+    bhTree = compDesc->bhTree;
 }
 
 void AIComponent::Process(Entity *entity, f32 dt) {
-    
+
     PhysicsComponent *phyComp = entity->GetComponent<PhysicsComponent>();
 
+    if(bhTree) {
+        BehaviorNodeContex contx;
+        contx.entity = entity;
+        contx.phyComp = phyComp;
+        contx.aiComp = this;
+        bhTree->run(&contx);
+        return;
+    }
+    
     Steering steering = {};
 
     switch(behavior) {
-        case STEERING_BEHAVIOR_FACE: { steering = Face(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
-        case STEERING_BEHAVIOR_SEEK: { steering = Seek(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
-        case STEERING_BEHAVIOR_FLEE: { steering = Flee(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_FACE:   { steering = Face(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_SEEK:   { steering = Seek(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_FLEE:   { steering = Flee(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        case STEERING_BEHAVIOR_ARRIVE: { steering = Arrive(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
     }
     
     phyComp->physics.acc += steering.linear;
@@ -811,8 +834,8 @@ void PlayerAnimationComponent::Terminate(Entity *entity) {
 
 
 static void AdjustAngle(f32& angle) {
-    while(angle >  PI) angle -= 2*PI;
-    while(angle < -PI) angle += 2*PI;
+    while(angle >  (f32)PI) angle -= (f32)(2*PI);
+    while(angle < -(f32)PI) angle += (f32)(2*PI);
 }
 
 void PlayerAnimationComponent::Process(Entity *entity, f32 dt) {
@@ -827,19 +850,15 @@ void PlayerAnimationComponent::Process(Entity *entity, f32 dt) {
     
     PhysicsComponent *phyComp = entity->GetComponent<PhysicsComponent>();
 
-    Vec3 dir = phyComp->physics.vel;
+    // TODO: the player orientatin should not depend on the velocity direction,
+    // the velocity direction should depend on the angular velocity. 
+    // TODO: add and angular velocity to the player
+    Vec3 dir = { phyComp->physics.vel.x, 0.0f, phyComp->physics.vel.z };
     dir.Normalize();
+    f32 orientation = atan2f(dir.z, dir.x);
 
-    f32 targetOrientation = atan2f(dir.z, dir.x) - PI*0.5;
-    if(targetOrientation < 0) targetOrientation += 2*PI;
+    phyComp->physics.orientation = orientation;
 
-    f32 angularDist = targetOrientation - phyComp->physics.orientation;
-    AdjustAngle(angularDist);
-
-    phyComp->physics.orientation += angularDist;
-
-    
-    //phyComp->physics.orientation = camera->rot.y;
 }
 
 // Player Animaton Transition -------------------------------

@@ -50,7 +50,7 @@ protected:
 
     void AddWeightToVertex(SkinVertex *vertex, u32 boneId, f32 weight);
 
-    void TweenImporter::NormalizeVertexWeigths(SkinVertex *vertex);
+    void NormalizeVertexWeigths(SkinVertex *vertex);
 };
 
 struct ModelImporter : public TweenImporter {

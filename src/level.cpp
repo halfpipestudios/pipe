@@ -220,7 +220,17 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count);
     map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     map.scale = 1.0f/32.0f;
-    
+
+    // Load the BehaviorTree
+    bhTree.Initialize();
+
+    bhTree.AddNode<BehaviorSequence>(
+        bhTree.AddNode<BehaviorArrive>(Vec3( 8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3(-8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3(-8, 0, -6)),
+        bhTree.AddNode<BehaviorArrive>(Vec3( 8, 0, -6))
+    );    
+
     // NOTE Load entities ------------------------------------------------------------------------------------
     ModelImporter modelImporter;
     
@@ -247,10 +257,11 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
                     modelImporter.model, animShader);
     
     AIComponentDesc aiCompDesc = {};
-    aiCompDesc.behavior = STEERING_BEHAVIOR_FACE;
+    aiCompDesc.behavior = STEERING_BEHAVIOR_ARRIVE;
     aiCompDesc.timeToTarget = 0.5f;
-    aiCompDesc.arrivalRadii = 0;
+    aiCompDesc.arrivalRadii = 2.0f;
     aiCompDesc.active = true;
+    aiCompDesc.bhTree = &bhTree;
     orc->AddComponent<AIComponent>(&aiCompDesc);
     
     // Load Hero
