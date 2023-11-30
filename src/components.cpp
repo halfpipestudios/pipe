@@ -275,7 +275,7 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     }
 
     groundSegment.a = collisionComp->cylinder.c - (velXZ * (collisionComp->cylinder.radii + 0.05f));
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001f), 0);
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.01f), 0);
     for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -285,7 +285,7 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     }
 
     groundSegment.a = collisionComp->cylinder.c;
-    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.001f), 0);
+    groundSegment.b = groundSegment.a + Vec3(0, -(collisionComp->cylinder.n + 0.01f), 0);
     for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -502,6 +502,15 @@ void InputComponent::Process(Entity *entity, f32 dt) {
     physicsComp->physics.acc += worldFront * input->state[0].leftStickY;
     physicsComp->physics.acc += right      * input->state[0].leftStickX;
     physicsComp->physics.acc *= acc * drag;
+
+
+    // TODO: the player orientatin should not depend on the velocity direction,
+    // the velocity direction should depend on the angular velocity. 
+    // TODO: add and angular velocity to the player
+    Vec3 dir = { physicsComp->physics.vel.x, 0.0f, physicsComp->physics.vel.z };
+    dir.Normalize();
+    f32 orientation = atan2f(dir.z, dir.x);
+    physicsComp->physics.orientation = orientation;
 
 
 }
@@ -842,18 +851,6 @@ void PlayerAnimationComponent::Process(Entity *entity, f32 dt) {
         newState->Enter(entity);
         state = newState;
     }
-    
-    PhysicsComponent *phyComp = entity->GetComponent<PhysicsComponent>();
-
-    // TODO: the player orientatin should not depend on the velocity direction,
-    // the velocity direction should depend on the angular velocity. 
-    // TODO: add and angular velocity to the player
-    Vec3 dir = { phyComp->physics.vel.x, 0.0f, phyComp->physics.vel.z };
-    dir.Normalize();
-    f32 orientation = atan2f(dir.z, dir.x);
-
-    phyComp->physics.orientation = orientation;
-
 }
 
 // Player Animaton Transition -------------------------------

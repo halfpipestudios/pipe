@@ -225,10 +225,10 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     bhTree.Initialize();
 
     bhTree.AddNode<BehaviorSequence>(
-        bhTree.AddNode<BehaviorArrive>(Vec3( 8, 0,  8)),
-        bhTree.AddNode<BehaviorArrive>(Vec3(-8, 0,  8)),
-        bhTree.AddNode<BehaviorArrive>(Vec3(-8, 0, -6)),
-        bhTree.AddNode<BehaviorArrive>(Vec3( 8, 0, -6))
+        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3(-16, 0, -6)),
+        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
     );    
 
     // NOTE Load entities ------------------------------------------------------------------------------------
@@ -258,11 +258,16 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     
     AIComponentDesc aiCompDesc = {};
     aiCompDesc.behavior = STEERING_BEHAVIOR_ARRIVE;
-    aiCompDesc.timeToTarget = 0.5f;
+    aiCompDesc.timeToTarget = 0.75f;
     aiCompDesc.arrivalRadii = 2.0f;
     aiCompDesc.active = true;
     aiCompDesc.bhTree = &bhTree;
     orc->AddComponent<AIComponent>(&aiCompDesc);
+
+    PlayerAnimationComponentDesc playerAnimCompuDesc = {};
+    playerAnimCompuDesc.camera = &camera;
+    playerAnimCompuDesc.animationSet = &animationsSets[1];
+    orc->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
     
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");
@@ -275,7 +280,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     inputCompDesc.camera = &camera; 
     hero->AddComponent<InputComponent>(&inputCompDesc);
     
-    PlayerAnimationComponentDesc playerAnimCompuDesc = {};
+    playerAnimCompuDesc = {};
     playerAnimCompuDesc.camera = &camera;
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
