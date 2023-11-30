@@ -56,22 +56,6 @@ void Animation::Initialize(AnimationClip *clip, i32 root, bool loop) {
     this->loop = loop;
 }
 
-void Animation::Update(f32 dt) {
-    
-    if(time >= duration) {
-        if(loop == true) {
-            time = 0;
-        }
-    }
-
-    if(Finished()) return;
-
-    currentPose = (JointPose *)MemoryManager::Get()->AllocFrameMemory(sizeof(JointPose)*clip->skeleton->numJoints, 8);
-    SampleAnimationPose();
-
-    time += dt;
-}
-
 void Animation::SamplePrevAndNextAnimationPose(AnimationSample *prev, AnimationSample *next, f32 time) {
     
     u32 nextSampleIndex = 1;
@@ -90,18 +74,29 @@ void Animation::SamplePrevAndNextAnimationPose(AnimationSample *prev, AnimationS
     *next = clip->samples[nextSampleIndex];
 }
 
-void Animation::SampleAnimationPose() {
+void Animation::SampleNextAnimationPose(JointPose *pose, f32 dt) {
+
+    if(time >= duration) {
+        if(loop == true) {
+            time = 0;
+        }
+    }
+
+    if(Finished()) return;
+
     AnimationSample prev, next; 
     SamplePrevAndNextAnimationPose(&prev, &next, time);
     f32 progression = (time - prev.time_stamp) / (next.time_stamp - prev.time_stamp);
-    JointPoseMixSamples(currentPose, prev.localPoses, next.localPoses, clip->skeleton->numJoints, progression);
+    JointPoseMixSamples(pose, prev.localPoses, next.localPoses, clip->skeleton->numJoints, progression);
+
+    time += dt;
 }
 
-void Animation::SampleAnimationPose(f32 time) {
+void Animation::SampleAnimationPose(JointPose *pose, f32 time) {
     AnimationSample prev, next; 
     SamplePrevAndNextAnimationPose(&prev, &next, time);
     f32 progression = (time - prev.time_stamp) / (next.time_stamp - prev.time_stamp);
-    JointPoseMixSamples(currentPose, prev.localPoses, next.localPoses, clip->skeleton->numJoints, progression);
+    JointPoseMixSamples(pose, prev.localPoses, next.localPoses, clip->skeleton->numJoints, progression);
 }
 
 /* -------------------------------------------- */

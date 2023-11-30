@@ -556,6 +556,28 @@ void AIComponent::Process(Entity *entity, f32 dt) {
 
 PlayerAnimationTransition PlayerAnimationState::transition;
 
+void PlayerAnimationState::CalculateCurrentAnimationFrame(Entity *entity, f32 dt) {
+    Skeleton *skeleton = anim->animationSet->skeleton;
+    ASSERT(skeleton != nullptr);
+    
+    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
+    
+    MemoryManager::Get()->BeginTemporalMemory();
+    
+    JointPose *pose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose) * skeleton->numJoints, 8); 
+    
+    if(transition.InProgress()) {
+        transition.SampleJointPose(pose, entity, dt);
+    } else {
+        SampleJointPose(pose, entity, dt);
+    }
+    
+    CalculateFinalTransformMatrices(pose, anim->finalTransformMatrix, skeleton);
+    
+    MemoryManager::Get()->EndTemporalMemory();
+
+}
+
 // Idle Animation state -------------------------------
 
 void PlayerAnimationIdleState::Initialize(PlayerAnimationComponent *component) {
@@ -564,10 +586,8 @@ void PlayerAnimationIdleState::Initialize(PlayerAnimationComponent *component) {
     idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
 }
 
-JointPose *PlayerAnimationIdleState::SampleJointPose(Entity *entity, f32 dt) {
-    idleAnimation.Update(dt);
-    return idleAnimation.GetCurrentPose();
-
+void PlayerAnimationIdleState::SampleJointPose(JointPose *pose, Entity *entity, f32 dt) {
+    idleAnimation.SampleNextAnimationPose(pose, dt);
 }
 
 PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
@@ -586,16 +606,11 @@ PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *in
             transition.Start(this, &anim->jump, 0.2f);
         }
     }
-
-    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
-    if(transition.InProgress()) {
-        transition.Update(entity, dt);
-        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
-        if(transition.Finished()) {
-            return transition.GetNextState();
-        }
-    } else {
-        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    
+    CalculateCurrentAnimationFrame(entity, dt);
+    
+    if(transition.Finished()) {
+        return transition.GetNextState();
     }
 
     return nullptr;
@@ -618,21 +633,25 @@ void PlayerAnimationWalkState::Initialize(PlayerAnimationComponent *component) {
     walkAnimation.Initialize(set->FindAnimationClipByName("walking"), -1, true);
 }
 
-JointPose *PlayerAnimationWalkState::SampleJointPose(Entity *entity, f32 dt) {
+void PlayerAnimationWalkState::SampleJointPose(JointPose *pose, Entity *entity, f32 dt) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
-
-    idleAnimation.Update(dt);
-    walkAnimation.Update(dt);
-
+    
     f32 t = CLAMP(vel2d.Len() * 0.25f, 0, 1);
     u32 numJoints = anim->animationSet->skeleton->numJoints;
-    JointPose *finalPose = (JointPose *)MemoryManager::Get()->AllocFrameMemory(sizeof(JointPose)*numJoints, 8);
-    JointPoseMixSamples(finalPose, idleAnimation.GetCurrentPose(), walkAnimation.GetCurrentPose(), numJoints, t);
 
-    return finalPose;
+    MemoryManager::Get()->BeginTemporalMemory();
+    
+    JointPose *idlePose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
+    JointPose *walkPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
+    
+    idleAnimation.SampleNextAnimationPose(idlePose, dt);
+    walkAnimation.SampleNextAnimationPose(walkPose, dt);
+    JointPoseMixSamples(pose, idlePose, walkPose, numJoints, t);
+    
+    MemoryManager::Get()->EndTemporalMemory();
 }
 
 PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
@@ -652,15 +671,10 @@ PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *in
         }
     }
 
-    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
-    if(transition.InProgress()) {
-        transition.Update(entity, dt);
-        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
-        if(transition.Finished()) {
-            return transition.GetNextState();
-        }
-    } else {
-        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    CalculateCurrentAnimationFrame(entity, dt);
+    
+    if(transition.Finished()) {
+        return transition.GetNextState();
     }
 
     return nullptr;
@@ -682,17 +696,13 @@ void PlayerAnimationJumpState::Initialize(PlayerAnimationComponent *component) {
     jumpAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, false);
 }
 
-JointPose *PlayerAnimationJumpState::SampleJointPose(Entity *entity, f32 dt) {
-
-    PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
-    ASSERT(physicsComp != nullptr);
-
-    jumpAnimation.Update(dt);
+void PlayerAnimationJumpState::SampleJointPose(JointPose *pose, Entity *entity, f32 dt) {
+    
     if(jumpAnimation.time > 0.42f) {
-        jumpAnimation.SampleAnimationPose(0.42f);
+        jumpAnimation.SampleAnimationPose(pose, 0.42f);
+    } else {
+        jumpAnimation.SampleNextAnimationPose(pose, dt);
     }
-
-    return jumpAnimation.GetCurrentPose();
 }
 
 PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
@@ -713,17 +723,12 @@ PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *in
         }
     }
 
-    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
-    if(transition.InProgress()) {
-        transition.Update(entity, dt);
-        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
-        if(transition.Finished()) {
-            return transition.GetNextState();
-        }
-    } else {
-        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
-    }
+    CalculateCurrentAnimationFrame(entity, dt);
     
+    if(transition.Finished()) {
+        return transition.GetNextState();
+    }
+
     return nullptr;
 }
 
@@ -743,11 +748,8 @@ void PlayerAnimationFallState::Initialize(PlayerAnimationComponent *component) {
     fallAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, true);
 }
 
-JointPose *PlayerAnimationFallState::SampleJointPose(Entity *entity, f32 dt) {
-    fallAnimation.Update(dt);
-    fallAnimation.SampleAnimationPose(0.42f);
-    return fallAnimation.GetCurrentPose();
-
+void PlayerAnimationFallState::SampleJointPose(JointPose *pose, Entity *entity, f32 dt) {
+    fallAnimation.SampleAnimationPose(pose, 0.42f);
 }
 
 PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
@@ -766,15 +768,10 @@ PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *in
         }
     }
 
-    anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
-    if(transition.InProgress()) {
-        transition.Update(entity, dt);
-        CalculateFinalTransformMatrices(transition.GetCurrentPose(), anim->finalTransformMatrix, anim->animationSet->skeleton);
-        if(transition.Finished()) {
-            return transition.GetNextState();
-        }
-    } else {
-        CalculateFinalTransformMatrices(SampleJointPose(entity, dt), anim->finalTransformMatrix, anim->animationSet->skeleton);
+    CalculateCurrentAnimationFrame(entity, dt);
+
+    if(transition.Finished()) {
+        return transition.GetNextState();
     }
 
     return nullptr;
@@ -854,21 +851,26 @@ void PlayerAnimationTransition::Start(PlayerAnimationState *src, PlayerAnimation
     this->des = des;
 }
 
-void PlayerAnimationTransition::Update(Entity *entity, f32 dt) {
+void PlayerAnimationTransition::SampleJointPose(JointPose *pose, Entity *entity, f32 dt) {
     
     ASSERT(inTransition == true);
     ASSERT(duration > 0);
 
     f32 t = time / duration;
 
-    JointPose *srcPose = src->SampleJointPose(entity, dt);
-    JointPose *desPose = des->SampleJointPose(entity, dt);
-    
     ASSERT(src->anim->animationSet->skeleton->numJoints == des->anim->animationSet->skeleton->numJoints)
     u32 numJoints = src->anim->animationSet->skeleton->numJoints;
-    currentPose = (JointPose *)MemoryManager::Get()->AllocFrameMemory(sizeof(JointPose)*numJoints, 8);
+    
+    MemoryManager::Get()->BeginTemporalMemory();
 
-    JointPoseMixSamples(currentPose, srcPose, desPose, numJoints, t);
+    JointPose *srcPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
+    JointPose *desPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
+    
+    src->SampleJointPose(srcPose, entity, dt);
+    des->SampleJointPose(desPose, entity, dt);
+    JointPoseMixSamples(pose, srcPose, desPose, numJoints, t);
+
+    MemoryManager::Get()->EndTemporalMemory();
 
     time += dt;
 
@@ -884,12 +886,9 @@ bool PlayerAnimationTransition::Finished() {
     return inTransition == false && time > duration;
 }
 
-JointPose *PlayerAnimationTransition::GetCurrentPose() {
-    return currentPose;
-}
-
 PlayerAnimationState *PlayerAnimationTransition::GetNextState() {
     ASSERT(Finished());
     ASSERT(des != nullptr);
+    time = 0;
     return des;
 }
