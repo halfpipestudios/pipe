@@ -57,16 +57,11 @@ struct Animation {
     f32 duration;
     bool loop;
     
-    JointPose *currentPose;
-
     void Initialize(AnimationClip *clip, i32 root, bool loop);
-    void Update(f32 dt);
+    
+    void SampleAnimationPose(JointPose *pose, f32 time);
+    void SampleNextAnimationPose(JointPose *pose, f32 dt);
 
-    void SampleAnimationPose();
-    void SampleAnimationPose(f32 time);
-
-    // NOTE: This function must be call after calling Update(f32 dt) function
-    inline JointPose *GetCurrentPose() { return currentPose; }
     inline bool Finished() { return time >= duration; }
 
 private:
