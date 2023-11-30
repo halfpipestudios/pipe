@@ -151,7 +151,6 @@ struct PlayerAnimationState {
 
     PlayerAnimationComponent *anim;
     
-    static PlayerAnimationTransition transition;
 };
 
 struct PlayerAnimationIdleState : public PlayerAnimationState {
@@ -216,6 +215,8 @@ struct PlayerAnimationComponent : public Component {
 
     Mat4 *finalTransformMatrix;
     u32 numFinalTransformMatrix;
+
+    PlayerAnimationTransition transition;
 
     void Initialize(Entity *entity, void *initData) override;
     void Terminate(Entity *entity) override;

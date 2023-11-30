@@ -554,8 +554,6 @@ void AIComponent::Process(Entity *entity, f32 dt) {
 // Player Animaton State ------------------------------------
 // ----------------------------------------------------------
 
-PlayerAnimationTransition PlayerAnimationState::transition;
-
 void PlayerAnimationState::CalculateCurrentAnimationFrame(Entity *entity, f32 dt) {
     Skeleton *skeleton = anim->animationSet->skeleton;
     ASSERT(skeleton != nullptr);
@@ -566,8 +564,8 @@ void PlayerAnimationState::CalculateCurrentAnimationFrame(Entity *entity, f32 dt
     
     JointPose *pose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose) * skeleton->numJoints, 8); 
     
-    if(transition.InProgress()) {
-        transition.SampleJointPose(pose, entity, dt);
+    if(anim->transition.InProgress()) {
+        anim->transition.SampleJointPose(pose, entity, dt);
     } else {
         SampleJointPose(pose, entity, dt);
     }
@@ -597,20 +595,20 @@ PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *in
     
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
-    if(!transition.InProgress()) {
+    if(!anim->transition.InProgress()) {
         if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
-            transition.Start(this, &anim->walk, 0.2f);
+            anim->transition.Start(this, &anim->walk, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
-            transition.Start(this, &anim->fall, 0.2f);
+            anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
-            transition.Start(this, &anim->jump, 0.2f);
+            anim->transition.Start(this, &anim->jump, 0.2f);
         }
     }
     
     CalculateCurrentAnimationFrame(entity, dt);
     
-    if(transition.Finished()) {
-        return transition.GetNextState();
+    if(anim->transition.Finished()) {
+        return anim->transition.GetNextState();
     }
 
     return nullptr;
@@ -661,20 +659,20 @@ PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *in
 
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
-    if(!transition.InProgress()) {
+    if(!anim->transition.InProgress()) {
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
-            transition.Start(this, &anim->jump, 0.2f);
+            anim->transition.Start(this, &anim->jump, 0.2f);
         } else if(physicsComp->physics.vel.Len() < 0.01f) {
-            transition.Start(this, &anim->idle, 0.2f);
+            anim->transition.Start(this, &anim->idle, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
-            transition.Start(this, &anim->fall, 0.2f);
+            anim->transition.Start(this, &anim->fall, 0.2f);
         }
     }
 
     CalculateCurrentAnimationFrame(entity, dt);
     
-    if(transition.Finished()) {
-        return transition.GetNextState();
+    if(anim->transition.Finished()) {
+        return anim->transition.GetNextState();
     }
 
     return nullptr;
@@ -713,20 +711,20 @@ PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *in
 
     f32 e = 0.01f;
 
-    if(!transition.InProgress()) {
+    if(!anim->transition.InProgress()) {
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
-            transition.Start(this, &anim->fall, 0.2f);
+            anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
-            transition.Start(this, &anim->walk, 0.2f);
+            anim->transition.Start(this, &anim->walk, 0.2f);
         } else if(physicsComp->physics.vel.Len() < e) {
-            transition.Start(this, &anim->idle, 0.2f);
+            anim->transition.Start(this, &anim->idle, 0.2f);
         }
     }
 
     CalculateCurrentAnimationFrame(entity, dt);
     
-    if(transition.Finished()) {
-        return transition.GetNextState();
+    if(anim->transition.Finished()) {
+        return anim->transition.GetNextState();
     }
 
     return nullptr;
@@ -760,18 +758,18 @@ PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *in
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
 
-    if(!transition.InProgress()) {
+    if(!anim->transition.InProgress()) {
         if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
-            transition.Start(this, &anim->walk, 0.2f);
+            anim->transition.Start(this, &anim->walk, 0.2f);
         } else if(physicsComp->physics.vel.Len() < e) {
-            transition.Start(this, &anim->idle, 0.2f);
+            anim->transition.Start(this, &anim->idle, 0.2f);
         }
     }
 
     CalculateCurrentAnimationFrame(entity, dt);
 
-    if(transition.Finished()) {
-        return transition.GetNextState();
+    if(anim->transition.Finished()) {
+        return anim->transition.GetNextState();
     }
 
     return nullptr;
