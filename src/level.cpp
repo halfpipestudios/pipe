@@ -265,7 +265,6 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     orc->AddComponent<AIComponent>(&aiCompDesc);
 
     PlayerAnimationComponentDesc playerAnimCompuDesc = {};
-    playerAnimCompuDesc.camera = &camera;
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     orc->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
 
@@ -276,15 +275,14 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
                      modelImporter.model, animShader);
     
     aiCompDesc = {};
-    aiCompDesc.behavior = STEERING_BEHAVIOR_SEEK;
-    aiCompDesc.timeToTarget = 1.0f;
-    aiCompDesc.arrivalRadii = 2.0f;
+    aiCompDesc.behavior = STEERING_BEHAVIOR_ARRIVE;
+    aiCompDesc.timeToTarget = 0.75f;
+    aiCompDesc.arrivalRadii = 4.0f;
     aiCompDesc.active = true;
     aiCompDesc.bhTree = nullptr;
     orc1->AddComponent<AIComponent>(&aiCompDesc);
 
     playerAnimCompuDesc = {};
-    playerAnimCompuDesc.camera = &camera;
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     orc1->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
     
@@ -300,7 +298,6 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     hero->AddComponent<InputComponent>(&inputCompDesc);
     
     playerAnimCompuDesc = {};
-    playerAnimCompuDesc.camera = &camera;
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
 
@@ -312,6 +309,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     camera.Initialize();
 
     TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
+    TransformComponent *orcTransform = orc->GetComponent<TransformComponent>();
     gBlackBoard.target = &heroTransform->pos;
     
 }

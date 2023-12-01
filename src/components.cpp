@@ -620,7 +620,7 @@ void PlayerAnimationIdleState::SampleJointPose(JointPose *pose, Entity *entity, 
     idleAnimation.SampleNextAnimationPose(pose, dt);
 }
 
-PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *input, f32 dt) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
@@ -648,7 +648,6 @@ PlayerAnimationState *PlayerAnimationIdleState::Update(Entity *entity, Input *in
 }
 
 void PlayerAnimationIdleState::Enter(Entity *entity) {
-    printf("Idle Animation!\n");
 }
 
 void PlayerAnimationIdleState::Exit(Entity *entity) {
@@ -684,7 +683,7 @@ void PlayerAnimationWalkState::SampleJointPose(JointPose *pose, Entity *entity, 
     MemoryManager::Get()->EndTemporalMemory();
 }
 
-PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *input, f32 dt) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
@@ -712,7 +711,6 @@ PlayerAnimationState *PlayerAnimationWalkState::Update(Entity *entity, Input *in
 }
 
 void PlayerAnimationWalkState::Enter(Entity *entity) {
-    printf("Walking Animation!\n");
 }
 
 void PlayerAnimationWalkState::Exit(Entity *entity) {
@@ -735,7 +733,7 @@ void PlayerAnimationJumpState::SampleJointPose(JointPose *pose, Entity *entity, 
     }
 }
 
-PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *input, f32 dt) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
@@ -763,7 +761,6 @@ PlayerAnimationState *PlayerAnimationJumpState::Update(Entity *entity, Input *in
 }
 
 void PlayerAnimationJumpState::Enter(Entity *entity) {
-    printf("Jumping Animation!\n");
 }
 
 void PlayerAnimationJumpState::Exit(Entity *entity) {
@@ -782,7 +779,7 @@ void PlayerAnimationFallState::SampleJointPose(JointPose *pose, Entity *entity, 
     fallAnimation.SampleAnimationPose(pose, 0.42f);
 }
 
-PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *input, Camera camera, f32 dt) {
+PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *input, f32 dt) {
 
     PhysicsComponent *physicsComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicsComp != nullptr);
@@ -808,7 +805,6 @@ PlayerAnimationState *PlayerAnimationFallState::Update(Entity *entity, Input *in
 }
 
 void PlayerAnimationFallState::Enter(Entity *entity) {
-    printf("Falling Animation!\n");
 }
 
 void PlayerAnimationFallState::Exit(Entity *entity) {
@@ -820,7 +816,6 @@ void PlayerAnimationFallState::Exit(Entity *entity) {
 void PlayerAnimationComponent::Initialize(Entity *entity, void *initData) {
     
     PlayerAnimationComponentDesc *desc = (PlayerAnimationComponentDesc *)initData;
-    camera = desc->camera;
     animationSet = desc->animationSet;
 
     numFinalTransformMatrix = animationSet->skeleton->numJoints;
@@ -845,7 +840,7 @@ static void AdjustAngle(f32& angle) {
 void PlayerAnimationComponent::Process(Entity *entity, f32 dt) {
     Input *input = PlatformManager::Get()->GetInput();
     
-    PlayerAnimationState *newState = state->Update(entity, input, *camera, dt);
+    PlayerAnimationState *newState = state->Update(entity, input, dt);
     if(newState != nullptr) {
         state->Exit(entity);
         newState->Enter(entity);

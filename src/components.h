@@ -122,6 +122,7 @@ struct CollisionComponent : public Component {
 };
 
 struct PlayerAnimationState;
+struct PlayerAnimationComponent;
 
 struct PlayerAnimationTransition {
     bool inTransition = false;
@@ -137,12 +138,10 @@ struct PlayerAnimationTransition {
     PlayerAnimationState *GetNextState();
 };
 
-struct PlayerAnimationComponent;
-
 struct PlayerAnimationState {
     virtual void Initialize(PlayerAnimationComponent *component) = 0;
     
-    virtual PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt) = 0;
+    virtual PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt) = 0;
     virtual void SampleJointPose(JointPose *pose, Entity *entity, f32 dt) = 0;
     virtual void Enter(Entity *entity) = 0;
     virtual void Exit(Entity *entity) = 0;
@@ -157,7 +156,7 @@ struct PlayerAnimationIdleState : public PlayerAnimationState {
 
     void Initialize(PlayerAnimationComponent *component) override;
     
-    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt);
     void SampleJointPose(JointPose *pose, Entity *entity, f32 dt);
     void Enter(Entity *entity) override;
     void Exit(Entity *entity) override;
@@ -169,7 +168,7 @@ struct PlayerAnimationWalkState : public PlayerAnimationState {
 
     void Initialize(PlayerAnimationComponent *component) override;
     
-    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt);
     void SampleJointPose(JointPose *pose, Entity *entity, f32 dt);
     void Enter(Entity *entity) override;
     void Exit(Entity *entity) override;
@@ -182,7 +181,7 @@ struct PlayerAnimationJumpState : public PlayerAnimationState {
 
     void Initialize(PlayerAnimationComponent *component) override;
 
-    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt);
     void SampleJointPose(JointPose *pose, Entity *entity, f32 dt);
     void Enter(Entity *entity) override;
     void Exit(Entity *entity) override;
@@ -194,7 +193,7 @@ struct PlayerAnimationFallState : public PlayerAnimationState {
 
     void Initialize(PlayerAnimationComponent *component) override;
     
-    PlayerAnimationState *Update(Entity *entity, Input *input, Camera camera, f32 dt);
+    PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt);
     void SampleJointPose(JointPose *pose, Entity *entity, f32 dt);
     void Enter(Entity *entity) override;
     void Exit(Entity *entity) override;
@@ -203,13 +202,11 @@ struct PlayerAnimationFallState : public PlayerAnimationState {
 };
 
 struct PlayerAnimationComponentDesc {
-    Camera *camera;
     AnimationClipSet *animationSet;
 };
 
 struct PlayerAnimationComponent : public Component {
     
-    Camera *camera;
     AnimationClipSet *animationSet;
     PlayerAnimationState *state;
 
