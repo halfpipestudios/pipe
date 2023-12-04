@@ -221,7 +221,7 @@ void tgui_texture(TGuiWindowHandle window, void *texture);
 
 #define TGUI_MAX_LABEL_SIZE 256
 typedef struct TGuiLabel {
-    char content[TGUI_MAX_TEXT_SIZE];
+    char content[TGUI_MAX_LABEL_SIZE];
     tgui_u32 size;
     tgui_u32 color;
 } TGuiLabel;

@@ -107,6 +107,48 @@ void Editor::Terminate() {
     tgui_terminate();
 }
 
+static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    TransformComponent *transform = entity->GetComponent<TransformComponent>();
+    ASSERT(transform);
+    
+    char position[256];
+    char rotation[256];
+    char scale[256];
+    
+    sprintf(position, "    p = (%.2f, %.2f, %.2f)\0", transform->pos.x, transform->pos.y, transform->pos.z);
+    sprintf(rotation, "    r = (%.2f, %.2f, %.2f)\0", transform->rot.x, transform->rot.y, transform->rot.z);
+    sprintf(   scale, "    s = (%.2f, %.2f, %.2f)\0", transform->scale.x, transform->scale.y, transform->scale.z);
+
+    _tgui_label(window, position, 0x222222, x, *y, position);
+    *y += 14;
+    _tgui_label(window, rotation, 0x222222, x, *y, rotation);
+    *y += 14;
+    _tgui_label(window,    scale, 0x222222, x, *y,    scale);
+    *y += 20;
+}
+
+static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    PhysicsComponent *physicComp = entity->GetComponent<PhysicsComponent>();
+    ASSERT(physicComp);
+    
+    Physics p = physicComp->physics;
+
+    char pos[256];
+    char vel[256];
+    char acc[256];
+    
+    sprintf(pos, "    p = (%.2f, %.2f, %.2f)\0", p.pos.x, p.pos.y, p.pos.z);
+    sprintf(vel, "    v = (%.2f, %.2f, %.2f)\0", p.vel.x, p.vel.y, p.vel.z);
+    sprintf(acc, "    a = (%.2f, %.2f, %.2f)\0", p.acc.x, p.acc.y, p.acc.z);
+
+    _tgui_label(window, pos, 0x222222, x, *y, pos);
+    *y += 14;
+    _tgui_label(window, vel, 0x222222, x, *y, vel);
+    *y += 14;
+    _tgui_label(window, acc, 0x222222, x, *y, acc);
+    *y += 20;
+}
+
 void Editor::Update(f32 dt) {
     game->Update(dt);
     
@@ -158,7 +200,7 @@ void Editor::Update(f32 dt) {
     {
         if(selectedEntity) {
             
-            u32 y = 10;
+            i32 y = 10;
 
             ComponentContainer *container = selectedEntity->componentContainerList;
             while(container != nullptr) {
@@ -166,8 +208,16 @@ void Editor::Update(f32 dt) {
                 Component *component =  (Component *)&container->component;
 
                 char *compName = (char *)typeid(*component).name();
-                _tgui_label(compWindow, compName, 0x00ff00, 10, y, compName);
+                _tgui_label(compWindow, compName, 0x222222, 10, y, compName);
                 y += 20;
+
+                if(typeid(*component) == typeid(TransformComponent)) {
+                    UpdateTransformComponent(compWindow, selectedEntity, 10, &y);
+                }
+
+                if(typeid(*component) == typeid(PhysicsComponent)) {
+                    UpdatePhysicsComponent(compWindow, selectedEntity, 10, &y);
+                }
                 
                 container = container->next;
             }
