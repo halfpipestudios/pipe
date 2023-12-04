@@ -137,10 +137,10 @@ static void LoadModelToGpu(Model *model) {
     }
 }
 
-Entity *Level::AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader) {
+Entity *Level::AddEntity(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader) {
     Entity *entity = entitiesAllocator.Alloc();
     if(entitiesEnd == nullptr) entitiesEnd = entity;
-    entity->Initialize(pos, rot, scale, model, shader, &map, entitiesEnd, &animationsSets[1]);
+    entity->Initialize(name, pos, rot, scale, model, shader, &map, entitiesEnd, &animationsSets[1]);
     entity->next = entities;
     if(entities != nullptr) {
         entities->prev = entity;
@@ -149,10 +149,10 @@ Entity *Level::AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader sha
     return entity;
 }
 
-
-Entity *Level::AddEntity() {
+Entity *Level::AddEntity(const char *name) {
     Entity *entity = entitiesAllocator.Alloc();
     if(entitiesEnd == nullptr) entitiesEnd = entity;
+    entity->Initialize(name);
     entity->next = entities;
     if(entities != nullptr) {
         entities->prev = entity;
@@ -161,8 +161,8 @@ Entity *Level::AddEntity() {
     return entity;
 }
 
-Entity *Level::AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
-    Entity *platform = AddEntity();
+Entity *Level::AddMovingPlatform(const char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
+    Entity *platform = AddEntity(name);
 
     TransformComponentDesc transformDesc = {};
     transformDesc.pos = a;
@@ -253,7 +253,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     // Load Orc
     modelImporter.Read("./data/models/orc.twm");
     LoadModelToGpu(&modelImporter.model);
-    orc = AddEntity(Vec3(10, 4, 8), Vec3(), Vec3(1, 1, 1),
+    orc = AddEntity("orc_1", Vec3(10, 4, 8), Vec3(), Vec3(1, 1, 1),
                     modelImporter.model, animShader);
     
     AIComponentDesc aiCompDesc = {};
@@ -271,7 +271,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     // Load Orc1
     modelImporter.Read("./data/models/orc.twm");
     LoadModelToGpu(&modelImporter.model);
-    orc1 = AddEntity(Vec3(10, 4, 10), Vec3(), Vec3(1, 1, 1),
+    orc1 = AddEntity("orc_2", Vec3(10, 4, 10), Vec3(), Vec3(1, 1, 1),
                      modelImporter.model, animShader);
     
     aiCompDesc = {};
@@ -289,7 +289,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     // Load Hero
     modelImporter.Read("./data/models/hero.twm");
     LoadModelToGpu(&modelImporter.model);
-    hero = AddEntity(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
+    hero = AddEntity("hero", Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
                      modelImporter.model, animShader);
 
     InputComponentDesc inputCompDesc = {};
@@ -302,9 +302,9 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
 
     // Load Horizontal Platform      scale             from             to
-    platformHor  = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
-    platformVer0 = AddMovingPlatform(Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
-    platformVer1 = AddMovingPlatform(Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
+    platformHor  = AddMovingPlatform("mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
+    platformVer0 = AddMovingPlatform("mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
+    platformVer1 = AddMovingPlatform("mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
 
     camera.Initialize();
 

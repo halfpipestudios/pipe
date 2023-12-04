@@ -43,14 +43,16 @@ private:
     Entity *entities;
     ObjectAllocator<Entity> entitiesAllocator;
 
-    Entity *AddEntity();
-    Entity *AddEntity(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader);
-    Entity *AddMovingPlatform(Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
+    Entity *AddEntity(const char *name);
+    Entity *AddEntity(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader);
+    Entity *AddMovingPlatform(const char *name, Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
 
     BehaviorTree bhTree;
     
     AnimationClipSet *animationsSets;
     u32 numAnimationsSets;
+
+    friend struct Editor;
 };
 
 #endif // _LEVEL_H_

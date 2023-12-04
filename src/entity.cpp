@@ -7,14 +7,18 @@
 
 
 // ---------------------------------------------------------
-
-void Entity::Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, Map *map, Entity *entities, AnimationClipSet *animationSet) {
-    
+void Entity::Initialize(const char *name) {
+    this->name = (char *)name;
     ClearFlags();
 
     next = nullptr;
     prev = nullptr;
     componentContainerList = nullptr;
+}
+
+void Entity::Initialize(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, Map *map, Entity *entities, AnimationClipSet *animationSet) {
+    
+    Initialize(name);
 
     TransformComponentDesc transformDesc = {};
     transformDesc.pos = pos;

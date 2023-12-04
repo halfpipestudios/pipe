@@ -6,21 +6,26 @@
 #include <tgui.h>
 
 struct Game;
+struct Level;
+struct Entity;
 
 struct Editor {
     void Initialize(Game *game);
     void Terminate();
     void Update(f32 dt);
     void Render();
-
+    
     Game *game;
+    Entity *selectedEntity;
+
     TGuiGfxBackend tguiBackend;
 
     TGuiWindowHandle gameWindow;
     TGuiWindowHandle toolWindow;
+    TGuiWindowHandle compWindow;
+    TGuiWindowHandle entiWindow;
 
     FrameBuffer gameFrameBuffer;
-
 };
 
 #endif // _EDITOR_H_

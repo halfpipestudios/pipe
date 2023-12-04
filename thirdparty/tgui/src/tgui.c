@@ -348,6 +348,47 @@ void tgui_widget_alloc_into_window(tgui_u64 id, TGuiWidgetInternalFunc internal,
     tgui_clink_list_insert_back(window->widgets, widget);
 }
 
+void _tgui_label(TGuiWindowHandle handle, char *content, tgui_u32 color, tgui_s32 x, tgui_s32 y, char *tgui_id) {
+
+    TGuiWindow *window = tgui_window_get_from_handle(handle);
+
+    if(!tgui_window_update_widget(window)) {
+        return;
+    }
+
+    tgui_u64 id = tgui_get_widget_id(tgui_id);
+    
+    tgui_u32 content_size = TGUI_MIN(strlen(content), TGUI_MAX_LABEL_SIZE-1);
+
+    TGuiLabel *label_state = tgui_widget_get_state(id, TGuiLabel);
+    memcpy(label_state->content, content, content_size);
+    label_state->size = content_size;
+    label_state->content[content_size] = '\0';
+    label_state->color = color;
+    
+    TGuiRectangle text_rect = tgui_get_size_text_dim(x, y, label_state->content, label_state->size);
+
+    tgui_widget_alloc_into_window(id, _tgui_label_internal, window, x, y, tgui_rect_width(text_rect), tgui_rect_height(text_rect));
+}
+
+void _tgui_label_internal(TGuiWidget *widget, TGuiPainter *painter) {
+
+    TGuiWindow *window = widget->parent;
+    tgui_u64 id = widget->id;
+    
+    TGuiRectangle rect = calculate_widget_rect(widget); 
+    tgui_calculate_hot_widget(window, rect, id);
+
+    TGuiRectangle saved_painter_clip = painter->clip;
+    painter->clip = tgui_rect_intersection(rect, window->dim);
+    
+    TGuiLabel *label_state = tgui_widget_get_state(id, TGuiLabel);
+    tgui_font_draw_text(painter, rect.min_x, rect.min_y, label_state->content,  label_state->size, label_state->color);
+
+    painter->clip = saved_painter_clip;
+}
+
+
 tgui_b32 _tgui_button(TGuiWindowHandle handle, char *label, tgui_s32 x, tgui_s32 y, char *tgui_id) {
 
     TGuiWindow *window = tgui_window_get_from_handle(handle);
@@ -390,7 +431,7 @@ void _tgui_button_internal(TGuiWidget *widget, TGuiPainter *painter) {
     /* TODO: Desing a command interface to render the complete UI independently */
     
     tgui_u32 button_color = 0x999999;
-    tgui_u32 decoration_color = 0x444444;
+    tgui_u32 decoration_color = 0x222222;
     
     if(state.hot == id) {
         button_color = 0x888888;

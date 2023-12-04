@@ -63,6 +63,7 @@ typedef struct TGuiInput {
 struct TGuiAllocatedWindow;
 
 typedef enum TGuiWindowFlags {
+    TGUI_WINDOW_NONE = 0,
     TGUI_WINDOW_SCROLLING   = 1 << 0,
     TGUI_WINDOW_TRANSPARENT = 1 << 1,
 } TGuiWindowFlags;
@@ -217,6 +218,17 @@ void tgui_texture(TGuiWindowHandle window, void *texture);
 #define tgui_color_picker(window, x, y, w, h, color) _tgui_color_picker((window), (x), (y), (w), (h), (color), TGUI_ID)
 
 #define tgui_dropdown_menu(window, x, y, options, options_size, options_ptr) _tgui_dropdown_menu((window), (x), (y), (options), (options_size), (options_ptr), TGUI_ID)
+
+#define TGUI_MAX_LABEL_SIZE 256
+typedef struct TGuiLabel {
+    char content[TGUI_MAX_TEXT_SIZE];
+    tgui_u32 size;
+    tgui_u32 color;
+} TGuiLabel;
+
+void _tgui_label(TGuiWindowHandle window, char *content, tgui_u32 color, tgui_s32 x, tgui_s32 y, char *tgui_id);
+
+void _tgui_label_internal(TGuiWidget *widget, TGuiPainter *painter);
 
 typedef struct TGuiButton {
     char *label;

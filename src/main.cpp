@@ -42,7 +42,7 @@ int main() {
         i32 w = PlatformManager::Get()->GetWindow()->GetWidth(); 
         i32 h = PlatformManager::Get()->GetWindow()->GetHeight(); 
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)w/(f32)h, 0.01f, 1000.0f));
-        GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_POINT);
+        GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
         GraphicsManager::Get()->SetViewport(0, 0, w, h);
         GraphicsManager::Get()->BindFrameBuffer(nullptr);
         //GraphicsManager::Get()->ClearColorBuffer(nullptr, 0.5f, 0.0f, 1.0f);

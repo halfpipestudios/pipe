@@ -49,7 +49,7 @@ void TGuiDrawBuffers(void *shader, void *texture, TGuiVertexArray *vertex_buffer
 static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 
     tguiInput->mouse_button_is_down = input->MouseIsPress(MOUSE_BUTTON_L);
-    tguiInput->mouse_button_was_down = input->MouseJustPress(MOUSE_BUTTON_L);
+    //tguiInput->mouse_button_was_down = input->MouseJustPress(MOUSE_BUTTON_L);
 
     tguiInput->mouse_x = input->state[0].mouseX;
     tguiInput->mouse_y = input->state[0].mouseY;
@@ -77,6 +77,7 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 
 void Editor::Initialize(Game *game) {
     this->game = game;
+    this->selectedEntity = nullptr;
 
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
@@ -91,9 +92,10 @@ void Editor::Initialize(Game *game) {
     
     tgui_texture_atlas_generate_atlas();
 
-
     gameWindow = tgui_create_root_window("Game", TGUI_WINDOW_TRANSPARENT);
     toolWindow = tgui_split_window(gameWindow, TGUI_SPLIT_DIR_VERTICAL, "Tools", TGUI_WINDOW_SCROLLING);
+    entiWindow = tgui_split_window(toolWindow, TGUI_SPLIT_DIR_HORIZONTAL, "Entities", TGUI_WINDOW_SCROLLING);
+    compWindow = tgui_split_window(entiWindow, TGUI_SPLIT_DIR_HORIZONTAL, "Component", TGUI_WINDOW_SCROLLING);
 
     tgui_try_to_load_data_file();
     
@@ -107,11 +109,75 @@ void Editor::Terminate() {
 
 void Editor::Update(f32 dt) {
     game->Update(dt);
+    
+    Level *level = &game->level;
+    Entity *entities = level->entities;
 
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
     tgui_begin(dt);
-    tgui_texture(gameWindow, (void *)GraphicsManager::Get()->FrameBufferGetTexture(gameFrameBuffer));
+    
+    // NOTE: Game window UI
+    {
+        tgui_texture(gameWindow, (void *)GraphicsManager::Get()->FrameBufferGetTexture(gameFrameBuffer));
+    }
+
+    // NOTE: Tools window UI
+    {
+        // TODO: These are default of the tgui library, make interface to get them
+        u32 buttonW = 120;
+        u32 buttonH = 30;
+
+        i32 w = tgui_window_width(toolWindow); 
+        i32 h = tgui_window_height(toolWindow); 
+        i32 x = w / 2 - buttonW / 2; if(x < 0) x = 0;
+        i32 y = 10;
+        tgui_button(toolWindow, "Save Level", x, y);
+        tgui_button(toolWindow, "Load Level", x, y + 30 + 10);
+        tgui_button(toolWindow, "Add Entity", x, y + 60 + 20);
+    }
+    
+    // NOTE: Entity window UI
+    {
+        Entity *entity = entities;
+
+        _tgui_tree_view_begin(entiWindow, TGUI_ID);
+        _tgui_tree_view_root_node_begin("Entities", nullptr);
+
+        while(entity != nullptr) {
+            _tgui_tree_view_node(entity->name, (void *)entity);
+            entity = entity->next;
+        }
+
+        _tgui_tree_view_root_node_end();
+        _tgui_tree_view_end((void **)&selectedEntity);
+
+    }
+
+    //  NOTE: Component window UI
+    {
+        if(selectedEntity) {
+            
+            u32 y = 10;
+
+            ComponentContainer *container = selectedEntity->componentContainerList;
+            while(container != nullptr) {
+                
+                Component *component =  (Component *)&container->component;
+
+                char *compName = (char *)typeid(*component).name();
+                _tgui_label(compWindow, compName, 0x00ff00, 10, y, compName);
+                y += 20;
+                
+                container = container->next;
+            }
+
+
+        } else {
+            _tgui_label(compWindow, "There is no entity selected!", 0x222222, 10, 10, TGUI_ID);
+        }
+    }
+    
     tgui_end();
 }
 
