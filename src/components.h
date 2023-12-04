@@ -31,6 +31,7 @@ struct Component {
     virtual void Terminate(Entity *entity) {}
     virtual void Process(Entity *entity, f32 dt) {}
     virtual void Render(Entity *entity) {}
+    virtual ~Component() = default;
 };
 
 struct TransformComponentDesc {
@@ -139,6 +140,7 @@ struct PlayerAnimationTransition {
 };
 
 struct PlayerAnimationState {
+    //virtual ~PlayerAnimationState() = default;
     virtual void Initialize(PlayerAnimationComponent *component) = 0;
     
     virtual PlayerAnimationState *Update(Entity *entity, Input *input, f32 dt) = 0;
@@ -290,12 +292,16 @@ union ComponentUnion {
     MovingPlatformComponent movPlatform;
     AIComponent ai;
     PlayerAnimationComponent playerAmin;
+
+    ~ComponentUnion() = delete;
 };
 
 struct ComponentContainer {
     ComponentUnion component;
     ComponentContainer *next;
     ComponentContainer *prev;
+
+    ~ComponentContainer() = delete;
 };
 
 #endif // _COMPONENT_H_

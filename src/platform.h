@@ -10,6 +10,7 @@ struct File {
 };
 
 struct Window {
+    virtual ~Window() = default;
     virtual void Initialize(i32 w, i32 h) = 0;
     virtual void Terminate() = 0;    
     
@@ -21,7 +22,7 @@ struct Window {
 struct Input;
 
 struct Platform {
-    
+    virtual ~Platform() = default;
     virtual void Initialize() = 0;
     virtual void Terminate() = 0;
     

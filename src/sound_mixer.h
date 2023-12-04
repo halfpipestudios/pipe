@@ -12,7 +12,7 @@ struct SoundPosition {
 };
 
 struct PlayingSound {
-    
+    virtual ~PlayingSound() = default; 
     virtual void Play() = 0;
     virtual void Play3DSound(SoundPosition listener, SoundPosition emiter) = 0;
     virtual void Update3DSound(SoundPosition listener, SoundPosition emiter) = 0;
@@ -24,7 +24,7 @@ struct PlayingSound {
 };
 
 struct SoundMixer {
-    
+    virtual ~SoundMixer() = default;
     virtual void Initialize() = 0;
     virtual void Terminate() = 0;
     

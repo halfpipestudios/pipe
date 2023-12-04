@@ -100,6 +100,7 @@ struct D3D112DVertex {
 };
 
 struct Graphics {
+    virtual ~Graphics() = default;
     virtual void Initialize() = 0;
     virtual void Terminate() = 0;
 
