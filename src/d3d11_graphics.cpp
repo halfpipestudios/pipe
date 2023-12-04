@@ -1144,7 +1144,11 @@ void D3D11BatchRenderer::AddBatchVertex(D3D112DVertex *vertices, u32 vertexCount
     for(u32 quadIndex = 0; quadIndex < quadCount; ++quadIndex) {
         
         memcpy(cpuQuadBuffer.quads + cpuQuadBuffer.used, vertices + quadIndex * 4, sizeof(D3D11Quad));
-        memcpy(cpuQuadBuffer.indices + cpuQuadBuffer.used * 6, indices + quadIndex * 6, sizeof(u32) * 6);
+        
+        // NOTE: Fix by manuto uzumaki
+        if(quadIndex < cpuQuadBuffer.size) {
+            memcpy(cpuQuadBuffer.indices + cpuQuadBuffer.used * 6, indices + quadIndex * 6, sizeof(u32) * 6);
+        }
         
         ++cpuQuadBuffer.used;
 

@@ -206,7 +206,7 @@ void Editor::Render() {
     GraphicsManager::Get()->SetViewport(0, 0, PlatformManager::Get()->GetWindow()->GetWidth(), PlatformManager::Get()->GetWindow()->GetHeight());
     GraphicsManager::Get()->BindFrameBuffer(nullptr);
     GraphicsManager::Get()->ClearColorBuffer(nullptr, 1, 0, 1);
-    GraphicsManager::Get()->ClearDepthStencilBuffer(nullptr);
+    // GraphicsManager::Get()->ClearDepthStencilBuffer(nullptr);
     
     tgui_draw_buffers();
 }
