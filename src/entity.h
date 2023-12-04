@@ -26,7 +26,8 @@ enum EntityFlags {
 
 struct Entity {
 
-    void Initialize(Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, Map *map, Entity *entities, AnimationClipSet *animationSet);
+    void Initialize(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader, Map *map, Entity *entities, AnimationClipSet *animationSet);
+    void Initialize(const char *name);
     void Terminate();
 
     void Update(Map *map, f32 dt);
@@ -40,7 +41,8 @@ struct Entity {
 
     template <typename T>
     T *GetComponent();
-
+    
+    char *name;
     u32 flags;
     ComponentContainer *componentContainerList; 
     Entity *next;

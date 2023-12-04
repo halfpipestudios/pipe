@@ -25,6 +25,8 @@ private:
 
     Level level;
 
+    friend struct Editor;
+
 };
 
 #endif // _GAME_H_
