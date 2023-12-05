@@ -57,4 +57,12 @@ tgui_b32 tgui_tokenizer_next_token(TGuiTokenizer *tokenizer, TGuiToken *token, t
 
 void tgui_token_print(TGuiToken *token);
 
+
+tgui_b32 tgui_is_digit(char character);
+
+tgui_b32 tgui_is_alpha(char character);
+
+tgui_b32 tgui_is_space(char character);
+
+
 #endif /* _TGUI_SERIALIZER_ */

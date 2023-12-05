@@ -23,6 +23,7 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
     Win32Platform *platform = (Win32Platform *)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
     Input *input = &platform->input;
+    
     switch(msg) {
         case WM_CREATE: {
 
@@ -45,11 +46,25 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_SYSKEYDOWN:
         case WM_KEYUP:
         case WM_SYSKEYUP: {
+
+            DWORD vkCode = (DWORD)wParam;
             bool wasPress = ((lParam & (1 << 30)) != 0);
             bool isPress  = ((lParam & (1 << 31)) == 0);
+            
+            if(vkCode == VK_BACK) {
+                input->state[0].kBackspace = isPress;
+            }
+
+            if(vkCode == VK_RIGHT) {
+                input->state[0].kRightArrow= isPress;
+            }
+
+            if(vkCode == VK_LEFT) {
+                input->state[0].kLeftArrow = isPress;
+            }
+
             if(isPress != wasPress)
             {
-                DWORD vkCode = (DWORD)wParam;
                 input->state[0].keys[vkCode] = isPress;
             }
         } break;
@@ -68,6 +83,10 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         {
             input->state[0].mouseX = (i32)GET_X_LPARAM(lParam);
             input->state[0].mouseY = (i32)GET_Y_LPARAM(lParam);
+        } break;
+        case WM_CHAR: {
+            input->state[0].text[0] = (char)wParam;
+            input->state[0].textSize = 1;
         } break;
 
     }
@@ -126,6 +145,14 @@ static f32 Win32ProcessXInputStick(SHORT value, i32 deadZoneValue)
 void Win32Platform::PollEvents() {
 
     input.state[1] = input.state[0];
+
+    input.state[0].text[0] = 0;
+    input.state[0].textSize = 0;
+
+    input.state[0].kBackspace = false;
+    input.state[0].kRightArrow = false;
+    input.state[0].kLeftArrow = false;
+
     window.resize = false;
 
     HWND window = *(HWND *)GetWindow()->GetOsWindow();

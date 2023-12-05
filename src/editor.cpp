@@ -63,15 +63,18 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
         tguiInput->resize_h = h;
     }
     
-    //tguiInput->text[TGUI_MAX_TEXT_SIZE];
-    tguiInput->text_size = 0;
+    u32 size = MIN(input->state[0].textSize, TGUI_MAX_TEXT_SIZE);
+    for(u32 index = 0; index < size; ++index) {
+        tguiInput->text[index] = input->state[0].text[index];
+    }
+    tguiInput->text_size = size;
     
-    tguiInput->keyboard.k_r_arrow_down = 0;
-    tguiInput->keyboard.k_l_arrow_down = 0;
+    tguiInput->keyboard.k_r_arrow_down = input->state[0].kRightArrow;
+    tguiInput->keyboard.k_l_arrow_down = input->state[0].kLeftArrow;
     tguiInput->keyboard.k_delete = 0;
-    tguiInput->keyboard.k_backspace = 0;
-    tguiInput->keyboard.k_ctrl = 0;
-    tguiInput->keyboard.k_shift = 0;
+    tguiInput->keyboard.k_backspace = input->state[0].kBackspace;
+    tguiInput->keyboard.k_ctrl = input->KeyIsPress(KEY_CONTROL);
+    tguiInput->keyboard.k_shift = input->KeyIsPress(KEY_SHIFT);
 }
 
 
@@ -111,42 +114,66 @@ static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i3
     TransformComponent *transform = entity->GetComponent<TransformComponent>();
     ASSERT(transform);
     
-    char position[256];
-    char rotation[256];
-    char scale[256];
+    u32 w = 68;
+    u32 h = 28;
     
-    sprintf(position, "    p = (%.2f, %.2f, %.2f)\0", transform->pos.x, transform->pos.y, transform->pos.z);
-    sprintf(rotation, "    r = (%.2f, %.2f, %.2f)\0", transform->rot.x, transform->rot.y, transform->rot.z);
-    sprintf(   scale, "    s = (%.2f, %.2f, %.2f)\0", transform->scale.x, transform->scale.y, transform->scale.z);
+    u32 label_x = x + 10;
+    x = label_x + 40;
 
-    _tgui_label(window, position, 0x222222, x, *y, position);
-    *y += 14;
-    _tgui_label(window, rotation, 0x222222, x, *y, rotation);
-    *y += 14;
-    _tgui_label(window,    scale, 0x222222, x, *y,    scale);
-    *y += 20;
+    _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &transform->pos.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
+
+    _tgui_label(window, "r =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &transform->rot.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->rot.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->rot.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
+
+    _tgui_label(window, "S =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &transform->scale.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->scale.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &transform->scale.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
 }
 
 static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
     PhysicsComponent *physicComp = entity->GetComponent<PhysicsComponent>();
     ASSERT(physicComp);
-    
-    Physics p = physicComp->physics;
 
-    char pos[256];
-    char vel[256];
-    char acc[256];
-    
-    sprintf(pos, "    p = (%.2f, %.2f, %.2f)\0", p.pos.x, p.pos.y, p.pos.z);
-    sprintf(vel, "    v = (%.2f, %.2f, %.2f)\0", p.vel.x, p.vel.y, p.vel.z);
-    sprintf(acc, "    a = (%.2f, %.2f, %.2f)\0", p.acc.x, p.acc.y, p.acc.z);
+    Physics *p = &physicComp->physics;
 
-    _tgui_label(window, pos, 0x222222, x, *y, pos);
-    *y += 14;
-    _tgui_label(window, vel, 0x222222, x, *y, vel);
-    *y += 14;
-    _tgui_label(window, acc, 0x222222, x, *y, acc);
-    *y += 20;
+    u32 w = 68;
+    u32 h = 28;
+    
+    u32 label_x = x + 10;
+    x = label_x + 40;
+
+    _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &p->pos.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
+
+    _tgui_label(window, "v =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &p->vel.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->vel.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->vel.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
+
+    _tgui_label(window, "a =", 0x222222, label_x, *y, TGUI_ID);
+    tgui_float_input(window, &p->acc.x, 0xff0000, x, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->acc.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+    tgui_float_input(window, &p->acc.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+    *y += h;
 }
 
 void Editor::Update(f32 dt) {
@@ -197,6 +224,7 @@ void Editor::Update(f32 dt) {
     }
 
     //  NOTE: Component window UI
+    f32 value = 123.321f;
     {
         if(selectedEntity) {
             

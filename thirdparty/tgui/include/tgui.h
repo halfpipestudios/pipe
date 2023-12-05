@@ -239,7 +239,29 @@ tgui_b32 _tgui_button(TGuiWindowHandle window, char *label, tgui_s32 x, tgui_s32
 
 void _tgui_button_internal(TGuiWidget *widget, TGuiPainter *painter);
 
-#define TGUI_TEXT_INPUT_MAX_CHARACTERS 124 
+#define TGUI_FLOAT_INPUT_MAX_CHARACTERS 64 
+#define TGUI_FLOAT_INPUT_PADDING 2
+
+typedef struct TGuiFloatInput {
+    tgui_u8 buffer[TGUI_FLOAT_INPUT_MAX_CHARACTERS];
+    tgui_u32 used;
+
+    tgui_f32 *value;
+    tgui_f32 saved_value;
+    
+    tgui_u32 border_color;
+    tgui_u32 cursor;    
+
+    tgui_b32 initilize;
+
+} TGuiFloatInput;
+
+void tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id);
+
+void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter);
+
+#define TGUI_TEXT_INPUT_MAX_CHARACTERS 128 
+
 typedef struct TGuiTextInput {
     tgui_u8 buffer[TGUI_TEXT_INPUT_MAX_CHARACTERS];
     tgui_u32 used;

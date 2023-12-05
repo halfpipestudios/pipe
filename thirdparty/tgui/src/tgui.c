@@ -509,6 +509,174 @@ static void delete_selection(TGuiTextInput *text_input) {
     }
 }
 
+void tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id) {
+    
+    TGuiWindow *window = tgui_window_get_from_handle(handle);
+    
+    tgui_u64 id = tgui_get_widget_id(tgui_id);
+    
+    if(!tgui_window_update_widget(window)) {
+        if(state.active == id) {
+            state.active = 0;
+        }
+        return;
+    }
+    
+    tgui_u32 h =  font.max_glyph_height + TGUI_FLOAT_INPUT_PADDING*2;
+
+    TGuiFloatInput *float_input = tgui_widget_get_state(id, TGuiFloatInput);
+    float_input->value = value;
+    float_input->border_color = border_color;
+    tgui_widget_alloc_into_window(id, _tgui_float_input_internal, window, x, y, w, h);
+}
+
+static inline void float_input_update_buffer(TGuiFloatInput *float_input) {
+    snprintf(float_input->buffer, TGUI_FLOAT_INPUT_MAX_CHARACTERS, "%.2f", *float_input->value);
+    float_input->used = strlen(float_input->buffer);
+}
+
+static inline void float_input_update_value(TGuiFloatInput *float_input) {
+    *float_input->value = (tgui_f32)atof(float_input->buffer);
+}
+
+static inline tgui_b32 float_input_valid_character(tgui_u8 character) {
+    if(tgui_is_digit(character)) {
+        return true;
+    }
+    if(character == '.') {
+        return true;
+    }
+    return false;
+}
+
+
+static inline void float_input_move_cursor_left(TGuiFloatInput *float_input) {
+    if(float_input->cursor == 0) return;
+    --float_input->cursor;
+}
+
+static inline void float_input_move_cursor_right(TGuiFloatInput *float_input) {
+    if(float_input->cursor == float_input->used) return;
+    ++float_input->cursor;
+}
+
+static inline void float_input_insert_at_cursor(TGuiFloatInput *float_input, tgui_u8 character) {
+    if(float_input->used >= (TGUI_FLOAT_INPUT_MAX_CHARACTERS-1)) return;
+
+    for(tgui_s32 index = float_input->used - 1; index >= (tgui_s32)float_input->cursor; --index) {
+        float_input->buffer[index + 1] = float_input->buffer[index];
+    }
+    
+    float_input->buffer[float_input->cursor] = character;
+
+    ++float_input->used;
+    ++float_input->cursor;
+
+    float_input->buffer[float_input->used] = '\0';
+}
+
+static inline void float_input_remove_from_cursor(TGuiFloatInput *float_input) {
+    if(float_input->cursor == 0 || float_input->used == 0) return;
+    
+    for(tgui_u32 index = float_input->cursor; index < float_input->used; ++index) {
+        float_input->buffer[index - 1] = float_input->buffer[index];
+    }
+
+    --float_input->used;
+    --float_input->cursor;
+
+    float_input->buffer[float_input->used] = '\0';
+}
+
+void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
+
+    TGuiWindow *window = widget->parent;
+    tgui_u64 id = widget->id;
+    
+    TGuiKeyboard *keyboard = &input.keyboard;
+
+    TGuiRectangle rect = calculate_widget_rect(widget);
+    tgui_calculate_hot_widget(window, rect, id);
+    
+    TGuiFloatInput *float_input = tgui_widget_get_state(id, TGuiFloatInput);
+    
+    if(!float_input->initilize) {
+        float_input_update_buffer(float_input);
+        float_input->cursor = 0;
+        float_input->saved_value = *float_input->value;
+
+        float_input->initilize = true;
+    }
+    
+    if(state.active == id) {
+        
+        if(input.text_size > 0) {
+            for(tgui_u32 index = 0; index < input.text_size; ++index) {
+                tgui_u8 character = input.text[index];
+                if(float_input_valid_character(character)) {
+                    float_input_insert_at_cursor(float_input, character);
+                }
+            }
+        }
+
+        if(keyboard->k_backspace) {
+            float_input_remove_from_cursor(float_input);
+        }
+
+        if(keyboard->k_l_arrow_down) {
+            float_input_move_cursor_left(float_input);
+        }
+
+        if(keyboard->k_r_arrow_down) {
+            float_input_move_cursor_right(float_input);
+        }
+
+        float_input_update_value(float_input);
+
+    } else if (state.hot == id) {
+        if(!input.mouse_button_was_down && input.mouse_button_is_down) {
+            state.active = id;
+        }
+    
+    } else {
+        float_input_update_buffer(float_input);
+    }
+
+    if(state.active == id && state.hot != id && input.mouse_button_was_down && !input.mouse_button_is_down) {
+        state.active = 0;
+    }
+
+    TGuiRectangle saved_painter_clip = painter->clip;
+    painter->clip = tgui_rect_intersection(rect, window->dim);
+    
+    tgui_u32 color = 0x333333;
+    if(state.active == id) {
+        color = 0x222222;
+    }
+
+    tgui_painter_draw_rectangle(painter, rect, color);
+    
+    TGuiRectangle text_rect = tgui_get_size_text_dim(0, 0, float_input->buffer, float_input->used);
+    
+    tgui_u32 text_x = rect.min_x + tgui_rect_width(rect) / 2 - tgui_rect_width(text_rect) / 2;
+    tgui_u32 text_y = rect.min_y + tgui_rect_height(rect) / 2 - tgui_rect_height(text_rect) / 2;
+
+    tgui_font_draw_text(painter, text_x, text_y, float_input->buffer,  float_input->used, 0xffffff);
+
+    TGuiRectangle cursor_rect = {
+        text_x + (float_input->cursor * font.max_glyph_width),
+        text_y,
+        text_x + (float_input->cursor * font.max_glyph_width),
+        text_y + font.max_glyph_height
+    };
+    
+    tgui_painter_draw_rectangle(painter, cursor_rect, 0xaaaaff);
+
+    tgui_painter_draw_rectangle_outline(painter, rect, float_input->border_color);
+
+    painter->clip = saved_painter_clip;
+}
+
 TGuiTextInput *_tgui_text_input(TGuiWindowHandle handle, tgui_s32 x, tgui_s32 y, char *tgui_id) {
     
     TGuiWindow *window = tgui_window_get_from_handle(handle);

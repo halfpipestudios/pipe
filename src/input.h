@@ -13,6 +13,14 @@ struct InputState {
     f32 leftStickY;
     f32 rightStickX;
     f32 rightStickY;
+    
+    // NOTE: Editor input
+    char text[4];
+    u32 textSize;
+
+    bool kBackspace;
+    bool kRightArrow;
+    bool kLeftArrow;
 };
 
 struct Input {
