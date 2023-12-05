@@ -662,15 +662,17 @@ void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
     tgui_u32 text_y = rect.min_y + tgui_rect_height(rect) / 2 - tgui_rect_height(text_rect) / 2;
 
     tgui_font_draw_text(painter, text_x, text_y, float_input->buffer,  float_input->used, 0xffffff);
-
-    TGuiRectangle cursor_rect = {
-        text_x + (float_input->cursor * font.max_glyph_width),
-        text_y,
-        text_x + (float_input->cursor * font.max_glyph_width),
-        text_y + font.max_glyph_height
-    };
     
-    tgui_painter_draw_rectangle(painter, cursor_rect, 0xaaaaff);
+    if(state.active == id) {
+        TGuiRectangle cursor_rect = {
+            text_x + (float_input->cursor * font.max_glyph_width),
+            text_y,
+            text_x + (float_input->cursor * font.max_glyph_width),
+            text_y + font.max_glyph_height
+        };
+        
+        tgui_painter_draw_rectangle(painter, cursor_rect, 0xaaaaff);
+    }
 
     tgui_painter_draw_rectangle_outline(painter, rect, float_input->border_color);
 

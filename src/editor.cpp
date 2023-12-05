@@ -114,7 +114,7 @@ static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i3
     TransformComponent *transform = entity->GetComponent<TransformComponent>();
     ASSERT(transform);
     
-    u32 w = 68;
+    u32 w = 72;
     u32 h = 28;
     
     u32 label_x = x + 10;
@@ -148,7 +148,7 @@ static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 
 
     Physics *p = &physicComp->physics;
 
-    u32 w = 68;
+    u32 w = 72;
     u32 h = 28;
     
     u32 label_x = x + 10;
