@@ -574,7 +574,7 @@ static inline tgui_b32 float_input_valid_character(tgui_u8 character) {
     if(tgui_is_digit(character)) {
         return true;
     }
-    if(character == '.') {
+    if(character == '.' || character == '-') {
         return true;
     }
     return false;
