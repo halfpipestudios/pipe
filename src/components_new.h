@@ -16,7 +16,6 @@ struct Component_ : ComponentBase {
     }
 };
 
-
 struct AComponent : Component_<AComponent> {
     char *name = "componente A\n";
 };

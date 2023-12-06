@@ -330,7 +330,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 
     StaticArray<AComponent, COMPONENTS_ARRAY_MAX_SIZE> *acomponents = em.GetComponents<AComponent>(); 
 
-    AComponent *manoloAComponent = (AComponent *)manolo->componentsPtrs.Get(BComponent::GetID());
+    AComponent *manoloAComponent = (AComponent *)manolo->componentsPtrs.Get(AComponent::GetID());
 
     i32 StopHere = 0;
     
