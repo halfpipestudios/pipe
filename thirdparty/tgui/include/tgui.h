@@ -226,7 +226,7 @@ typedef struct TGuiLabel {
     tgui_u32 color;
 } TGuiLabel;
 
-void _tgui_label(TGuiWindowHandle window, char *content, tgui_u32 color, tgui_s32 x, tgui_s32 y, char *tgui_id);
+void _tgui_label(TGuiWindowHandle handle, char *content, tgui_u32 color, tgui_s32 x, tgui_s32 y, char *tgui_id);
 
 void _tgui_label_internal(TGuiWidget *widget, TGuiPainter *painter);
 
@@ -235,9 +235,19 @@ typedef struct TGuiButton {
     tgui_b32 result;
 } TGuiButton;
 
-tgui_b32 _tgui_button(TGuiWindowHandle window, char *label, tgui_s32 x, tgui_s32 y, char *tgui_id);
+tgui_b32 _tgui_button(TGuiWindowHandle handle, char *label, tgui_s32 x, tgui_s32 y, char *tgui_id);
 
 void _tgui_button_internal(TGuiWidget *widget, TGuiPainter *painter);
+
+typedef struct TGuiSeparator {
+    char *label;
+    tgui_b32 open;
+    tgui_b32 initilize;
+} TGuiSeparator;
+
+tgui_b32 _tgui_separator(TGuiWindowHandle window, char *label, tgui_s32 y, tgui_b32 initial_value, char *tgui_id);
+
+void _tgui_separator_internal(TGuiWidget *widget, TGuiPainter *painter);
 
 #define TGUI_FLOAT_INPUT_MAX_CHARACTERS 64 
 #define TGUI_FLOAT_INPUT_PADDING 2
@@ -256,7 +266,7 @@ typedef struct TGuiFloatInput {
 
 } TGuiFloatInput;
 
-void tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id);
+void _tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id);
 
 void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter);
 
