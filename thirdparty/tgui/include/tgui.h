@@ -245,7 +245,7 @@ typedef struct TGuiSeparator {
     tgui_b32 initilize;
 } TGuiSeparator;
 
-tgui_b32 _tgui_separator(TGuiWindowHandle window, char *label, tgui_s32 y, char *tgui_id);
+tgui_b32 _tgui_separator(TGuiWindowHandle window, char *label, tgui_s32 y, tgui_b32 initial_value, char *tgui_id);
 
 void _tgui_separator_internal(TGuiWidget *widget, TGuiPainter *painter);
 

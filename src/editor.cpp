@@ -120,7 +120,7 @@ static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i3
     u32 label_x = x + 10;
     x = label_x + 40;
     
-    if(_tgui_separator(window, "Transform Component", *y, TGUI_ID)) {
+    if(_tgui_separator(window, "Transform Component", *y, true, TGUI_ID)) {
         *y += h + 10;
 
         _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
@@ -158,7 +158,7 @@ static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 
     u32 label_x = x + 10;
     x = label_x + 40;
 
-    if(_tgui_separator(window, "Physic Component", *y, TGUI_ID)) {
+    if(_tgui_separator(window, "Physic Component", *y, true, TGUI_ID)) {
         *y += h + 10;
 
         _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
@@ -187,11 +187,59 @@ static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 
 static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
     CollisionComponent *col = entity->GetComponent<CollisionComponent>();
     ASSERT(col);
-
     u32 w = 72;
     u32 h = 28;
+    if(_tgui_separator(window, "Collision Component", *y, false, TGUI_ID)) {
+    }
+    *y += h;
+}
 
-    if(_tgui_separator(window, "Collision Component", *y, TGUI_ID)) {
+static void UpdateGraphicComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Graphic Component", *y, false, TGUI_ID)) {
+    }
+    *y += h;
+}
+
+static void UpdateInputComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Input Component", *y, false, TGUI_ID)) {
+    }
+    *y += h;
+}
+
+static void UpdatePlayerAnimationComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Player Animation Component", *y, false, TGUI_ID)) {
+    }
+    *y += h;
+}
+
+static void UpdateMovingPlatformComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Moving Platform Component", *y, false, TGUI_ID)) {
+    }
+    *y += h;
+}
+
+static void UpdateAIComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "AI Component", *y, false, TGUI_ID)) {
     }
     *y += h;
 }
@@ -248,7 +296,7 @@ void Editor::Update(f32 dt) {
     {
         if(selectedEntity) {
             
-            i32 y = 10;
+            i32 y = 4;
 
             ComponentContainer *container = selectedEntity->componentContainerList;
             while(container != nullptr) {
@@ -261,6 +309,16 @@ void Editor::Update(f32 dt) {
                     UpdatePhysicsComponent(compWindow, selectedEntity, 10, &y);
                 } else if(typeid(*component) == typeid(CollisionComponent)) {
                     UpdateCollisionComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(GraphicsComponent)) {
+                    UpdateGraphicComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(InputComponent)) {
+                    UpdateInputComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(PlayerAnimationComponent)) {
+                    UpdatePlayerAnimationComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(MovingPlatformComponent)) {
+                    UpdateMovingPlatformComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(AIComponent)) {
+                    UpdateAIComponent(compWindow, selectedEntity, 10, &y);
                 } else {
                     char *compName = (char *)typeid(*component).name();
                     _tgui_label(compWindow, compName, 0x222222, 10, y, compName);

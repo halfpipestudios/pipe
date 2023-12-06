@@ -463,7 +463,7 @@ void _tgui_button_internal(TGuiWidget *widget, TGuiPainter *painter) {
     button_state->result = result;
 }
 
-tgui_b32 _tgui_separator(TGuiWindowHandle handle, char *label, tgui_s32 y, char *tgui_id) {
+tgui_b32 _tgui_separator(TGuiWindowHandle handle, char *label, tgui_s32 y, tgui_b32 initial_value, char *tgui_id) {
 
     TGuiWindow *window = tgui_window_get_from_handle(handle);
     
@@ -478,10 +478,14 @@ tgui_b32 _tgui_separator(TGuiWindowHandle handle, char *label, tgui_s32 y, char 
     
     TGuiSeparator *separator = tgui_widget_get_state(id, TGuiSeparator);
     separator->label = label;
+
+    if(!separator->initilize) {
+        separator->open = initial_value;
+        separator->initilize = true;
+    }
     
-    tgui_u32 w = tgui_rect_width(window->dim);
     tgui_u32 h = font.max_glyph_height + 10;
-    tgui_widget_alloc_into_window(id, _tgui_separator_internal, window, 0, y, w, h);
+    tgui_widget_alloc_into_window(id, _tgui_separator_internal, window, 0, y, 0, h);
 
     return separator->open;
 }
@@ -499,11 +503,6 @@ void _tgui_separator_internal(TGuiWidget *widget, TGuiPainter *painter) {
     tgui_calculate_hot_widget(window, fake_separator_dim, id);
 
     TGuiSeparator *separator = tgui_widget_get_state(id, TGuiSeparator);
-    
-    if(!separator->initilize) {
-        separator->open = true;
-        separator->initilize = true;
-    }
 
     if(state.active == id) {
 
@@ -518,13 +517,13 @@ void _tgui_separator_internal(TGuiWidget *widget, TGuiPainter *painter) {
         state.active = 0;
     }
 
-    tgui_u32 color = 0x333333;
+    tgui_u32 color = 0x444444;
     if(separator->open == true) {
-        color = 0x444444;
+        color = 0x555555;
     }
 
     TGuiRectangle saved_painter_clip = painter->clip;
-    painter->clip = tgui_rect_intersection(fake_separator_dim, window->dim);
+    painter->clip = tgui_rect_intersection(fake_separator_dim, painter->clip);
     
     tgui_painter_draw_rectangle(painter, fake_separator_dim, color);
     
