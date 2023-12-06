@@ -667,6 +667,7 @@ void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
     } else if (state.hot == id) {
         if(!input.mouse_button_was_down && input.mouse_button_is_down) {
             state.active = id;
+            float_input->cursor = 0;
         }
     
     } else {
@@ -1517,7 +1518,7 @@ void treeview_node_draw(TGuiWidget *widget, TGuiTreeView *treeview, TGuiTreeView
     tgui_b32 mouse_in_node = tgui_rect_point_overlaps(fake_node_dim, input.mouse_x, input.mouse_y);
     tgui_u32 _color = *color;
     if(state.hot == widget->id && mouse_in_node) {
-        _color = 0xaaaaff;
+        _color = 0x777777;
     }
     
     TGuiRectangle saved_painter_clip = painter->clip;
@@ -1527,7 +1528,7 @@ void treeview_node_draw(TGuiWidget *widget, TGuiTreeView *treeview, TGuiTreeView
 
     if((tgui_u32)treeview->selection_index == node->selected_state_index && tgui_array_get(&treeview->selected_node_data, treeview->selection_index)) {
         _color = 0xaaaaff;
-        tgui_painter_draw_rectangle_outline(painter, fake_node_dim, _color);
+        tgui_painter_draw_rectangle(painter, fake_node_dim, _color);
     }
 
 
@@ -1777,9 +1778,13 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
     }
 
     TGuiRectangle header_rect = tgui_rect_from_wh(rect.min_x, rect.min_y, TGUI_DROPDOWN_MENU_DELFAUT_W, TGUI_DROPDOWN_MENU_DELFAUT_H);
-    TGuiRectangle saved_painter_clip = painter->clip;
-    painter->clip = tgui_rect_intersection(rect, painter->clip);
     
+    TGuiRectangle saved_painter_clip = painter->clip;
+    TGuiRenderBuffer *saved_render_buffer = painter->render_buffer;
+
+    painter->clip = tgui_rect_intersection(rect, painter->clip);
+    painter->render_buffer = &state.render_state.render_buffer_tgui_on_top;
+
     if(state.active == id) {
         for(tgui_u32 i = 0; i < dropdown->options_size; ++i) {
             TGuiRectangle option_rect = calculate_option_rect(rect.min_x, rect.min_y, i);
@@ -1837,8 +1842,7 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
     //painter_draw_rectangle(painter, rect, 0xff00ff);
     
     painter->clip = saved_painter_clip;
-
-
+    painter->render_buffer = saved_render_buffer;
 }
 
 /* ---------------------- */

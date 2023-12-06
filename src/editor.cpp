@@ -189,7 +189,20 @@ static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i3
     ASSERT(col);
     u32 w = 72;
     u32 h = 28;
-    if(_tgui_separator(window, "Collision Component", *y, false, TGUI_ID)) {
+
+    static char *options[] = {
+        "Cylinder",
+        "ConvexHull",
+    };
+    u32 optionsSize = sizeof(options)/sizeof(options[0]);
+    i32 optionIndex = 0;
+
+    u32 label_x = x + 10;
+
+    if(_tgui_separator(window, "Collision Component", *y, true, TGUI_ID)) {
+        *y += h + 10;
+        _tgui_dropdown_menu(window, label_x, *y, options, optionsSize, &optionIndex, TGUI_ID); 
+        *y += 10;
     }
     *y += h;
 }
