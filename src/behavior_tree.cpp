@@ -9,12 +9,14 @@ void BehaviorTree::Initialize(size_t bufferSize_) {
     bufferSize = bufferSize_;
     buffer = (u8 *)MemoryManager::Get()->AllocStaticMemory(bufferSize, 1);
     current_ptr = buffer + bufferSize;
+
+    nodes = (BehaviorNode **)MemoryManager::Get()->AllocStaticMemory(BEHAVIOR_TREE_MAX_NODES * sizeof(BehaviorNode *), 1);
 }
 
 
 BehaviorStatus BehaviorTree::run(BehaviorNodeContex *contx) {
-    if(nodes.size()) {
-        return nodes.back()->run(contx);
+    if(nodesCount) {
+        return nodes[nodesCount - 1]->run(contx);
     }
     return BEHAVIOR_FAIL;
 }
@@ -38,11 +40,15 @@ BehaviorStatus BehaviorArrive::run(BehaviorNodeContex *contx) {
 
 
 // BehaviorSequence
-BehaviorSequence::BehaviorSequence(std::initializer_list<BehaviorNode *> ls) : nodes(ls) {}
+BehaviorSequence::BehaviorSequence(std::initializer_list<BehaviorNode *> ls) {
+    ASSERT(ls.size() <= BEHAVIOR_NODE_MAX_CHILDS);
+    nodesCount = ls.size();
+    memcpy(nodes, ls.begin(), sizeof(BehaviorNode *) * ls.size());
+}
 
 
 BehaviorStatus BehaviorSequence::run(BehaviorNodeContex *contx) {
-    if(currentNode == nodes.end()) {
+    if(currentNode == (nodes + nodesCount)) {
         resetSequence();
     }
 
@@ -53,7 +59,7 @@ BehaviorStatus BehaviorSequence::run(BehaviorNodeContex *contx) {
         case BEHAVIOR_RUNNING: { return BEHAVIOR_RUNNING; }
         case BEHAVIOR_SUCCESS: { 
             ++currentNode;
-            if(currentNode == nodes.end()) { resetSequence(); return BEHAVIOR_SUCCESS; }
+            if(currentNode == (nodes + nodesCount)) { resetSequence(); return BEHAVIOR_SUCCESS; }
         }
     }
     return BEHAVIOR_RUNNING;
@@ -61,7 +67,11 @@ BehaviorStatus BehaviorSequence::run(BehaviorNodeContex *contx) {
 
 
 // BehaviorSelector
-BehaviorSelector::BehaviorSelector(std::initializer_list<BehaviorNode *> ls) : nodes(ls) {}
+BehaviorSelector::BehaviorSelector(std::initializer_list<BehaviorNode *> ls) {
+    ASSERT(ls.size() <= BEHAVIOR_NODE_MAX_CHILDS);
+    nodesCount = ls.size();
+    memcpy(nodes, ls.begin(), sizeof(BehaviorNode *) * ls.size());
+}
 
 BehaviorStatus BehaviorSelector::run(BehaviorNodeContex *contx) {
     // TODO: ....

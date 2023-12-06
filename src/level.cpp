@@ -8,6 +8,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+
+#include "components_new.h"
+#include "entity_manager.h"
+
 static Vertex gCubeVertices[] = {
         // positions          // texture Coords
    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
@@ -311,6 +315,24 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
     TransformComponent *orcTransform = orc->GetComponent<TransformComponent>();
     gBlackBoard.target = &heroTransform->pos;
+
+
+    // TODO: EntityManager test ...
+    EntityManager em;
+    em.AddComponentType<AComponent>();
+    em.AddComponentType<BComponent>();
+    em.AddComponentType<CComponent>();
+
+    Entity *manolo = em.AddEntity();
+    manolo->name = "Manolo";
+
+    AComponent *acomponent = em.AddComponent<AComponent>(manolo);
+
+    StaticArray<AComponent, COMPONENTS_ARRAY_MAX_SIZE> *acomponents = em.GetComponents<AComponent>(); 
+
+    AComponent *manoloAComponent = (AComponent *)manolo->componentsPtrs.Get(BComponent::GetID());
+
+    i32 StopHere = 0;
     
 }
 

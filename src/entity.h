@@ -8,8 +8,12 @@
 #include "camera.h"
 #include "math.h"
 #include "components.h"
+#include "components_new.h"
 
 #include <typeinfo>
+
+#include "data_structures.h"
+
 
 static ObjectAllocator<ComponentContainer> gComponetsAllocator;
 
@@ -53,6 +57,8 @@ struct Entity {
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
 
+    StaticHashMap<ComponentBase *, 64> componentsPtrs;
+
 };
 
 
@@ -60,11 +66,6 @@ template <typename T>
 void Entity::AddComponent(void *initData) {
     ComponentContainer *container = gComponetsAllocator.Alloc();
     memset(container, 0, sizeof(ComponentContainer));
-    
-    // Super Hack
-    //T *component = (T *)&container->component;
-    // T tmpComponent = {};
-    // memcpy(component, &tmpComponent, sizeof(T));
     
     T *component = new(&container->component) T;
 

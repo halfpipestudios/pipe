@@ -1,8 +1,6 @@
 #ifndef _BEHAVIOR_TREE_H_
 #define _BEHAVIOR_TREE_H_
 
-#include <memory>
-#include <vector>
 #include <initializer_list>
 
 #include "common.h"
@@ -13,6 +11,9 @@ enum BehaviorStatus {
     BEHAVIOR_FAIL,
     BEHAVIOR_RUNNING
 };
+
+#define BEHAVIOR_TREE_MAX_NODES 128
+#define BEHAVIOR_NODE_MAX_CHILDS 16
 
 struct Entity;
 struct PhysicsComponent;
@@ -42,18 +43,21 @@ struct BehaviorSequence : BehaviorNode {
     BehaviorSequence(std::initializer_list<BehaviorNode *> ls);
     BehaviorStatus run(BehaviorNodeContex *contx) override;
 
-    void resetSequence() { currentNode = nodes.begin(); }
+    void resetSequence() { currentNode = nodes; }
 
-    std::vector<BehaviorNode *>nodes                  {};
-    std::vector<BehaviorNode *>::iterator currentNode { nodes.begin() };
+    BehaviorNode *nodes[BEHAVIOR_NODE_MAX_CHILDS];
+    u32 nodesCount { 0 };
+    BehaviorNode **currentNode { nodes };
 };
 
+// TODO: ...
 struct BehaviorSelector : BehaviorNode {
     BehaviorSelector(std::initializer_list<BehaviorNode *> ls);
     BehaviorStatus run(BehaviorNodeContex *contx) override;
 
-    std::vector<BehaviorNode *>nodes                  {};
-    std::vector<BehaviorNode *>::iterator currentNode { nodes.begin() };
+    BehaviorNode *nodes[BEHAVIOR_NODE_MAX_CHILDS];
+    u32 nodesCount { 0 };
+    BehaviorNode **currentNode { nodes };
 };
 
 struct BehaviorTree {
@@ -69,7 +73,8 @@ struct BehaviorTree {
     u8 *buffer = nullptr;
     u8 *current_ptr = nullptr;
 
-    std::vector<BehaviorNode *> nodes;
+    BehaviorNode **nodes { nullptr };
+    u32 nodesCount { 0 };
 
 };
 
@@ -85,7 +90,7 @@ BehaviorNode *BehaviorTree::AddNode(ParamType&&... params) {
     }
 
     NodeType *node = new(current_ptr) NodeType{std::forward<ParamType>(params)...};
-    nodes.push_back(node);
+    nodes[nodesCount++] = node;
     return node;
 }
 
