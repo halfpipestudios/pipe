@@ -119,25 +119,29 @@ static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i3
     
     u32 label_x = x + 10;
     x = label_x + 40;
+    
+    if(_tgui_separator(window, "Transform Component", *y, TGUI_ID)) {
+        *y += h + 10;
 
-    _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &transform->pos.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+        _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &transform->pos.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
 
-    *y += h;
+        *y += h;
 
-    _tgui_label(window, "r =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &transform->rot.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->rot.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->rot.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+        _tgui_label(window, "r =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &transform->rot.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->rot.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->rot.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
 
-    *y += h;
+        *y += h;
 
-    _tgui_label(window, "S =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &transform->scale.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->scale.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &transform->scale.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+        _tgui_label(window, "S =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &transform->scale.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->scale.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &transform->scale.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+    }
 
     *y += h;
 }
@@ -154,25 +158,41 @@ static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 
     u32 label_x = x + 10;
     x = label_x + 40;
 
-    _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &p->pos.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+    if(_tgui_separator(window, "Physic Component", *y, TGUI_ID)) {
+        *y += h + 10;
+
+        _tgui_label(window, "p =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &p->pos.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->pos.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->pos.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+        *y += h;
+
+        _tgui_label(window, "v =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &p->vel.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->vel.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->vel.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+
+        *y += h;
+
+        _tgui_label(window, "a =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_float_input(window, &p->acc.x, 0xff0000, x, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->acc.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
+        _tgui_float_input(window, &p->acc.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+    }
 
     *y += h;
+}
 
-    _tgui_label(window, "v =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &p->vel.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->vel.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->vel.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
+static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
+    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+    ASSERT(col);
 
-    *y += h;
+    u32 w = 72;
+    u32 h = 28;
 
-    _tgui_label(window, "a =", 0x222222, label_x, *y, TGUI_ID);
-    tgui_float_input(window, &p->acc.x, 0xff0000, x, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->acc.y, 0x00ff00, x+1*w+10, *y, w, TGUI_ID);
-    tgui_float_input(window, &p->acc.z, 0x0000ff, x+2*w+20, *y, w, TGUI_ID);
-
+    if(_tgui_separator(window, "Collision Component", *y, TGUI_ID)) {
+    }
     *y += h;
 }
 
@@ -235,16 +255,16 @@ void Editor::Update(f32 dt) {
                 
                 Component *component =  (Component *)&container->component;
 
-                char *compName = (char *)typeid(*component).name();
-                _tgui_label(compWindow, compName, 0x222222, 10, y, compName);
-                y += 20;
-
                 if(typeid(*component) == typeid(TransformComponent)) {
                     UpdateTransformComponent(compWindow, selectedEntity, 10, &y);
-                }
-
-                if(typeid(*component) == typeid(PhysicsComponent)) {
+                } else if(typeid(*component) == typeid(PhysicsComponent)) {
                     UpdatePhysicsComponent(compWindow, selectedEntity, 10, &y);
+                } else if(typeid(*component) == typeid(CollisionComponent)) {
+                    UpdateCollisionComponent(compWindow, selectedEntity, 10, &y);
+                } else {
+                    char *compName = (char *)typeid(*component).name();
+                    _tgui_label(compWindow, compName, 0x222222, 10, y, compName);
+                    y += 20;
                 }
                 
                 container = container->next;

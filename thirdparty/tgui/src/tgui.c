@@ -463,53 +463,85 @@ void _tgui_button_internal(TGuiWidget *widget, TGuiPainter *painter) {
     button_state->result = result;
 }
 
-static TGuiRectangle calculate_selection_rect(TGuiTextInput *text_input, tgui_s32 x, tgui_s32 y, tgui_u32 start, tgui_u32 end) {
+tgui_b32 _tgui_separator(TGuiWindowHandle handle, char *label, tgui_s32 y, char *tgui_id) {
 
-    if(start > end) {
-        tgui_u32 temp = start;
-        start = end;
-        end = temp;
+    TGuiWindow *window = tgui_window_get_from_handle(handle);
+    
+    tgui_u64 id = tgui_get_widget_id(tgui_id);
+    
+    if(!tgui_window_update_widget(window)) {
+        if(state.active == id) {
+            state.active = 0;
+        }
+        return false;
     }
-    TGUI_ASSERT(start <= end);
+    
+    TGuiSeparator *separator = tgui_widget_get_state(id, TGuiSeparator);
+    separator->label = label;
+    
+    tgui_u32 w = tgui_rect_width(window->dim);
+    tgui_u32 h = font.max_glyph_height + 10;
+    tgui_widget_alloc_into_window(id, _tgui_separator_internal, window, 0, y, w, h);
 
-    TGuiRectangle result = {
-        x + (start - text_input->offset) * font.max_glyph_width,
-        y,
-        x + (end - text_input->offset) * font.max_glyph_width,
-        y + font.max_glyph_height,
-    };
-
-    return result;
+    return separator->open;
 }
 
-static void delete_selection(TGuiTextInput *text_input) {
-    
-    tgui_u32 start = text_input->selection_start;
-    tgui_u32 end = text_input->selection_end;
+void _tgui_separator_internal(TGuiWidget *widget, TGuiPainter *painter) {
 
-    if(start > end) {
-        tgui_u32 temp = start;
-        start = end;
-        end = temp;
-    }
-    TGUI_ASSERT(start <= end);
+    TGuiWindow *window = widget->parent;
+    tgui_u64 id = widget->id;
+    
+    TGuiRectangle rect = calculate_widget_rect(widget);
+    TGuiRectangle fake_separator_dim = rect;
+    fake_separator_dim.min_x = window->dim.min_x;
+    fake_separator_dim.max_x = window->dim.max_x;
+    
+    tgui_calculate_hot_widget(window, fake_separator_dim, id);
 
-    TGUI_ASSERT(text_input->selection == true);
-    memmove(text_input->buffer + start,
-            text_input->buffer + end,
-            text_input->used - end);
+    TGuiSeparator *separator = tgui_widget_get_state(id, TGuiSeparator);
     
-    TGUI_ASSERT((end - start) <= text_input->used);
-    
-    text_input->used -= (end - start);
-    text_input->selection = false;
-    text_input->cursor = start;
-    if(text_input->offset > start) {
-        text_input->offset = start;
+    if(!separator->initilize) {
+        separator->open = true;
+        separator->initilize = true;
     }
+
+    if(state.active == id) {
+
+    } else if(state.hot == id) {
+        if(!input.mouse_button_was_down && input.mouse_button_is_down) {
+            state.active = id;
+        }
+    }
+
+    if(state.active == id) {
+        separator->open = !separator->open;
+        state.active = 0;
+    }
+
+    tgui_u32 color = 0x333333;
+    if(separator->open == true) {
+        color = 0x444444;
+    }
+
+    TGuiRectangle saved_painter_clip = painter->clip;
+    painter->clip = tgui_rect_intersection(fake_separator_dim, window->dim);
+    
+    tgui_painter_draw_rectangle(painter, fake_separator_dim, color);
+    
+    char *label = separator->label;
+    TGuiRectangle label_rect = tgui_get_text_dim(0, 0, label);
+    
+    tgui_s32 label_x = rect.min_x + 24;
+    tgui_s32 label_y = rect.min_y + (tgui_rect_height(rect) - 1) / 2 - (tgui_rect_height(label_rect) - 1) / 2;
+    tgui_font_draw_text(painter, label_x, label_y, label,  strlen(label), 0xffffff);
+
+    tgui_painter_draw_rectangle_outline(painter, fake_separator_dim, 0x888888);
+
+    painter->clip = saved_painter_clip;
+
 }
 
-void tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id) {
+void _tgui_float_input(TGuiWindowHandle handle, tgui_f32 *value, tgui_u32 border_color, tgui_s32 x, tgui_s32 y, tgui_s32 w, char *tgui_id) {
     
     TGuiWindow *window = tgui_window_get_from_handle(handle);
     
@@ -677,6 +709,52 @@ void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
     tgui_painter_draw_rectangle_outline(painter, rect, float_input->border_color);
 
     painter->clip = saved_painter_clip;
+}
+
+static TGuiRectangle calculate_selection_rect(TGuiTextInput *text_input, tgui_s32 x, tgui_s32 y, tgui_u32 start, tgui_u32 end) {
+
+    if(start > end) {
+        tgui_u32 temp = start;
+        start = end;
+        end = temp;
+    }
+    TGUI_ASSERT(start <= end);
+
+    TGuiRectangle result = {
+        x + (start - text_input->offset) * font.max_glyph_width,
+        y,
+        x + (end - text_input->offset) * font.max_glyph_width,
+        y + font.max_glyph_height,
+    };
+
+    return result;
+}
+
+static void delete_selection(TGuiTextInput *text_input) {
+    
+    tgui_u32 start = text_input->selection_start;
+    tgui_u32 end = text_input->selection_end;
+
+    if(start > end) {
+        tgui_u32 temp = start;
+        start = end;
+        end = temp;
+    }
+    TGUI_ASSERT(start <= end);
+
+    TGUI_ASSERT(text_input->selection == true);
+    memmove(text_input->buffer + start,
+            text_input->buffer + end,
+            text_input->used - end);
+    
+    TGUI_ASSERT((end - start) <= text_input->used);
+    
+    text_input->used -= (end - start);
+    text_input->selection = false;
+    text_input->cursor = start;
+    if(text_input->offset > start) {
+        text_input->offset = start;
+    }
 }
 
 TGuiTextInput *_tgui_text_input(TGuiWindowHandle handle, tgui_s32 x, tgui_s32 y, char *tgui_id) {
@@ -1612,7 +1690,7 @@ void _tgui_dropdown_menu(TGuiWindowHandle handle, tgui_s32 x, tgui_s32 y, char *
     
     TGuiDropDownMenu *dropdown = tgui_widget_get_state(id, TGuiDropDownMenu);
     if(!dropdown->initialize) {
-        dropdown->selected_option = 0;
+        dropdown->selected_option = *selected_option_index;
 
         dropdown->initialize = true;
     }
