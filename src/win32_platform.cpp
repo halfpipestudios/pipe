@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <xinput.h>
+#include <tgui.h>
 
 static WORD XInputButtons[] = {
     XINPUT_GAMEPAD_DPAD_UP,
@@ -98,6 +99,11 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 /*              Win32 Platform                  */
 /*----------------------------------------------*/
 
+static HCURSOR cursor_v_double_arrow;
+static HCURSOR cursor_h_double_arrow;
+static HCURSOR cursor_hand;
+static HCURSOR cursor_arrow;
+
 void Win32Platform::Initialize() {
     window.Initialize(1280, 720);
     SetWindowLongPtrA(window.hwnd, GWLP_USERDATA, (LONG_PTR)this);
@@ -108,6 +114,12 @@ void Win32Platform::Initialize() {
     ASSERT(IS_POWER_OF_TWO(GetPageSize()));
 
     QueryPerformanceFrequency(&frequency);
+    
+    cursor_v_double_arrow = LoadCursorA(nullptr, IDC_SIZENS);
+    cursor_h_double_arrow = LoadCursorA(nullptr, IDC_SIZEWE);
+    cursor_hand           = LoadCursorA(nullptr, IDC_HAND);
+    cursor_arrow          = LoadCursorA(nullptr, IDC_ARROW);
+
 }
 
 void Win32Platform::Terminate()  {
@@ -143,6 +155,13 @@ static f32 Win32ProcessXInputStick(SHORT value, i32 deadZoneValue)
 }
 
 void Win32Platform::PollEvents() {
+
+    switch (tgui_get_cursor_state()) { 
+    case TGUI_CURSOR_ARROW:   { SetCursor(cursor_arrow); } break;         
+    case TGUI_CURSOR_HAND:    { SetCursor(cursor_hand);  } break;          
+    case TGUI_CURSOR_V_ARROW: { SetCursor(cursor_v_double_arrow); } break;
+    case TGUI_CURSOR_H_ARROW: { SetCursor(cursor_h_double_arrow); } break;
+    }
 
     input.state[1] = input.state[0];
 

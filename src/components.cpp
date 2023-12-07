@@ -236,7 +236,7 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
     Segment playerSegment;
     playerSegment.a =  lastPhysics.pos;
     playerSegment.b = physics.pos;
-
+#if 0
     f32 tMin = FLT_MAX; 
     for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
@@ -251,6 +251,7 @@ void PhysicsComponent::ProcessMap(Entity *entity) {
         physics.pos = lastPhysics.pos + (physics.pos - lastPhysics.pos) * (tMin*0.8f);
         collisionComp->cylinder.c = physics.pos;
     }
+#endif
 
     GJK gjk;
     for(u32 i = 0; i < map->covexHulls.count; ++i) {

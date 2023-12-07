@@ -409,11 +409,10 @@ typedef struct TGuiDropDownMenu {
     
     char **options;
     tgui_u32 options_size;
-    tgui_u32 selected_option;
+    
+    tgui_u32 *selected_option;
     
     tgui_b32 click_was_in_scrollbar;
-
-    tgui_b32 initialize;
 
 } TGuiDropDownMenu;
 
