@@ -81,6 +81,7 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 void Editor::Initialize(Game *game) {
     this->game = game;
     this->selectedEntity = nullptr;
+    this->paused = false;
 
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
@@ -195,13 +196,14 @@ static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i3
         "ConvexHull",
     };
     u32 optionsSize = sizeof(options)/sizeof(options[0]);
-    i32 optionIndex = 0;
 
     u32 label_x = x + 10;
+    x = label_x + 40;
 
     if(_tgui_separator(window, "Collision Component", *y, true, TGUI_ID)) {
         *y += h + 10;
-        _tgui_dropdown_menu(window, label_x, *y, options, optionsSize, &optionIndex, TGUI_ID); 
+        _tgui_label(window, "c =", 0x222222, label_x, *y, TGUI_ID);
+        _tgui_dropdown_menu(window, x, *y, options, optionsSize, (i32 *)&col->type, TGUI_ID); 
         *y += 10;
     }
     *y += h;
@@ -258,6 +260,9 @@ static void UpdateAIComponent(TGuiWindowHandle window, Entity *entity, i32 x, i3
 }
 
 void Editor::Update(f32 dt) {
+    
+    if(paused) dt = 0; 
+
     game->Update(dt);
     
     Level *level = &game->level;
@@ -269,6 +274,11 @@ void Editor::Update(f32 dt) {
     
     // NOTE: Game window UI
     {
+        if(paused) {
+            _tgui_label(gameWindow, "game: paused", 0x00ff00, 4, 4, TGUI_ID);
+        } else {
+            _tgui_label(gameWindow, "game: playing", 0x00ff00, 4, 4, TGUI_ID);
+        }
         tgui_texture(gameWindow, (void *)GraphicsManager::Get()->FrameBufferGetTexture(gameFrameBuffer));
     }
 
@@ -283,8 +293,17 @@ void Editor::Update(f32 dt) {
         i32 x = w / 2 - buttonW / 2; if(x < 0) x = 0;
         i32 y = 10;
         tgui_button(toolWindow, "Save Level", x, y);
-        tgui_button(toolWindow, "Load Level", x, y + 30 + 10);
-        tgui_button(toolWindow, "Add Entity", x, y + 60 + 20);
+        tgui_button(toolWindow, "Load Level", x, y +  30 + 10);
+        tgui_button(toolWindow, "Add Entity", x, y +  60 + 20);
+
+        char *gameStateButton[] = {
+            "Pause Game",
+            "Play Game",
+        };
+
+        if(tgui_button(toolWindow, gameStateButton[paused], x, y + 90 + 30)) {
+            paused = !paused;
+        }
     }
     
     // NOTE: Entity window UI
@@ -309,7 +328,7 @@ void Editor::Update(f32 dt) {
     {
         if(selectedEntity) {
             
-            i32 y = 4;
+            i32 y = 2;
 
             ComponentContainer *container = selectedEntity->componentContainerList;
             while(container != nullptr) {

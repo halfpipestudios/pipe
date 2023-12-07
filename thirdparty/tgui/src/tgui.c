@@ -670,9 +670,9 @@ void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
             float_input->cursor = 0;
         }
     
-    } else {
-        float_input_update_buffer(float_input);
     }
+
+    float_input_update_buffer(float_input);
 
     if(state.active == id && state.hot != id && input.mouse_button_was_down && !input.mouse_button_is_down) {
         state.active = 0;
@@ -1675,42 +1675,6 @@ void _tgui_tree_view_internal(TGuiWidget *widget, TGuiPainter *painter) {
     }
 }
 
-void _tgui_dropdown_menu(TGuiWindowHandle handle, tgui_s32 x, tgui_s32 y, char **options, tgui_u32 options_size, tgui_s32 *selected_option_index, char *tgui_id) {
-
-    TGuiWindow *window = tgui_window_get_from_handle(handle);
-    
-    tgui_u64 id = tgui_get_widget_id(tgui_id);
-
-    if(!tgui_window_update_widget(window)) {
-        if(state.active == id) {
-            state.active = 0;
-        }
-        return;
-    }
-    
-    TGuiDropDownMenu *dropdown = tgui_widget_get_state(id, TGuiDropDownMenu);
-    if(!dropdown->initialize) {
-        dropdown->selected_option = *selected_option_index;
-
-        dropdown->initialize = true;
-    }
-
-    dropdown->options = options;
-    dropdown->options_size = options_size;
-    
-    tgui_u32 dropdown_w = TGUI_DROPDOWN_MENU_DELFAUT_W;
-    tgui_u32 dropdown_h = TGUI_DROPDOWN_MENU_DELFAUT_H;
-
-    if(state.active == id) {
-        dropdown_h += options_size * dropdown_h;
-    }
-
-    tgui_widget_alloc_into_window(id, _tgui_dropdown_menu_internal, window, x, y, dropdown_w, dropdown_h);
-
-    *selected_option_index = dropdown->selected_option;
-
-}
-
 TGuiRectangle calculate_option_rect(tgui_s32 x, tgui_s32 y, tgui_s32 option_index) {
     return tgui_rect_from_wh(x, y + TGUI_DROPDOWN_MENU_DELFAUT_H*(option_index + 1), TGUI_DROPDOWN_MENU_DELFAUT_W, TGUI_DROPDOWN_MENU_DELFAUT_H);
 }
@@ -1732,6 +1696,35 @@ tgui_b32 mouse_in_window_scrollbar(TGuiWindow *window, tgui_s32 x, tgui_s32 y) {
     return result;
 }
 
+void _tgui_dropdown_menu(TGuiWindowHandle handle, tgui_s32 x, tgui_s32 y, char **options, tgui_u32 options_size, tgui_s32 *selected_option, char *tgui_id) {
+
+    TGuiWindow *window = tgui_window_get_from_handle(handle);
+    
+    tgui_u64 id = tgui_get_widget_id(tgui_id);
+
+    if(!tgui_window_update_widget(window)) {
+        if(state.active == id) {
+            state.active = 0;
+        }
+        return;
+    }
+    
+    TGuiDropDownMenu *dropdown = tgui_widget_get_state(id, TGuiDropDownMenu);
+
+    dropdown->options = options;
+    dropdown->options_size = options_size;
+    dropdown->selected_option = selected_option;
+
+    tgui_u32 dropdown_w = TGUI_DROPDOWN_MENU_DELFAUT_W;
+    tgui_u32 dropdown_h = TGUI_DROPDOWN_MENU_DELFAUT_H;
+
+    if(state.active == id) {
+        dropdown_h += options_size * dropdown_h;
+    }
+
+    tgui_widget_alloc_into_window(id, _tgui_dropdown_menu_internal, window, x, y, dropdown_w, dropdown_h);
+}
+
 void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
     
     TGuiWindow *window = widget->parent;
@@ -1741,7 +1734,7 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
     TGuiDropDownMenu *dropdown = tgui_widget_get_state(id, TGuiDropDownMenu);
     
     tgui_calculate_hot_widget(window, rect, id);
-    
+
     tgui_b32 mouse_in_node = tgui_rect_point_overlaps(rect, input.mouse_x, input.mouse_y);
 
     if(state.hot == id) {
@@ -1769,12 +1762,13 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
             for(tgui_u32 i = 0; i < dropdown->options_size; ++i) {
                 TGuiRectangle option_rect = calculate_option_rect(rect.min_x, rect.min_y, i);
                 if(tgui_rect_point_overlaps(option_rect, input.mouse_x, input.mouse_y)) {
-                    dropdown->selected_option = i;
+                    *dropdown->selected_option = i;
                     state.active = 0;
                     break;
                 }
             }
         }
+
     }
 
     TGuiRectangle header_rect = tgui_rect_from_wh(rect.min_x, rect.min_y, TGUI_DROPDOWN_MENU_DELFAUT_W, TGUI_DROPDOWN_MENU_DELFAUT_H);
@@ -1784,6 +1778,8 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
 
     painter->clip = tgui_rect_intersection(rect, painter->clip);
     painter->render_buffer = &state.render_state.render_buffer_tgui_on_top;
+
+    tgui_u32 font_color = 0xffffff;
 
     if(state.active == id) {
         for(tgui_u32 i = 0; i < dropdown->options_size; ++i) {
@@ -1795,28 +1791,28 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
             tgui_s32 label_x = option_rect.min_x + (tgui_rect_width(option_rect) - 1) / 2 - (tgui_rect_width(label_rect) - 1) / 2;
             tgui_s32 label_y = option_rect.min_y + (tgui_rect_height(option_rect) - 1) / 2 - (tgui_rect_height(label_rect) - 1) / 2;
 
-            tgui_u32 color = 0x999999;
+            tgui_u32 color = 0x444444;
             if(state.hot == id && tgui_rect_point_overlaps(option_rect, input.mouse_x, input.mouse_y)) {
-                color = 0x777777;
+                color = 0x555555;
             }
             tgui_painter_draw_rectangle(painter, option_rect, color);
-            tgui_painter_draw_hline(painter, option_rect.max_y, option_rect.min_x, option_rect.max_x, 0x777777);
-            tgui_font_draw_text(painter, label_x, label_y, label, strlen(label), 0x444444);
+            tgui_painter_draw_hline(painter, option_rect.max_y, option_rect.min_x, option_rect.max_x, 0x888888);
+            tgui_font_draw_text(painter, label_x, label_y, label, strlen(label), font_color);
         }
     }
     
     tgui_u32 cruz_w = 8;
 
     TGuiRectangle option_rect = header_rect;
-    char *label = dropdown->options[dropdown->selected_option];
+    char *label = dropdown->options[*dropdown->selected_option];
     TGuiRectangle label_rect = tgui_get_text_dim(0, 0, label);
 
     tgui_s32 label_x = option_rect.min_x + (tgui_rect_width(option_rect) - 1) / 2 - (tgui_rect_width(label_rect) - 1) / 2 - cruz_w;
     tgui_s32 label_y = option_rect.min_y + (tgui_rect_height(option_rect) - 1) / 2 - (tgui_rect_height(label_rect) - 1) / 2;
-
-    tgui_painter_draw_rectangle(painter, header_rect, 0x444444);
-    tgui_painter_draw_rectangle_outline(painter, rect, 0x222222);
-    tgui_font_draw_text(painter, label_x, label_y, label, strlen(label), 0x999999);
+    
+    tgui_painter_draw_rectangle(painter, header_rect, 0x333333);
+    tgui_painter_draw_rectangle_outline(painter, rect, 0x888888);
+    tgui_font_draw_text(painter, label_x, label_y, label, strlen(label), font_color);
 
     tgui_s32 cruz_x = rect.max_x - (cruz_w + 12);
     tgui_s32 cruz_y = option_rect.min_y + (tgui_rect_height(option_rect) - 1) / 2 - (cruz_w - 1) / 2;
@@ -1826,16 +1822,16 @@ void _tgui_dropdown_menu_internal(TGuiWidget *widget, TGuiPainter *painter) {
         TGuiRectangle v_rect = cruz_rect;
         v_rect.min_x += cruz_w / 4;
         v_rect.max_x -= cruz_w / 4;
-        tgui_painter_draw_rectangle(painter, v_rect, 0x999999);
+        tgui_painter_draw_rectangle(painter, v_rect, 0x888888);
         TGuiRectangle h_rect = cruz_rect;
         h_rect.min_y += cruz_w / 4;
         h_rect.max_y -= cruz_w / 4;
-        tgui_painter_draw_rectangle(painter, h_rect, 0x999999);
+        tgui_painter_draw_rectangle(painter, h_rect, 0x888888);
     } else {
         TGuiRectangle h_rect = cruz_rect;
         h_rect.min_y += cruz_w / 4;
         h_rect.max_y -= cruz_w / 4;
-        tgui_painter_draw_rectangle(painter, h_rect, 0x999999);
+        tgui_painter_draw_rectangle(painter, h_rect, 0x888888);
     }
 
     //printf("hot widget:%lld, widget id:%lld\n", state.hot, id);

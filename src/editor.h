@@ -17,6 +17,7 @@ struct Editor {
     
     Game *game;
     Entity *selectedEntity;
+    bool paused;
 
     TGuiGfxBackend tguiBackend;
 
