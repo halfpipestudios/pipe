@@ -8,7 +8,7 @@
 #include "camera.h"
 #include "math.h"
 #include "components.h"
-#include "components_new.h"
+#include "cmp/base_cmp.h"
 
 #include <typeinfo>
 
@@ -25,6 +25,24 @@ enum EntityFlags {
     
     ENTITY_GROUNDED  = 1 << 2,
     ENTITY_COLLIDING = 1 << 3,
+};
+
+struct Entity_ {
+
+    char *name;
+    u32 flags;
+
+    inline void AddFlag(EntityFlags flag) { flags |= flag; }
+    inline void RemoveFlag(EntityFlags flag) { flags &= ~flag; }
+    inline void ClearFlags() { flags = 0; };
+    inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
+
+    template <typename ComponentType>
+    ComponentType* GetComponent() {
+        return (ComponentType *)componentsPtrs.Get(ComponentType::GetID());
+    }
+
+    StaticHashMap<CMPBase *, 64> componentsPtrs;
 };
 
 
@@ -57,7 +75,6 @@ struct Entity {
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
 
-    StaticHashMap<ComponentBase *, 64> componentsPtrs;
 
 };
 

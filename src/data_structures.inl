@@ -53,8 +53,6 @@ Type StaticHashMap<Type, Size>::Get(u64 key) {
         return elements[index].value;
     }
     
-    ASSERT(!"ELEMENT NOT FOUND!!!");
-
     return {};
 }
 
@@ -72,8 +70,9 @@ Type *StaticArray<Type, Size>::Push(Type value) {
 
     ASSERT(size + 1 <= capacity);
 
-    Type *element = data + size;
+    Type *element = new (data + size) Type;
     *element = value;
+
     ++size;
     return element;
 }

@@ -28,6 +28,10 @@ struct StaticArray {
     StaticArray();
     Type *Push(Type value);
 
+    Type& operator[] (u32 index){
+        return data[index];
+    }
+
     u32 capacity { Size    };
     u32 size     { 0       };
     Type *data   { nullptr };

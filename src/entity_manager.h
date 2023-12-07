@@ -12,27 +12,28 @@ struct EntityManager {
     }
 
     template <typename ComponentType>
-    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>* GetComponents() {
+    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& GetComponents() {
         return componentsStorage.GetComponents<ComponentType>();
     }
 
-    StaticArray<Entity, ENTITY_ARRAY_MAX_SIZE> *GetEntities() {
-        return &entities;
+    StaticArray<Entity_, ENTITY_ARRAY_MAX_SIZE>& GetEntities() {
+        return entities;
     }
 
-    Entity *AddEntity() {
+    Entity_ *AddEntity() {
         return entities.Push({});
     }
 
     template <typename ComponentType>
-    ComponentType *AddComponent(Entity *entity) {
-        StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>* componentsArray = GetComponents<ComponentType>();
-        ComponentType *component = componentsArray->Push({});
-        entity->componentsPtrs.Add(ComponentType::GetID(), (ComponentBase *)component);
+    ComponentType *AddComponent(Entity_ *entity) {
+        StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& componentsArray = GetComponents<ComponentType>();
+        ComponentType *component = componentsArray.Push({});
+        component->entity = entity;
+        entity->componentsPtrs.Add(ComponentType::GetID(), (CMPBase *)component);
         return component;
     }
 
-    StaticArray<Entity, ENTITY_ARRAY_MAX_SIZE> entities;
+    StaticArray<Entity_, ENTITY_ARRAY_MAX_SIZE> entities;
     ComponentStorage componentsStorage;
 };
 

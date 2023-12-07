@@ -1,8 +1,8 @@
 #ifndef _COMPONENT_STORAGE_H_
 #define _COMPONENT_STORAGE_H_
 
-#include "data_structures.c"
-#include "components_new.h"
+#include "data_structures.inl"
+#include "cmp/base_cmp.h"
 
 #define COMPONENTS_ARRAY_MAP_SIZE 64
 #define COMPONENTS_ARRAY_MAX_SIZE 256
@@ -17,10 +17,10 @@ struct ComponentArray : ComponentArrayBase {
 struct ComponentStorage {
 
     template <typename ComponentType>
-    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>* GetComponents() {
+    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& GetComponents() {
         i32 id = ComponentType::GetID(); 
         ComponentArray<ComponentType> *componentArray = (ComponentArray<ComponentType> *)componentsArraysMap.Get(id);
-        return &componentArray->components;
+        return componentArray->components;
     }
 
     template <typename ComponentType>

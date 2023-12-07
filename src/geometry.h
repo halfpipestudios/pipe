@@ -6,6 +6,7 @@
 
 #include "map_importer.h"
 
+struct CollisionCMP;
 struct CollisionComponent;
 struct Cylinder;
 
@@ -15,6 +16,7 @@ struct Segment {
 
     bool HitEntity(MapImporter::Entity *entity, f32 *tOut);
     bool HitCollider(CollisionComponent *collider, f32  *tOut);
+    bool HitCollider(CollisionCMP *collider, f32  *tOut);
 
     bool HitCylinder(Cylinder *cylinder, f32 *tOut);
     bool HitConvexHull(ConvexHull *convexHull, f32 *tOut);

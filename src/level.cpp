@@ -8,9 +8,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "cmp/transform_cmp.h"
+#include "cmp/graphics_cmp.h"
+#include "cmp/physics_cmp.h"
+#include "cmp/animation_cmp.h"
+#include "cmp/input_cmp.h"
+#include "cmp/collision_cmp.h"
+#include "cmp/moving_platform_cmp.h"
+#include "cmp/ai_cmp.h"
 
-#include "components_new.h"
-#include "entity_manager.h"
 
 static Vertex gCubeVertices[] = {
         // positions          // texture Coords
@@ -305,7 +311,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     playerAnimCompuDesc.animationSet = &animationsSets[1];
     hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
 
-    // Load Horizontal Platform      scale             from             to
+    // Load Horizontal Platform                         scale             from             to
     platformHor  = AddMovingPlatform("mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
     platformVer0 = AddMovingPlatform("mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
     platformVer1 = AddMovingPlatform("mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
@@ -318,28 +324,96 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 
 
     // TODO: EntityManager test ...
-    EntityManager em;
-    em.AddComponentType<AComponent>();
-    em.AddComponentType<BComponent>();
-    em.AddComponentType<CComponent>();
+    Input *input = PlatformManager::Get()->GetInput();
 
-    Entity *manolo = em.AddEntity();
+    em.AddComponentType<TransformCMP>();
+    em.AddComponentType<GraphicsCMP>();
+    em.AddComponentType<PhysicsCMP>();
+    em.AddComponentType<AnimationCMP>();
+    em.AddComponentType<InputCMP>();
+    em.AddComponentType<CollisionCMP>();
+    em.AddComponentType<MovingPlatformCMP>();
+    em.AddComponentType<AiCMP>();
+
+    // ADD MANOLO EL JUGADOR
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    manolo = em.AddEntity();
     manolo->name = "Manolo";
-
-    AComponent *acomponent = em.AddComponent<AComponent>(manolo);
-
-    StaticArray<AComponent, COMPONENTS_ARRAY_MAX_SIZE> *acomponents = em.GetComponents<AComponent>(); 
-
-    AComponent *manoloAComponent = (AComponent *)manolo->componentsPtrs.Get(AComponent::GetID());
-
-    i32 StopHere = 0;
     
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(manolo);
+    transformCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
+
+    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(manolo);
+    physicsCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3());
+
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(manolo);
+    graphicsCmp->Initialize(modelImporter.model, animShader);
+
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(manolo);
+    animationCmp->Initialize(&animationsSets[1]);
+
+    InputCMP *inputCmp = em.AddComponent<InputCMP>(manolo);
+    inputCmp->Initialize(input, &camera);
+
+    Cylinder cylinder = {};
+    cylinder.c = Vec3(0, 30, 0);
+    cylinder.u = Vec3(0, 1, 0);
+    cylinder.radii = 0.3f;
+    cylinder.n = 0.75f;
+    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(manolo);
+    collisionCmp->Initialize(cylinder);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    // ADD moving platofrm
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Entity_ *platform = em.AddEntity();
+    platform->name = "Moving Platform";
+    
+    transformCmp = em.AddComponent<TransformCMP>(platform);
+    transformCmp->Initialize(Vec3(14, 10,  0), Vec3(), Vec3(2, 0.5f, 2));
+
+    Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
+    mesh->texture = LoadTextureFromPath("cool.png");
+    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
+    mesh->indexBuffer = nullptr;
+
+    // load the model and add the mesh to the model
+    Model model = {};
+    model.type = MODEL_TYPE_STATIC;
+    model.numMeshes = 1;
+    model.meshes = mesh;
+
+    graphicsCmp = em.AddComponent<GraphicsCMP>(platform);
+    graphicsCmp->Initialize(model, statShader);
+
+    ConvexHull convexHull {};
+    convexHull.points = CreateCube();
+    convexHull.count  = ARRAY_LENGTH(gCube);
+
+    MapImporter::Entity entity {};
+    entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
+    memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
+    entity.facesCount = 6;
+
+    collisionCmp = em.AddComponent<CollisionCMP>(platform);
+    collisionCmp->Initialize(convexHull, entity);
+
+    MovingPlatformCMP *movingCmp = em.AddComponent<MovingPlatformCMP>(platform);
+    movingCmp->Initialize(Vec3(14, 10,  0), Vec3(14,  3, 0));
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 }
 
 void Level::Terminate() {
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
-    
+
+    /*
     Entity *entity = entities;
     while(entity != nullptr) {
         
@@ -349,20 +423,30 @@ void Level::Terminate() {
         toFree->Terminate();
         entitiesAllocator.Free(toFree);
     }
+    */
 
 }
 
 void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
-
+    /*
     Entity *entity = entities;
     while(entity != nullptr) {
         entity->Update(&map, dt);
         entity = entity->next;
     }
+    */
+    inputSys.Update(em, dt);
+    aiSys.Update(em, dt);
+    physicsSys.Update(em, dt);
+    movingPlatformSys.Update(em, dt);
+    collisionSys.Update(em, &map, dt);
+    physicsSys.PostUpdate(em, dt);
+    animationSys.Update(em, dt);
+    transformSys.Update(em);
 
-    TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
+    TransformCMP *heroTransform = manolo->GetComponent<TransformCMP>();
     camera.target = heroTransform->pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();
@@ -374,10 +458,15 @@ void Level::Render(Shader mapShader) {
     GraphicsManager::Get()->BindTextureBuffer(map.texture);
     GraphicsManager::Get()->DrawVertexBuffer(map.vertexBuffer, mapShader);
 
+
+    graphicsSys.Update(em);
+
+    /*
     Entity *entity = entities;
     while(entity != nullptr) {
         entity->Render();
         entity = entity->next;
     }
+    */
 }
 

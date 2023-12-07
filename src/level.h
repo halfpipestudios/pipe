@@ -10,6 +10,16 @@
 
 #include "behavior_tree.h"
 
+#include "entity_manager.h"
+#include "sys/transform_sys.inl"
+#include "sys/physics_sys.inl"
+#include "sys/graphics_sys.inl"
+#include "sys/animation_sys.inl"
+#include "sys/input_sys.inl"
+#include "sys/collision_sys.inl"
+#include "sys/moving_platform_sys.inl"
+#include "sys/ai_sys.inl"
+
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
     MapImporter::EntityArray entities;
@@ -27,6 +37,19 @@ struct Level {
     void Render(Shader mapShader);
 
 private:
+
+    EntityManager em;
+    GraphicsSys<EntityManager> graphicsSys;
+    TransformSys<EntityManager> transformSys;
+    PhysicsSys<EntityManager> physicsSys;
+    AnimationSys<EntityManager> animationSys;
+    InputSys<EntityManager> inputSys;
+    CollisionSys<EntityManager> collisionSys;
+    MovingPlatformSys<EntityManager> movingPlatformSys;
+    AiSys<EntityManager> aiSys;
+
+
+    Entity_ *manolo;
 
     Camera camera;
     
