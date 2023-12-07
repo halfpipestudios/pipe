@@ -7,7 +7,7 @@
 
 struct Game;
 struct Level;
-struct Entity;
+struct Entity_;
 
 struct Editor {
     void Initialize(Game *game);
@@ -16,7 +16,7 @@ struct Editor {
     void Render();
     
     Game *game;
-    Entity *selectedEntity;
+    Entity_ *selectedEntity;
     bool paused;
 
     TGuiGfxBackend tguiBackend;

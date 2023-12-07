@@ -2,6 +2,7 @@
 #define _ENTITY_MANAGER_H_
 
 #include "component_storage.h"
+#include "entity.h"
 
 #define ENTITY_ARRAY_MAX_SIZE 100
 

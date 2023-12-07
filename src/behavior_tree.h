@@ -15,14 +15,14 @@ enum BehaviorStatus {
 #define BEHAVIOR_TREE_MAX_NODES 128
 #define BEHAVIOR_NODE_MAX_CHILDS 16
 
-struct Entity;
-struct PhysicsComponent;
-struct AIComponent;
+struct Entity_;
+struct PhysicsCMP;
+struct AiCMP;
 
 struct BehaviorNodeContex {
-    Entity *entity;
-    PhysicsComponent *phyComp;
-    AIComponent      *aiComp;
+    Entity_ *entity;
+    PhysicsCMP *phyComp;
+    AiCMP      *aiComp;
 };
 
 struct BehaviorNode {

@@ -4,8 +4,8 @@
 #include "common.h"
 #include "math.h"
 
-struct AIComponent;
-struct PhysicsComponent;
+struct AiCMP;
+struct PhysicsCMP;
 
 struct AIBlackBoard {
     Vec3 *target;
@@ -32,10 +32,10 @@ struct Steering {
     }
 };
 
-Steering  Face(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget);
-Steering  Seek(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget);
-Steering  Flee(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget);
-Steering  Arrive(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget);
+Steering  Face(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget);
+Steering  Seek(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget);
+Steering  Flee(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget);
+Steering  Arrive(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget);
 
 
 #endif

@@ -1,6 +1,7 @@
 #include "data_structures.h"
 #include "memory_manager.h"
 #include "utils.h"
+#include <memory>
 
 // StaticHashMap -----------------------------------------------------------------------------------------
 template <typename Type, u32 Size>

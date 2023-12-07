@@ -1,5 +1,7 @@
 #include "ai_sys.h"
 
+#include "../behavior_tree.h"
+
 template <typename EM>
 void AiSys<EM>::Update(EM& em, f32 dt) {
 
@@ -13,29 +15,26 @@ void AiSys<EM>::Update(EM& em, f32 dt) {
         
         if(phy == nullptr) continue;
 
-        /*
         if(ai->bhTree) {
-            BehaviorNodeContex_ contx;
+            BehaviorNodeContex contx;
             contx.entity = entity;
             contx.phyComp = phy;
             contx.aiComp = ai;
-            bhTree->run(&contx);
+            ai->bhTree->run(&contx);
             return;
         }
         
         Steering steering = {};
 
-        switch(behavior) {
-            case STEERING_BEHAVIOR_FACE:   { steering = Face(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
-            case STEERING_BEHAVIOR_SEEK:   { steering = Seek(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
-            case STEERING_BEHAVIOR_FLEE:   { steering = Flee(  this, phyComp, *gBlackBoard.target, timeToTarget); } break;
-            case STEERING_BEHAVIOR_ARRIVE: { steering = Arrive(this, phyComp, *gBlackBoard.target, timeToTarget); } break;
+        switch(ai->behavior) {
+            case STEERING_BEHAVIOR_FACE:   { steering = Face(  ai, phy, *gBlackBoard.target, ai->timeToTarget); } break;
+            case STEERING_BEHAVIOR_SEEK:   { steering = Seek(  ai, phy, *gBlackBoard.target, ai->timeToTarget); } break;
+            case STEERING_BEHAVIOR_FLEE:   { steering = Flee(  ai, phy, *gBlackBoard.target, ai->timeToTarget); } break;
+            case STEERING_BEHAVIOR_ARRIVE: { steering = Arrive(ai, phy, *gBlackBoard.target, ai->timeToTarget); } break;
         }
         
         phy->physics.acc += steering.linear;
         phy->physics.angularVel += steering.angular;
-        */
-
         
     }
 

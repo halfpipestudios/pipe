@@ -147,41 +147,88 @@ static void LoadModelToGpu(Model *model) {
     }
 }
 
-Entity *Level::AddEntity(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader) {
-    Entity *entity = entitiesAllocator.Alloc();
-    if(entitiesEnd == nullptr) entitiesEnd = entity;
-    entity->Initialize(name, pos, rot, scale, model, shader, &map, entitiesEnd, &animationsSets[1]);
-    entity->next = entities;
-    if(entities != nullptr) {
-        entities->prev = entity;
-    }
-    entities = entity;
-    return entity;
+static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
+                           AnimationClipSet *animationClipSet, Camera *camera) {
+
+    Input *input = PlatformManager::Get()->GetInput();
+
+    Entity_ *hero = em.AddEntity();
+    hero->name = "Hero";
+    
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(hero);
+    transformCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
+
+    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(hero);
+    physicsCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3());
+
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(hero);
+    graphicsCmp->Initialize(model, shader);
+
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(hero);
+    animationCmp->Initialize(animationClipSet);
+
+    InputCMP *inputCmp = em.AddComponent<InputCMP>(hero);
+    inputCmp->Initialize(input, camera);
+
+    Cylinder cylinder = {};
+    cylinder.c = Vec3(0, 30, 0);
+    cylinder.u = Vec3(0, 1, 0);
+    cylinder.radii = 0.3f;
+    cylinder.n = 0.75f;
+    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(hero);
+    collisionCmp->Initialize(cylinder);
+
+    return hero;
+    
 }
 
-Entity *Level::AddEntity(const char *name) {
-    Entity *entity = entitiesAllocator.Alloc();
-    if(entitiesEnd == nullptr) entitiesEnd = entity;
-    entity->Initialize(name);
-    entity->next = entities;
-    if(entities != nullptr) {
-        entities->prev = entity;
-    }
-    entities = entity;
-    return entity;
+static Entity_ *CreateOrc(EntityManager& em,
+                          char *name,
+                          Vec3 pos,
+                          Model& model, Shader shader,
+                          AnimationClipSet *animationClipSet,
+                          BehaviorTree *bhTree = nullptr) {
+
+    Input *input = PlatformManager::Get()->GetInput();
+
+    Entity_ *orc = em.AddEntity();
+    orc->name = name;
+    
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(orc);
+    transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
+
+    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(orc);
+    physicsCmp->Initialize(pos, Vec3(), Vec3());
+
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(orc);
+    graphicsCmp->Initialize(model, shader);
+
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
+    animationCmp->Initialize(animationClipSet);
+
+    Cylinder cylinder = {};
+    cylinder.c = pos;
+    cylinder.u = Vec3(0, 1, 0);
+    cylinder.radii = 0.3f;
+    cylinder.n = 0.75f;
+    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(orc);
+    collisionCmp->Initialize(cylinder);
+
+    AiCMP *aiCmp = em.AddComponent<AiCMP>(orc);
+    aiCmp->Initialize(STEERING_BEHAVIOR_ARRIVE, 0.75f, 2.0f, true, bhTree);
+
+    return orc;
+    
 }
 
-Entity *Level::AddMovingPlatform(const char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
-    Entity *platform = AddEntity(name);
 
-    TransformComponentDesc transformDesc = {};
-    transformDesc.pos = a;
-    transformDesc.rot = Vec3();
-    transformDesc.scale = scale;
-    platform->AddComponent<TransformComponent>(&transformDesc);
+static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
+    Entity_ *platform = em.AddEntity();
+    platform->name = name;
+    
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(platform);
+    transformCmp->Initialize(a, Vec3(), scale);
 
-    // TODO: we dont need to load the model for each entity, reused it
-    // load the mesh
     Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
     mesh->texture = LoadTextureFromPath("cool.png");
     mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
@@ -193,32 +240,28 @@ Entity *Level::AddMovingPlatform(const char *name, Vec3 scale, Vec3 a, Vec3 b, S
     model.numMeshes = 1;
     model.meshes = mesh;
 
-    GraphicsComponentDesc graphCompDesc = {};
-    graphCompDesc.model = model;
-    graphCompDesc.shader = shader;
-    platform->AddComponent<GraphicsComponent>(&graphCompDesc);
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(platform);
+    graphicsCmp->Initialize(model, shader);
 
-    CollisionComponentDesc colliderDesc = {};
-    colliderDesc.type = COLLIDER_CONVEXHULL;
-    colliderDesc.poly3D.convexHull.points = CreateCube();
-    colliderDesc.poly3D.convexHull.count  = ARRAY_LENGTH(gCube);
-    colliderDesc.poly3D.entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
-    memcpy(colliderDesc.poly3D.entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
-    colliderDesc.poly3D.entity.facesCount = 6;
-    platform->AddComponent<CollisionComponent>(&colliderDesc);
+    ConvexHull convexHull {};
+    convexHull.points = CreateCube();
+    convexHull.count  = ARRAY_LENGTH(gCube);
 
-    MovingPlatformComponentDesc movCompDesc = {};
-    movCompDesc.a = a;
-    movCompDesc.b = b;
-    platform->AddComponent<MovingPlatformComponent>(&movCompDesc);
+    MapImporter::Entity entity {};
+    entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
+    memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
+    entity.facesCount = 6;
+
+    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(platform);
+    collisionCmp->Initialize(convexHull, entity);
+
+    MovingPlatformCMP *movingCmp = em.AddComponent<MovingPlatformCMP>(platform);
+    movingCmp->Initialize(a, b);
 
     return platform;
 }
 
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
-    entities = nullptr;
-    entitiesEnd = nullptr;
-
     // NOTE Load Map ------------------------------------------------------------------------------------------
     MapImporter mapImporter;
     mapImporter.LoadMapFromFile(mapFilePath);
@@ -241,11 +284,8 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
     );    
 
-    // NOTE Load entities ------------------------------------------------------------------------------------
-    ModelImporter modelImporter;
     
     // Load all level animations
-    
     numAnimationsSets = 2;
     animationsSets = (AnimationClipSet *)MemoryManager::Get()->AllocStaticMemory(sizeof(AnimationClipSet) * numAnimationsSets, 1);
     
@@ -260,71 +300,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     animationsSets[1].numClips = animationImporter.numAnimations;
     animationsSets[1].skeleton = animationImporter.skeleton;
 
-    // Load Orc
-    modelImporter.Read("./data/models/orc.twm");
-    LoadModelToGpu(&modelImporter.model);
-    orc = AddEntity("orc_1", Vec3(10, 4, 8), Vec3(), Vec3(1, 1, 1),
-                    modelImporter.model, animShader);
-    
-    AIComponentDesc aiCompDesc = {};
-    aiCompDesc.behavior = STEERING_BEHAVIOR_ARRIVE;
-    aiCompDesc.timeToTarget = 0.75f;
-    aiCompDesc.arrivalRadii = 2.0f;
-    aiCompDesc.active = true;
-    aiCompDesc.bhTree = &bhTree;
-    orc->AddComponent<AIComponent>(&aiCompDesc);
-
-    PlayerAnimationComponentDesc playerAnimCompuDesc = {};
-    playerAnimCompuDesc.animationSet = &animationsSets[1];
-    orc->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
-
-    // Load Orc1
-    modelImporter.Read("./data/models/orc.twm");
-    LoadModelToGpu(&modelImporter.model);
-    orc1 = AddEntity("orc_2", Vec3(10, 4, 10), Vec3(), Vec3(1, 1, 1),
-                     modelImporter.model, animShader);
-    
-    aiCompDesc = {};
-    aiCompDesc.behavior = STEERING_BEHAVIOR_ARRIVE;
-    aiCompDesc.timeToTarget = 0.75f;
-    aiCompDesc.arrivalRadii = 4.0f;
-    aiCompDesc.active = true;
-    aiCompDesc.bhTree = nullptr;
-    orc1->AddComponent<AIComponent>(&aiCompDesc);
-
-    playerAnimCompuDesc = {};
-    playerAnimCompuDesc.animationSet = &animationsSets[1];
-    orc1->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
-    
-    // Load Hero
-    modelImporter.Read("./data/models/hero.twm");
-    LoadModelToGpu(&modelImporter.model);
-    hero = AddEntity("hero", Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f),
-                     modelImporter.model, animShader);
-
-    InputComponentDesc inputCompDesc = {};
-    inputCompDesc.input = PlatformManager::Get()->GetInput(); 
-    inputCompDesc.camera = &camera; 
-    hero->AddComponent<InputComponent>(&inputCompDesc);
-    
-    playerAnimCompuDesc = {};
-    playerAnimCompuDesc.animationSet = &animationsSets[1];
-    hero->AddComponent<PlayerAnimationComponent>(&playerAnimCompuDesc);
-
-    // Load Horizontal Platform                         scale             from             to
-    platformHor  = AddMovingPlatform("mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
-    platformVer0 = AddMovingPlatform("mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
-    platformVer1 = AddMovingPlatform("mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
-
     camera.Initialize();
-
-    TransformComponent *heroTransform = hero->GetComponent<TransformComponent>();
-    TransformComponent *orcTransform = orc->GetComponent<TransformComponent>();
-    gBlackBoard.target = &heroTransform->pos;
-
-
-    // TODO: EntityManager test ...
-    Input *input = PlatformManager::Get()->GetInput();
 
     em.AddComponentType<TransformCMP>();
     em.AddComponentType<GraphicsCMP>();
@@ -335,108 +311,40 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     em.AddComponentType<MovingPlatformCMP>();
     em.AddComponentType<AiCMP>();
 
-    // ADD MANOLO EL JUGADOR
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    manolo = em.AddEntity();
-    manolo->name = "Manolo";
-    
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(manolo);
-    transformCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
-
-    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(manolo);
-    physicsCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3());
-
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(manolo);
-    graphicsCmp->Initialize(modelImporter.model, animShader);
-
-    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(manolo);
-    animationCmp->Initialize(&animationsSets[1]);
-
-    InputCMP *inputCmp = em.AddComponent<InputCMP>(manolo);
-    inputCmp->Initialize(input, &camera);
-
-    Cylinder cylinder = {};
-    cylinder.c = Vec3(0, 30, 0);
-    cylinder.u = Vec3(0, 1, 0);
-    cylinder.radii = 0.3f;
-    cylinder.n = 0.75f;
-    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(manolo);
-    collisionCmp->Initialize(cylinder);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE Load entities ------------------------------------------------------------------------------------
+    ModelImporter modelImporter;
 
 
+    modelImporter.Read("./data/models/hero.twm");
+    LoadModelToGpu(&modelImporter.model);
 
-    // ADD moving platofrm
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Entity_ *platform = em.AddEntity();
-    platform->name = "Moving Platform";
-    
-    transformCmp = em.AddComponent<TransformCMP>(platform);
-    transformCmp->Initialize(Vec3(14, 10,  0), Vec3(), Vec3(2, 0.5f, 2));
+    hero = CreateHero(em, modelImporter.model, animShader, &animationsSets[1], &camera);
 
-    Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
-    mesh->texture = LoadTextureFromPath("cool.png");
-    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
-    mesh->indexBuffer = nullptr;
+    modelImporter.Read("./data/models/orc.twm");
+    LoadModelToGpu(&modelImporter.model);
 
-    // load the model and add the mesh to the model
-    Model model = {};
-    model.type = MODEL_TYPE_STATIC;
-    model.numMeshes = 1;
-    model.meshes = mesh;
+    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), modelImporter.model, animShader, &animationsSets[1]);
+    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8), modelImporter.model, animShader, &animationsSets[1], &bhTree);
 
-    graphicsCmp = em.AddComponent<GraphicsCMP>(platform);
-    graphicsCmp->Initialize(model, statShader);
+    platformHor  = CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
+    platformVer0 = CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
+    platformVer1 = CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
 
-    ConvexHull convexHull {};
-    convexHull.points = CreateCube();
-    convexHull.count  = ARRAY_LENGTH(gCube);
 
-    MapImporter::Entity entity {};
-    entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
-    memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
-    entity.facesCount = 6;
-
-    collisionCmp = em.AddComponent<CollisionCMP>(platform);
-    collisionCmp->Initialize(convexHull, entity);
-
-    MovingPlatformCMP *movingCmp = em.AddComponent<MovingPlatformCMP>(platform);
-    movingCmp->Initialize(Vec3(14, 10,  0), Vec3(14,  3, 0));
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
+    gBlackBoard.target = &heroTransform->pos;
 
 }
 
 void Level::Terminate() {
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
-
-    /*
-    Entity *entity = entities;
-    while(entity != nullptr) {
-        
-        Entity *toFree = entity;
-        entity = entity->next; 
-
-        toFree->Terminate();
-        entitiesAllocator.Free(toFree);
-    }
-    */
-
 }
 
 void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
-    /*
-    Entity *entity = entities;
-    while(entity != nullptr) {
-        entity->Update(&map, dt);
-        entity = entity->next;
-    }
-    */
+
     inputSys.Update(em, dt);
     aiSys.Update(em, dt);
     physicsSys.Update(em, dt);
@@ -446,7 +354,7 @@ void Level::Update(f32 dt) {
     animationSys.Update(em, dt);
     transformSys.Update(em);
 
-    TransformCMP *heroTransform = manolo->GetComponent<TransformCMP>();
+    TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
     camera.target = heroTransform->pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();
@@ -458,15 +366,6 @@ void Level::Render(Shader mapShader) {
     GraphicsManager::Get()->BindTextureBuffer(map.texture);
     GraphicsManager::Get()->DrawVertexBuffer(map.vertexBuffer, mapShader);
 
-
     graphicsSys.Update(em);
-
-    /*
-    Entity *entity = entities;
-    while(entity != nullptr) {
-        entity->Render();
-        entity = entity->next;
-    }
-    */
 }
 

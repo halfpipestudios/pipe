@@ -1,3 +1,4 @@
+#if 0
 #ifndef _COMPONENT_H_
 #define _COMPONENT_H_
 
@@ -305,3 +306,4 @@ struct ComponentContainer {
 };
 
 #endif // _COMPONENT_H_
+#endif

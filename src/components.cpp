@@ -1,3 +1,4 @@
+#if 0
 #include "components.h"
 #include "geometry.h"
 #include "entity.h"
@@ -558,7 +559,7 @@ void AIComponent::Initialize(Entity *entity, void *initData) {
 }
 
 void AIComponent::Process(Entity *entity, f32 dt) {
-
+/*
     PhysicsComponent *phyComp = entity->GetComponent<PhysicsComponent>();
 
     if(bhTree) {
@@ -581,6 +582,7 @@ void AIComponent::Process(Entity *entity, f32 dt) {
     
     phyComp->physics.acc += steering.linear;
     phyComp->physics.angularVel += steering.angular;
+    */
 
 }
 
@@ -902,3 +904,4 @@ PlayerAnimationState *PlayerAnimationTransition::GetNextState() {
     time = 0;
     return des;
 }
+#endif

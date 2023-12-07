@@ -2,7 +2,11 @@
 #include "memory_manager.h"
 #include "steering_behaviors.h"
 
-#include "components.h"
+#include "cmp/physics_cmp.h"
+#include "cmp/ai_cmp.h"
+
+#include <initializer_list>
+#include <memory>
 
 // BehaviorTree -------------------------------------------------------------
 void BehaviorTree::Initialize(size_t bufferSize_) {

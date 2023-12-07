@@ -39,6 +39,7 @@ struct Level {
 private:
 
     EntityManager em;
+
     GraphicsSys<EntityManager> graphicsSys;
     TransformSys<EntityManager> transformSys;
     PhysicsSys<EntityManager> physicsSys;
@@ -48,28 +49,17 @@ private:
     MovingPlatformSys<EntityManager> movingPlatformSys;
     AiSys<EntityManager> aiSys;
 
-
-    Entity_ *manolo;
-
     Camera camera;
     
     Map map;
 
-    Entity *hero;
-    Entity *orc;
-    Entity *orc1;
-    Entity *platformHor;
-    Entity *platformVer0;
-    Entity *platformVer1;
+    Entity_ *hero;
+    Entity_ *orc;
+    Entity_ *orc1;
+    Entity_ *platformHor;
+    Entity_ *platformVer0;
+    Entity_ *platformVer1;
  
-    Entity *entitiesEnd;
-    Entity *entities;
-    ObjectAllocator<Entity> entitiesAllocator;
-
-    Entity *AddEntity(const char *name);
-    Entity *AddEntity(const char *name, Vec3 pos, Vec3 rot, Vec3 scale, Model model, Shader shader);
-    Entity *AddMovingPlatform(const char *name, Vec3 scale, Vec3 a, Vec3 b, Shader sahder);
-
     BehaviorTree bhTree;
     
     AnimationClipSet *animationsSets;

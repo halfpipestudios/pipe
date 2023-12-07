@@ -1,6 +1,8 @@
 #ifndef _PHYSICS_CMP_H_
 #define _PHYSICS_CMP_H_
 
+#include "base_cmp.h"
+
 struct PhysicsState {
     Vec3 pos { };
     Vec3 vel { };

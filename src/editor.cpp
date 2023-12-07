@@ -1,6 +1,15 @@
 #include "editor.h"
 #include "game.h"
 
+#include "cmp/transform_cmp.h"
+#include "cmp/graphics_cmp.h"
+#include "cmp/physics_cmp.h"
+#include "cmp/animation_cmp.h"
+#include "cmp/input_cmp.h"
+#include "cmp/collision_cmp.h"
+#include "cmp/moving_platform_cmp.h"
+#include "cmp/ai_cmp.h"
+
 void *TGuiCreateShader(char *vert, char *frag) {
     Shader shader = GraphicsManager::Get()->CreateShaderTGui(vert, frag);
     return (void *)shader;
@@ -111,8 +120,8 @@ void Editor::Terminate() {
     tgui_terminate();
 }
 
-static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    TransformComponent *transform = entity->GetComponent<TransformComponent>();
+static void UpdateTransformComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
+    TransformCMP *transform = entity->GetComponent<TransformCMP>();
     ASSERT(transform);
     
     u32 w = 72;
@@ -147,11 +156,11 @@ static void UpdateTransformComponent(TGuiWindowHandle window, Entity *entity, i3
     *y += h;
 }
 
-static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    PhysicsComponent *physicComp = entity->GetComponent<PhysicsComponent>();
+static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
+    PhysicsCMP *physicComp = entity->GetComponent<PhysicsCMP>();
     ASSERT(physicComp);
 
-    Physics *p = &physicComp->physics;
+    PhysicsState *p = &physicComp->physics;
 
     u32 w = 72;
     u32 h = 28;
@@ -185,8 +194,8 @@ static void UpdatePhysicsComponent(TGuiWindowHandle window, Entity *entity, i32 
     *y += h;
 }
 
-static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
+static void UpdateCollisionComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
+    CollisionCMP *col = entity->GetComponent<CollisionCMP>();
     ASSERT(col);
     u32 w = 72;
     u32 h = 28;
@@ -209,9 +218,7 @@ static void UpdateCollisionComponent(TGuiWindowHandle window, Entity *entity, i3
     *y += h;
 }
 
-static void UpdateGraphicComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
-    ASSERT(col);
+static void UpdateGraphicComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Graphic Component", *y, false, TGUI_ID)) {
@@ -219,9 +226,7 @@ static void UpdateGraphicComponent(TGuiWindowHandle window, Entity *entity, i32 
     *y += h;
 }
 
-static void UpdateInputComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
-    ASSERT(col);
+static void UpdateInputComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Input Component", *y, false, TGUI_ID)) {
@@ -229,9 +234,7 @@ static void UpdateInputComponent(TGuiWindowHandle window, Entity *entity, i32 x,
     *y += h;
 }
 
-static void UpdatePlayerAnimationComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
-    ASSERT(col);
+static void UpdatePlayerAnimationComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Player Animation Component", *y, false, TGUI_ID)) {
@@ -239,9 +242,7 @@ static void UpdatePlayerAnimationComponent(TGuiWindowHandle window, Entity *enti
     *y += h;
 }
 
-static void UpdateMovingPlatformComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
-    ASSERT(col);
+static void UpdateMovingPlatformComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Moving Platform Component", *y, false, TGUI_ID)) {
@@ -249,9 +250,7 @@ static void UpdateMovingPlatformComponent(TGuiWindowHandle window, Entity *entit
     *y += h;
 }
 
-static void UpdateAIComponent(TGuiWindowHandle window, Entity *entity, i32 x, i32 *y) {
-    CollisionComponent *col = entity->GetComponent<CollisionComponent>();
-    ASSERT(col);
+static void UpdateAIComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i32 *y) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "AI Component", *y, false, TGUI_ID)) {
@@ -266,7 +265,7 @@ void Editor::Update(f32 dt) {
     game->Update(dt);
     
     Level *level = &game->level;
-    Entity *entities = level->entities;
+    auto& entities = level->em.GetEntities();
 
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
@@ -308,14 +307,12 @@ void Editor::Update(f32 dt) {
     
     // NOTE: Entity window UI
     {
-        Entity *entity = entities;
-
         _tgui_tree_view_begin(entiWindow, TGUI_ID);
         _tgui_tree_view_root_node_begin("Entities", nullptr);
 
-        while(entity != nullptr) {
+        for(i32 i = 0; i < entities.size; ++i) {
+            Entity_ *entity = &entities[i];
             _tgui_tree_view_node(entity->name, (void *)entity);
-            entity = entity->next;
         }
 
         _tgui_tree_view_root_node_end();
@@ -329,7 +326,43 @@ void Editor::Update(f32 dt) {
         if(selectedEntity) {
             
             i32 y = 2;
+            
+            auto *elements = selectedEntity->componentsPtrs.elements;
+            u32 elementsCount = selectedEntity->componentsPtrs.capacity;
 
+            for(u32 i = 0; i < elementsCount; ++i) {
+                auto *element = &elements[i];
+                if(element->id == 0) continue;
+
+                CMPBase *component = element->value;
+
+                if(component->id == TransformCMP::GetID()) {
+                    UpdateTransformComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == PhysicsCMP::GetID()) {
+                    UpdatePhysicsComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == CollisionCMP::GetID()) {
+                    UpdateCollisionComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == GraphicsCMP::GetID()) {
+                    UpdateGraphicComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == InputCMP::GetID()) {
+                    UpdateInputComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == AnimationCMP::GetID()) {
+                    UpdatePlayerAnimationComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == MovingPlatformCMP::GetID()) {
+                    UpdateMovingPlatformComponent(compWindow, selectedEntity, 10, &y);
+                } else if(component->id == AiCMP::GetID()) {
+                    UpdateAIComponent(compWindow, selectedEntity, 10, &y);
+                } else {
+                    char *compName = "Unknown Component";
+                    _tgui_label(compWindow, compName, 0x222222, 10, y, compName);
+                    y += 20;
+                }
+
+                
+
+            }
+
+            /*
             ComponentContainer *container = selectedEntity->componentContainerList;
             while(container != nullptr) {
                 
@@ -359,6 +392,7 @@ void Editor::Update(f32 dt) {
                 
                 container = container->next;
             }
+            */
 
 
         } else {

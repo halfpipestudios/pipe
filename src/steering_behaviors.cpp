@@ -1,6 +1,8 @@
 #include "steering_behaviors.h"
 
-#include "components.h"
+#include "cmp/physics_cmp.h"
+#include "cmp/ai_cmp.h"
+
 #include <stdio.h>
 
 AIBlackBoard gBlackBoard;
@@ -33,7 +35,7 @@ f32 MachAngle(f32 currentAngle, f32 targetAngle, f32 timeToTarget) {
     return angularVel;
 }
 
-Steering Face(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget) {
+Steering Face(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget) {
     Steering steering;
 
     // get the direction to align with
@@ -51,7 +53,7 @@ Steering Face(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 t
     return steering;
 }
 
-Steering Seek(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget) {
+Steering Seek(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget) {
     Steering steering;
 
     steering = Face(aiComp, phyComp, target, timeToTarget);
@@ -73,13 +75,13 @@ Steering Seek(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 t
     return steering;
 }
 
-Steering Flee(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget) {
+Steering Flee(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget) {
     Vec3 oppositeTarget = (phyComp->physics.pos*2.0f) - target;
     return Seek(aiComp, phyComp, oppositeTarget,  timeToTarget);
 }
 
 
-Steering  Arrive(AIComponent *aiComp, PhysicsComponent *phyComp, Vec3 target, f32 timeToTarget) {
+Steering  Arrive(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget) {
     Steering steering;
 
     steering = Face(aiComp, phyComp, target, timeToTarget);

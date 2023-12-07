@@ -54,6 +54,7 @@ bool Segment::HitCylinder(Cylinder *cylinder, f32 *tOut) {
     return false;
 }
 
+#if 0
 bool Segment::HitCollider(CollisionComponent *collider, f32  *tOut) {
 
     switch(collider->type) {
@@ -69,6 +70,7 @@ bool Segment::HitCollider(CollisionComponent *collider, f32  *tOut) {
     *tOut = -1.0f;
     return false;
 }
+#endif
 
 bool Segment::HitCollider(CollisionCMP *collider, f32  *tOut) {
 

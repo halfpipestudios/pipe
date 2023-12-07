@@ -1,3 +1,4 @@
+#if 0
 #include "entity.h"
 #include "level.h"
 #include "components.h"
@@ -87,3 +88,4 @@ void Entity::Render() {
         container = container->next;
     }
 }
+#endif
