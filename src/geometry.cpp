@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include "components.h"
 #include "cmp/collision_cmp.h"
 
 bool Segment::HitEntity(MapImporter::Entity *entity, f32 *tOut) {
@@ -53,24 +52,6 @@ bool Segment::HitCylinder(Cylinder *cylinder, f32 *tOut) {
     *tOut = -1.0f;
     return false;
 }
-
-#if 0
-bool Segment::HitCollider(CollisionComponent *collider, f32  *tOut) {
-
-    switch(collider->type) {
-        case COLLIDER_CYLINDER: {
-            return HitCylinder(&collider->cylinder, tOut);
-        } break;
-
-        case COLLIDER_CONVEXHULL: {
-            return HitEntity(&collider->poly3D.entity, tOut);
-        } break;
-    }
-
-    *tOut = -1.0f;
-    return false;
-}
-#endif
 
 bool Segment::HitCollider(CollisionCMP *collider, f32  *tOut) {
 
