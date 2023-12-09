@@ -42,7 +42,7 @@ void GraphicsSys<EM>::Update(EM& em) {
         
         for(u32 meshIndex = 0; meshIndex < graphic->model.numMeshes; ++meshIndex) {
             Mesh *mesh = graphic->model.meshes + meshIndex;
-            GraphicsManager::Get()->BindTextureBuffer(mesh->texture);
+            GraphicsManager::Get()->BindTextureBuffer(*TextureManager::Get()->Dereference(mesh->texture));
             if(mesh->indexBuffer) {
                 GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, graphic->shader);
             } else {

@@ -30,27 +30,14 @@ struct Handle {
     inline bool operator!=(const Handle &other) { return handle != other.handle; }
 
     inline bool IsNull() { return !handle; }
-    inline u32 GeIndex() { return (u32)index; }
-    inline u32 GeMagic() { return (u32)magic; }
+    inline u32 GetIndex() { return (u32)index; }
+    inline u32 GetMagic() { return (u32)magic; }
 };
-
-void Handle::Initialize(u32 index) {
-    ASSERT(IsNull());
-    ASSERT(index <= MAX_INDEX);
-
-    static u32 autoMagic = 0;
-
-    if(++autoMagic > MAX_MAGIC) {
-        autoMagic = 1;
-    }
-
-    this->index = index;
-    this->magic = autoMagic;
-}
 
 template <typename T, u32 Size>
 struct AssetManager {
 
+    AssetManager() = default;
     virtual ~AssetManager() = default;
     
     StaticArray<T, Size>   userVec;
@@ -58,19 +45,14 @@ struct AssetManager {
     StaticArray<u32, Size> freeVec;
 
     StaticHashMap<Handle, Size*2> map;
-    
+
     Handle GetAsset(const char *name);
-    void DeleteAsset(Handle handle);
-    void ClearAssets(); 
+    void   DeleteAsset(Handle handle);
+    void   ClearAssets();
     
-    virtual void Load(T *data)   {};
-    virtual void Unload(T *data) {};
+    virtual void Load(T *data, const char *name) = 0;
+    virtual void Unload(T *data) = 0;
 
-    // NOTE: Singleton
-    inline AssetManager *Get() { return assetManager; }
-    static AssetManager assetManager;
-
-protected:
     
     T *Acquire(Handle &handle);
     void Release(Handle handle);
@@ -85,11 +67,11 @@ Handle AssetManager<T, Size>::GetAsset(const char *name) {
     Handle *handlePtr = map.Get(name);
     if(handlePtr) return *handlePtr;
 
-    Handle handle;;
+    Handle handle;
      
-    T* data = Acquire(*handle);
-    map.Add(name, *handle);
-    Load(data);
+    T* data = Acquire(handle);
+    map.Add(name, handle);
+    Load(data, name);
     
     return handle;
 }
@@ -142,7 +124,7 @@ T *AssetManager<T, Size>::Acquire(Handle &handle) {
         index = freeVec[freeVec.size - 1];
         handle.Initialize(index);
         freeVec.size -= 1;
-        magicVec[index] = handle.GeMagic();
+        magicVec[index] = handle.GetMagic();
     }
     
     return &userVec[index];
@@ -162,10 +144,12 @@ template <typename T, u32 Size>
 T *AssetManager<T, Size>::Dereference(Handle handle) {
     if(handle.IsNull()) return nullptr;
 
+    u32 index = handle.GetIndex();
     ASSERT(index < userVec.size);
     ASSERT(magicVec[index] == handle.GetMagic());
 
     return &userVec[index];
 }
+
 
 #endif // _ASSET_MANAGER_H_

@@ -24,7 +24,9 @@ struct Map {
     MapImporter::ConvexHullArray covexHulls;
     MapImporter::EntityArray entities;
     VertexBuffer vertexBuffer;
+
     TextureBuffer texture;
+    
     f32 scale;
 };
 

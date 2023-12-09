@@ -73,15 +73,14 @@ Type StaticHashMap<Type, Size>::Get(u64 key) {
 
     u32 id = MurMur2(&key, sizeof(u64), seed);
     u32 index = (id & mask);
+
     u32 counter = 0;
-    
-    while(((elements[index].id != 0 && elements[index].id != id) || elements[index].id == 0) && counter < capacity) {
+    while((elements[index].id != 0 && elements[index].id != id) && counter < capacity) {
         index = (index + 1) % capacity;
         ++counter;
     }
 
-        // TODO: ------------------------ < or <= ?
-    if(elements[index].id != 0 && counter < capacity) {
+    if(elements[index].id != 0 && counter <= capacity) {
         return elements[index].value;
     }
     
@@ -94,13 +93,12 @@ Type *StaticHashMap<Type, Size>::Get(const char *key) {
     u32 index = (id & mask);
     u32 counter = 0;
     
-    while(((elements[index].id != 0 && elements[index].id != id) || elements[index].id == 0) && counter < capacity) {
+    while((elements[index].id != 0 && elements[index].id != id) && counter < capacity) {
         index = (index + 1) % capacity;
         ++counter;
     }
 
-        // TODO: ------------------------ < or <= ?
-    if(elements[index].id != 0 && counter < capacity) {
+    if(elements[index].id != 0 && counter <= capacity) {
         return &elements[index].value;
     }
 

@@ -11,6 +11,9 @@ typedef void * IndexBuffer;
 typedef void * TextureBuffer;
 typedef void * FrameBuffer;
 
+
+#include "asset_manager.h"
+
 struct TexArray;
 
 enum RasterizerState {
@@ -68,7 +71,8 @@ struct Texture {
 };
 
 struct Mesh {
-    TextureBuffer texture;  
+    //TextureBuffer texture;  
+    Handle texture;
     VertexBuffer vertexBuffer;
     IndexBuffer indexBuffer;
 

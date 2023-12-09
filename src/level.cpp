@@ -17,6 +17,8 @@
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
 
+#include "mgr/texture_manager.h"
+
 
 static Vertex gCubeVertices[] = {
         // positions          // texture Coords
@@ -119,6 +121,7 @@ Vec3 *CreateCube() {
     return cube;
 }
 
+
 static TextureBuffer LoadTextureFromPath(char *path) {
     static char diffuse_material_path_cstr[4096];
     sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", path); 
@@ -137,11 +140,12 @@ static TextureBuffer LoadTextureFromPath(char *path) {
     return textureBuffer;
 }
 
+
 static void LoadModelToGpu(Model *model) {
     ASSERT(model->type == MODEL_TYPE_ANIMATED);
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex; 
-        mesh->texture = LoadTextureFromPath(mesh->material);
+        mesh->texture = TextureManager::Get()->GetAsset(mesh->material);
         mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices, sizeof(SkinVertex));
         mesh->indexBuffer = GraphicsManager::Get()->CreateIndexBuffer(mesh->indices, mesh->numIndices);
     }
@@ -230,7 +234,7 @@ static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, 
     transformCmp->Initialize(a, Vec3(), scale);
 
     Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
-    mesh->texture = LoadTextureFromPath("cool.png");
+    mesh->texture = TextureManager::Get()->GetAsset("cool.png");
     mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
     mesh->indexBuffer = nullptr;
 
@@ -274,8 +278,12 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     map.covexHulls = mapImporter.GetConvexHulls();
     map.entities = mapImporter.GetEntities();
     map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
-    map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     map.scale = 1.0f/32.0f;
+
+    // TODO: Asset manger here ...
+    
+    //map.handle = 
+    map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
 
     // Load the BehaviorTree
     bhTree.Initialize();
@@ -343,6 +351,8 @@ void Level::Terminate() {
     
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
+
+    TextureManager::Get()->ClearAssets();
 
     memory.EndFrame();
 }
