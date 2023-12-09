@@ -6,8 +6,14 @@
 template <typename Type, u32 Size>
 struct StaticHashMap {
     StaticHashMap();
+    
     void Add(u64 key, Type value);
     Type Get(u64 key);
+    
+    void Add(const char *key, Type value);
+    Type *Get(const char *key);
+
+    void Clear();
 
     struct HashElement {
         u32 id { 0 };

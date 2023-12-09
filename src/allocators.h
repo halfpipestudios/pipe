@@ -3,6 +3,14 @@
 
 #include "memory_manager.h"
 
+struct MemoryFrame {
+    u64 address;
+    MemoryStorage *memory;
+
+    void BeginFrame();
+    void EndFrame();
+};
+
 struct FreeNode {
     FreeNode *next;
 };

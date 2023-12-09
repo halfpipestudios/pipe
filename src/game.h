@@ -18,7 +18,7 @@ struct Game {
     void Render();
 
 private:
- 
+
     Shader mapShader;
     Shader animShader;
     Shader statShader;

@@ -262,6 +262,9 @@ static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, 
 }
 
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
+
+    memory.BeginFrame();
+
     // NOTE Load Map ------------------------------------------------------------------------------------------
     MapImporter mapImporter;
     mapImporter.LoadMapFromFile(mapFilePath);
@@ -337,8 +340,11 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 }
 
 void Level::Terminate() {
+    
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
+
+    memory.EndFrame();
 }
 
 void Level::Update(f32 dt) {

@@ -37,6 +37,8 @@ struct Level {
     void Render(Shader mapShader);
 
 private:
+    
+    MemoryFrame memory; 
 
     EntityManager em;
 

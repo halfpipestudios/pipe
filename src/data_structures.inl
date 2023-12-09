@@ -12,6 +12,13 @@ StaticHashMap<Type, Size>::StaticHashMap() {
 
 
 template <typename Type, u32 Size>
+void StaticHashMap<Type, Size>::Clear() {
+    occupied = 0;
+    memset(elements, 0, sizeof(HashElement) * capacity);
+}
+
+
+template <typename Type, u32 Size>
 void StaticHashMap<Type, Size>::Add(u64 key, Type value) {
 
     ASSERT(occupied + 1 <= capacity);
@@ -34,7 +41,31 @@ void StaticHashMap<Type, Size>::Add(u64 key, Type value) {
         element->value = value;
         occupied++;
     }
+}
 
+template <typename Type, u32 Size>
+void StaticHashMap<Type, Size>::Add(const char *key, Type value) {
+
+    ASSERT(occupied + 1 <= capacity);
+
+    u32 id = MurMur2(key, strlen(key), seed);
+    u32 index = (id & mask);
+
+    if(elements[index].id == 0) {
+        HashElement *element = elements + index;
+        element->id = id;
+        element->value = value;
+        occupied++;
+    } else {
+        u32 nextIndex = index + 1;
+        while(elements[nextIndex].id != 0 || nextIndex >= capacity) {
+            nextIndex = (nextIndex + 1) % capacity;
+        }
+        HashElement *element = elements + nextIndex;
+        element->id = id;
+        element->value = value;
+        occupied++;
+    }
 }
 
 template <typename Type, u32 Size>
@@ -55,6 +86,25 @@ Type StaticHashMap<Type, Size>::Get(u64 key) {
     }
     
     return {};
+}
+
+template <typename Type, u32 Size>
+Type *StaticHashMap<Type, Size>::Get(const char *key) {
+    u32 id = MurMur2(key, strlen(key), seed);
+    u32 index = (id & mask);
+    u32 counter = 0;
+    
+    while(((elements[index].id != 0 && elements[index].id != id) || elements[index].id == 0) && counter < capacity) {
+        index = (index + 1) % capacity;
+        ++counter;
+    }
+
+        // TODO: ------------------------ < or <= ?
+    if(elements[index].id != 0 && counter < capacity) {
+        return &elements[index].value;
+    }
+
+    return nullptr;    
 }
 
 

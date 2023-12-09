@@ -20,6 +20,8 @@ struct MemoryStorage {
     void *AllocFrameMemory(u64 size, u64 align);
     void ClearFrameMemory();
 
+    inline DoubleEndedStackAllocator *GetDoubleStack() { return &memory; }
+
 private:  
     DoubleEndedStackAllocator memory;
     u64 lastMark;
