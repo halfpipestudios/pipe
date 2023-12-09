@@ -5,9 +5,6 @@
 #include <float.h>
 #include <stdio.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "cmp/transform_cmp.h"
 #include "cmp/graphics_cmp.h"
 #include "cmp/physics_cmp.h"
@@ -121,7 +118,7 @@ Vec3 *CreateCube() {
     return cube;
 }
 
-
+#if 0
 static TextureBuffer LoadTextureFromPath(char *path) {
     static char diffuse_material_path_cstr[4096];
     sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", path); 
@@ -139,7 +136,7 @@ static TextureBuffer LoadTextureFromPath(char *path) {
 
     return textureBuffer;
 }
-
+#endif
 
 static void LoadModelToGpu(Model *model) {
     ASSERT(model->type == MODEL_TYPE_ANIMATED);

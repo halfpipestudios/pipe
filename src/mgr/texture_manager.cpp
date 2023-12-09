@@ -1,11 +1,12 @@
 #include "texture_manager.h"
+#include "../graphics_manager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 void TextureManager::Load(TextureBuffer *data, const char *name) {
     static char diffuse_material_path_cstr[4096];
-    sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", path); 
+    sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", name); 
     stbi_set_flip_vertically_on_load(true);
     i32 w, h, n;
     u32 *bitmap = (u32 *)stbi_load(diffuse_material_path_cstr, &w, &h, &n, 4);
@@ -18,4 +19,5 @@ void TextureManager::Load(TextureBuffer *data, const char *name) {
 
 void TextureManager::Unload(TextureBuffer *data) {
     GraphicsManager::Get()->DestroyTextureBuffer(*data);
+    printf("remove texture: %llu\n", (u64)data);
 }
