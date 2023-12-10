@@ -31,7 +31,7 @@ struct Map {
 };
 
 struct Level {
-    
+
     void Initialize(char *mapFilePath, Shader mapShader, Shader animShader);
     void Terminate();
 
@@ -41,7 +41,6 @@ struct Level {
 private:
     
     MemoryFrame memory; 
-
     EntityManager em;
 
     GraphicsSys<EntityManager> graphicsSys;

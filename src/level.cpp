@@ -15,6 +15,7 @@
 #include "cmp/ai_cmp.h"
 
 #include "mgr/texture_manager.h"
+#include "mgr/model_manager.h"
 
 
 static Vertex gCubeVertices[] = {
@@ -116,36 +117,6 @@ Vec3 *CreateCube() {
     Vec3 *cube = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(ARRAY_LENGTH(gCube) * sizeof(Vec3), 1);
     memcpy(cube, gCube, ARRAY_LENGTH(gCube) * sizeof(Vec3));
     return cube;
-}
-
-#if 0
-static TextureBuffer LoadTextureFromPath(char *path) {
-    static char diffuse_material_path_cstr[4096];
-    sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", path); 
-    
-    stbi_set_flip_vertically_on_load(true);
-    i32 w, h, n;
-    u32 *bitmap = (u32 *)stbi_load(diffuse_material_path_cstr, &w, &h, &n, 4);
-    
-    Texture texture = {bitmap, w, h};
-    TextureBuffer textureBuffer = GraphicsManager::Get()->CreateTextureBuffer(&texture, 1);
-    
-    stbi_image_free(bitmap);
-
-    printf("Texture: %s loaded\n", diffuse_material_path_cstr);
-
-    return textureBuffer;
-}
-#endif
-
-static void LoadModelToGpu(Model *model) {
-    ASSERT(model->type == MODEL_TYPE_ANIMATED);
-    for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
-        Mesh *mesh = model->meshes + meshIndex; 
-        mesh->texture = TextureManager::Get()->GetAsset(mesh->material);
-        mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices, sizeof(SkinVertex));
-        mesh->indexBuffer = GraphicsManager::Get()->CreateIndexBuffer(mesh->indices, mesh->numIndices);
-    }
 }
 
 static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
@@ -265,6 +236,16 @@ static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, 
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
 
     memory.BeginFrame();
+    
+    em.Initialize();
+    em.AddComponentType<TransformCMP>();
+    em.AddComponentType<GraphicsCMP>();
+    em.AddComponentType<PhysicsCMP>();
+    em.AddComponentType<AnimationCMP>();
+    em.AddComponentType<InputCMP>();
+    em.AddComponentType<CollisionCMP>();
+    em.AddComponentType<MovingPlatformCMP>();
+    em.AddComponentType<AiCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     MapImporter mapImporter;
@@ -275,12 +256,9 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     map.covexHulls = mapImporter.GetConvexHulls();
     map.entities = mapImporter.GetEntities();
     map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
+    map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     map.scale = 1.0f/32.0f;
 
-    // TODO: Asset manger here ...
-    
-    //map.handle = 
-    map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
 
     // Load the BehaviorTree
     bhTree.Initialize();
@@ -308,36 +286,18 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     animationsSets[1].numClips = animationImporter.numAnimations;
     animationsSets[1].skeleton = animationImporter.skeleton;
 
+    Model *heroModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("hero.twm"));
+    Model *orcModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("orc.twm"));
+
     camera.Initialize();
 
-    em.AddComponentType<TransformCMP>();
-    em.AddComponentType<GraphicsCMP>();
-    em.AddComponentType<PhysicsCMP>();
-    em.AddComponentType<AnimationCMP>();
-    em.AddComponentType<InputCMP>();
-    em.AddComponentType<CollisionCMP>();
-    em.AddComponentType<MovingPlatformCMP>();
-    em.AddComponentType<AiCMP>();
-
-    // NOTE Load entities ------------------------------------------------------------------------------------
-    ModelImporter modelImporter;
-
-
-    modelImporter.Read("./data/models/hero.twm");
-    LoadModelToGpu(&modelImporter.model);
-
-    hero = CreateHero(em, modelImporter.model, animShader, &animationsSets[1], &camera);
-
-    modelImporter.Read("./data/models/orc.twm");
-    LoadModelToGpu(&modelImporter.model);
-
-    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), modelImporter.model, animShader, &animationsSets[1]);
-    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8), modelImporter.model, animShader, &animationsSets[1], &bhTree);
-
+    // NOTE Load entities ------------------------------------------------------------------------------------    
+    hero = CreateHero(em, *heroModel, animShader, &animationsSets[1], &camera);
+    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, &animationsSets[1]);
+    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8),  *orcModel, animShader, &animationsSets[1], &bhTree);
     platformHor  = CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
     platformVer0 = CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
     platformVer1 = CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
-
 
     TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
     gBlackBoard.target = &heroTransform->pos;
@@ -349,6 +309,7 @@ void Level::Terminate() {
     GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
     GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
 
+    ModelManager::Get()->ClearAssets();
     TextureManager::Get()->ClearAssets();
 
     memory.EndFrame();

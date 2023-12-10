@@ -31,7 +31,7 @@ struct Entity_ {
         return (ComponentType *)componentsPtrs.Get(ComponentType::GetID());
     }
 
-    StaticHashMap<CMPBase *, 64> componentsPtrs;
+    HashMap<CMPBase *> componentsPtrs;
 };
 
 #endif // _ENTITY_H_

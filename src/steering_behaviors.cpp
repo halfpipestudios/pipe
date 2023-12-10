@@ -76,8 +76,8 @@ Steering Seek(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget)
 }
 
 Steering Flee(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarget) {
-    Vec3 oppositeTarget = (phyComp->physics.pos*2.0f) - target;
-    return Seek(aiComp, phyComp, oppositeTarget,  timeToTarget);
+    Vec3 opositeTarget = (phyComp->physics.pos*2.0f) - target;
+    return Seek(aiComp, phyComp, opositeTarget,  timeToTarget);
 }
 
 
@@ -100,7 +100,8 @@ Steering  Arrive(AiCMP *aiComp, PhysicsCMP *phyComp, Vec3 target, f32 timeToTarg
     steering.linear *= acc / timeToTarget;
 
     Vec3 pos = {phyComp->physics.pos.x, 0.0f, phyComp->physics.pos.z};
-    f32 distToTargte = (target - pos).Len();
+    Vec3 tar = {target.x, 0.0f, target.z };
+    f32 distToTargte = (tar - pos).Len();
     if(distToTargte <= aiComp->arrivalRadii) {
         steering.linear = Vec3();
         steering.angular = 0;

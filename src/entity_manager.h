@@ -7,34 +7,42 @@
 #define ENTITY_ARRAY_MAX_SIZE 100
 
 struct EntityManager {
+
+    void Initialize() {
+        entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
+        componentsStorage.Initialize();
+    }
+
     template <typename ComponentType>
     void AddComponentType() {
         componentsStorage.AddComponentType<ComponentType>();
     }
 
     template <typename ComponentType>
-    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& GetComponents() {
+    Array<ComponentType>& GetComponents() {
         return componentsStorage.GetComponents<ComponentType>();
     }
 
-    StaticArray<Entity_, ENTITY_ARRAY_MAX_SIZE>& GetEntities() {
+    Array<Entity_>& GetEntities() {
         return entities;
     }
 
     Entity_ *AddEntity() {
-        return entities.Push({});
+        Entity_ *entity = entities.Push({});
+        entity->componentsPtrs.Initialize(COMPONENTS_ARRAY_MAP_SIZE);
+        return entity;
     }
 
     template <typename ComponentType>
     ComponentType *AddComponent(Entity_ *entity) {
-        StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& componentsArray = GetComponents<ComponentType>();
+        Array<ComponentType>& componentsArray = GetComponents<ComponentType>();
         ComponentType *component = componentsArray.Push({});
         component->entity = entity;
         entity->componentsPtrs.Add(ComponentType::GetID(), (CMPBase *)component);
         return component;
     }
 
-    StaticArray<Entity_, ENTITY_ARRAY_MAX_SIZE> entities;
+    Array<Entity_> entities;
     ComponentStorage componentsStorage;
 };
 

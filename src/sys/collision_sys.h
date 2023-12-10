@@ -9,8 +9,7 @@ struct CollisionSys {
 
 private:
     void ProcessMap(CollisionCMP *collider, PhysicsCMP *phy, Map *map);
-    void ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, 
-            StaticArray<CollisionCMP, COMPONENTS_ARRAY_MAX_SIZE>* colliders);
+    void ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders);
 };
 
 #endif // _COLLISION_SYS_H_

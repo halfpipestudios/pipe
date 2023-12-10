@@ -11,13 +11,17 @@ struct ComponentArrayBase {};
 
 template <typename ComponentType>
 struct ComponentArray : ComponentArrayBase {
-    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE> components;
+    Array<ComponentType> components;
 };
 
 struct ComponentStorage {
 
+    void Initialize() {
+        componentsArraysMap.Initialize(COMPONENTS_ARRAY_MAP_SIZE);
+    }
+
     template <typename ComponentType>
-    StaticArray<ComponentType, COMPONENTS_ARRAY_MAX_SIZE>& GetComponents() {
+    Array<ComponentType>& GetComponents() {
         i32 id = ComponentType::GetID(); 
         ComponentArray<ComponentType> *componentArray = (ComponentArray<ComponentType> *)componentsArraysMap.Get(id);
         return componentArray->components;
@@ -27,11 +31,12 @@ struct ComponentStorage {
     void AddComponentType() {
         i32 id = ComponentType::GetID(); 
         void *buffer = MemoryManager::Get()->AllocStaticMemory(sizeof(ComponentArray<ComponentType>), 1);
-        ComponentArrayBase *componentArray = new(buffer) ComponentArray<ComponentType>;
-        componentsArraysMap.Add(id, componentArray);
+        ComponentArray<ComponentType> *componentArray = new(buffer) ComponentArray<ComponentType>;
+        componentArray->components.Initialize(COMPONENTS_ARRAY_MAX_SIZE);
+        componentsArraysMap.Add(id, (ComponentArrayBase *)componentArray);
     }
 
-    StaticHashMap<ComponentArrayBase *, COMPONENTS_ARRAY_MAP_SIZE> componentsArraysMap;
+    HashMap<ComponentArrayBase *> componentsArraysMap;
 
 };
 

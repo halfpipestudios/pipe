@@ -70,8 +70,7 @@ void CollisionSys<EM>::ProcessMap(CollisionCMP *collider, PhysicsCMP *phy, Map *
 }
 
 template <typename EM>
-void CollisionSys<EM>::ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, 
-        StaticArray<CollisionCMP, COMPONENTS_ARRAY_MAX_SIZE>* colliders) {
+void CollisionSys<EM>::ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders) {
 
     GJK gjk;
     Entity_ *entity = collider->entity;
