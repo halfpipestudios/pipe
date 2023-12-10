@@ -34,35 +34,50 @@ struct Handle {
     inline u32 GetMagic() { return (u32)magic; }
 };
 
-template <typename T, u32 Size>
+template <typename T>
 struct AssetManager {
-
+    
     AssetManager() = default;
     virtual ~AssetManager() = default;
-    
-    StaticArray<T, Size>   userVec;
-    StaticArray<u32, Size> magicVec;
-    StaticArray<u32, Size> freeVec;
 
-    StaticHashMap<Handle, Size*2> map;
+    void Initialize(u32 size);
+    void Terminate();
+    
+    Array<T>   userVec;
+    Array<u32> magicVec;
+    Array<u32> freeVec;
+
+    HashMap<Handle> map;
 
     Handle GetAsset(const char *name);
     void   DeleteAsset(Handle handle);
     void   ClearAssets();
     
-    virtual void Load(T *data, const char *name) = 0;
-    virtual void Unload(T *data) = 0;
+    virtual void Load(T *data, const char *name) {};
+    virtual void Unload(T *data) {};
 
-    
     T *Acquire(Handle &handle);
     void Release(Handle handle);
     T *Dereference(Handle handle);
     bool IsInFreeList(u32 index);
-
 };
 
-template <typename T, u32 Size>
-Handle AssetManager<T, Size>::GetAsset(const char *name) {
+template <typename T>
+void AssetManager<T>::Initialize(u32 size) {
+    userVec.Initialize(size);
+    magicVec.Initialize(size);
+    freeVec.Initialize(size);
+    map.Initialize(size*2);
+}
+
+template <typename T>
+void AssetManager<T>::Terminate() {
+    ClearAssets();
+}
+
+
+template <typename T>
+Handle AssetManager<T>::GetAsset(const char *name) {
     
     Handle *handlePtr = map.Get(name);
     if(handlePtr) return *handlePtr;
@@ -76,8 +91,8 @@ Handle AssetManager<T, Size>::GetAsset(const char *name) {
     return handle;
 }
 
-template <typename T, u32 Size>
-void AssetManager<T, Size>::DeleteAsset(Handle handle) {
+template <typename T>
+void AssetManager<T>::DeleteAsset(Handle handle) {
     if(index < userVec.size && magicVec[index] == handle.GetMagic()) {
         T *data = Dereference(handle);
         Unload(data);
@@ -87,16 +102,16 @@ void AssetManager<T, Size>::DeleteAsset(Handle handle) {
     }
 }
 
-template <typename T, u32 Size>
-bool AssetManager<T, Size>::IsInFreeList(u32 index) {
+template <typename T>
+bool AssetManager<T>::IsInFreeList(u32 index) {
     for(u32 i = 0; i < freeVec.size; ++i) {
         if(index == freeVec[i]) return true;
     }
     return false;
 }
 
-template <typename T, u32 Size>
-void AssetManager<T, Size>::ClearAssets() {
+template <typename T>
+void AssetManager<T>::ClearAssets() {
     
     for(u32 index = 0; index < userVec.size; ++index)   {
         if(IsInFreeList(index)) continue;
@@ -110,8 +125,8 @@ void AssetManager<T, Size>::ClearAssets() {
     map.Clear();
 }
 
-template <typename T, u32 Size>
-T *AssetManager<T, Size>::Acquire(Handle &handle) {
+template <typename T>
+T *AssetManager<T>::Acquire(Handle &handle) {
     
     u32 index = 0;
 
@@ -130,8 +145,8 @@ T *AssetManager<T, Size>::Acquire(Handle &handle) {
     return &userVec[index];
 }
 
-template <typename T, u32 Size>
-void AssetManager<T, Size>::Release(Handle handle) {
+template <typename T>
+void AssetManager<T>::Release(Handle handle) {
     u32 index = handle.GetIndex();
     ASSERT(index < userVec.size);
     ASSERT(magicVec[index] == handle.GetMagic());
@@ -140,8 +155,8 @@ void AssetManager<T, Size>::Release(Handle handle) {
     freeVec.Push(index);
 }
 
-template <typename T, u32 Size>
-T *AssetManager<T, Size>::Dereference(Handle handle) {
+template <typename T>
+T *AssetManager<T>::Dereference(Handle handle) {
     if(handle.IsNull()) return nullptr;
 
     u32 index = handle.GetIndex();

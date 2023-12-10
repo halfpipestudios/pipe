@@ -3,6 +3,7 @@
 #include "platform_manager.h"
 #include "memory_manager.h"
 #include "graphics_manager.h"
+#include "mgr/texture_manager.h"
 #include "game.h"
 #include "editor.h"
 
@@ -11,6 +12,7 @@ int main() {
     PlatformManager::Get()->Initialize();
     MemoryManager::Get()->Initialize();
     GraphicsManager::Get()->Initialize();
+    TextureManager::Get()->Initialize(256);
 
     GraphicsManager::Get()->SetRasterizerState(RASTERIZER_STATE_CULL_NONE);
     
@@ -65,6 +67,7 @@ int main() {
     editor.Terminate();
     game.Terminate();
 
+    TextureManager::Get()->Terminate();
     GraphicsManager::Get()->Terminate();
     MemoryManager::Get()->Terminate();
     PlatformManager::Get()->Terminate();

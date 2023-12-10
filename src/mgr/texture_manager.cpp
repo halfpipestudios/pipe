@@ -4,6 +4,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+TextureManager TextureManager::textureManager;
+
 void TextureManager::Load(TextureBuffer *data, const char *name) {
     static char diffuse_material_path_cstr[4096];
     sprintf(diffuse_material_path_cstr, "%s%s", "./data/textures/", name); 

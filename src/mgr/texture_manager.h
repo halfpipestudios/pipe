@@ -5,19 +5,13 @@
 #include "../graphics.h"
 
 
-struct TextureManager : AssetManager<TextureBuffer, 256> {
-
+struct TextureManager : AssetManager<TextureBuffer> {
     void Load(TextureBuffer *data, const char *name) override;
     void Unload(TextureBuffer *data) override;
-
-    // NOTE: Singleton
-    inline static TextureManager *Get() {
-        if(!textureManager) textureManager = new TextureManager();
-
-        return textureManager;
-    }
     
-    static inline TextureManager *textureManager;
+    inline static TextureManager *Get() { return &textureManager; }
+
+    static TextureManager textureManager; 
 
 };
 
