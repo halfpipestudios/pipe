@@ -1,3 +1,6 @@
+#ifndef _HASH_MAP_INL_
+#define _HASH_MAP_INL_
+
 #include "data_structures.h"
 #include "memory_manager.h"
 #include "utils.h"
@@ -115,7 +118,7 @@ Type *HashMap<Type>::Get(const char *key) {
 template <typename Type>
 void Array<Type>::Initialize(u32 size) {
     capacity = size;
-    data = (Type *)MemoryManager::Get()->AllocStaticMemory(sizeof(Type) * capacity, 1);
+    data = (Type *)MemoryManager::Get()->AllocStaticMemory(sizeof(Type) * capacity, 8);
     memset(data, 0, sizeof(Type) * capacity);
 }
 
@@ -127,3 +130,5 @@ Type *Array<Type>::Push(Type value) {
     ++size;
     return element;
 }
+
+#endif

@@ -4,7 +4,7 @@
 #include "common.h"
 #include "cmp/base_cmp.h"
 
-#include "data_structures.h"
+#include "data_structures.inl"
 
 struct Input;
 

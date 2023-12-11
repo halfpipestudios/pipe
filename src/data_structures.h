@@ -46,6 +46,4 @@ struct Array {
     Type *data { nullptr };
 };
 
-
-
-#endif
+#endif _HASH_MAP_H_

@@ -2,7 +2,7 @@
 #define _ASSET_MANAGER_H_
 
 #include "common.h"
-#include "data_structures.h"
+#include "data_structures.inl"
 
 struct Handle {
 

@@ -1,8 +1,11 @@
 #include "model_manager.h"
 #include "texture_manager.h"
+
 #include "../graphics_manager.h"
 #include "../model_importer.h"
+
 #include <stdio.h>
+#include <string>
 
 ModelManager ModelManager::modelManager;
 
@@ -17,7 +20,13 @@ void ModelManager::Load(Model *data, const char *name) {
 
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex; 
-        mesh->texture = TextureManager::Get()->GetAsset(mesh->material);
+        
+        if(strcmp(mesh->material, "none") != 0) { 
+            mesh->texture = TextureManager::Get()->GetAsset(mesh->material);
+        } else {
+            mesh->texture = TextureManager::Get()->GetAsset("default1.png");
+        }
+        
         if (model->type == MODEL_TYPE_ANIMATED) {
             mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer((SkinVertex *)mesh->vertices, mesh->numVertices, sizeof(SkinVertex));
         } else {

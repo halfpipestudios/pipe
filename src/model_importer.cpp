@@ -172,17 +172,14 @@ void ModelImporter::ReadModelFile(Model *model, u8 *file) {
 
     u32 flags = READ_U32(file);
 
-    if(flags & TWEEN_MODEL) {
-        printf("Loading model file\n");
-    }
+    ASSERT(flags & TWEEN_MODEL);
+    printf("Loading model file\n");
 
     if(flags & TWEEN_SKELETON) { 
         model->type = MODEL_TYPE_ANIMATED;
     } else {
         model->type = MODEL_TYPE_STATIC;
     }
-    
-    ASSERT((flags & TWEEN_SKELETON) && (flags & TWEEN_MODEL));
 
     model->numMeshes = READ_U32(file);
     model->meshes = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh)*model->numMeshes, 8);

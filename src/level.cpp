@@ -17,52 +17,6 @@
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
 
-
-static Vertex gCubeVertices[] = {
-        // positions          // texture Coords
-   {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-   {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-   {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-                                                            
-   {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}},
-   {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
-   {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f}},
-   {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}},
-                                                            
-   {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
-   {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
-   {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
-   {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
-   {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
-                                                            
-   {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
-                                                            
-   {{-0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 1.0f}},
-   {{ 0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 1.0f}},
-   {{ 0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 0.0f}},
-   {{ 0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {1.0f, 0.0f}},
-   {{-0.5f, -0.5f,  0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 0.0f}},
-   {{-0.5f, -0.5f, -0.5f}, {0.0f,-1.0f,  0.0f}, {0.0f, 1.0f}},
-                                                            
-   {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 1.0f}},
-   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 1.0f}},
-   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 0.0f}},
-   {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {1.0f, 0.0f}},
-   {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 0.0f}},
-   {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f,  0.0f}, {0.0f, 1.0f}}
-};
-
 static Vec3 gCube[] = {
 
     // bottom
@@ -118,6 +72,35 @@ Vec3 *CreateCube() {
     memcpy(cube, gCube, ARRAY_LENGTH(gCube) * sizeof(Vec3));
     return cube;
 }
+
+void Map::Initialize(char *filename) {
+
+    MapImporter mapImporter;
+    mapImporter.LoadMapFromFile(filename);
+    MapImporter::VertexArray mapVertices = mapImporter.GetVertices();
+    MapImporter::TextureArray mapTextures = mapImporter.GetTextures();
+    
+    covexHulls = mapImporter.GetConvexHulls();
+    entities = mapImporter.GetEntities();
+    vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
+    texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
+    scale = 1.0f/32.0f;
+}
+
+void Map::Terminate() {
+    GraphicsManager::Get()->DestroyTextureBuffer(texture);
+    GraphicsManager::Get()->DestroyVertexBuffer(vertexBuffer);
+}
+
+
+void Map::Render(Shader shader) {
+
+    GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
+    GraphicsManager::Get()->BindTextureBuffer(texture);
+    GraphicsManager::Get()->DrawVertexBuffer(vertexBuffer, shader);
+
+}
+
 
 static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
                            AnimationClipSet *animationClipSet, Camera *camera) {
@@ -201,24 +184,14 @@ static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, 
     TransformCMP *transformCmp = em.AddComponent<TransformCMP>(platform);
     transformCmp->Initialize(a, Vec3(), scale);
 
-    Mesh *mesh = (Mesh *)MemoryManager::Get()->AllocStaticMemory(sizeof(Mesh), 1); 
-    mesh->texture = TextureManager::Get()->GetAsset("cool.png");
-    mesh->vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(gCubeVertices, ARRAY_LENGTH(gCubeVertices), sizeof(Vertex));
-    mesh->indexBuffer = nullptr;
-
-    // load the model and add the mesh to the model
-    Model model = {};
-    model.type = MODEL_TYPE_STATIC;
-    model.numMeshes = 1;
-    model.meshes = mesh;
-
+    Model *model = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("cube.twm"));
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(platform);
-    graphicsCmp->Initialize(model, shader);
+    graphicsCmp->Initialize(*model, shader);
 
+    // Collider
     ConvexHull convexHull {};
     convexHull.points = CreateCube();
     convexHull.count  = ARRAY_LENGTH(gCube);
-
     MapImporter::Entity entity {};
     entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
     memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
@@ -248,21 +221,10 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     em.AddComponentType<AiCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
-    MapImporter mapImporter;
-    mapImporter.LoadMapFromFile(mapFilePath);
-    MapImporter::VertexArray mapVertices = mapImporter.GetVertices();
-    MapImporter::TextureArray mapTextures = mapImporter.GetTextures();
-    
-    map.covexHulls = mapImporter.GetConvexHulls();
-    map.entities = mapImporter.GetEntities();
-    map.vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
-    map.texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
-    map.scale = 1.0f/32.0f;
-
+    map.Initialize(mapFilePath);
 
     // Load the BehaviorTree
     bhTree.Initialize();
-
     bhTree.AddNode<BehaviorSequence>(
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0,  8)),
         bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
@@ -306,8 +268,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 
 void Level::Terminate() {
     
-    GraphicsManager::Get()->DestroyTextureBuffer(map.texture);
-    GraphicsManager::Get()->DestroyVertexBuffer(map.vertexBuffer);
+    map.Terminate();
 
     ModelManager::Get()->ClearAssets();
     TextureManager::Get()->ClearAssets();
@@ -335,11 +296,7 @@ void Level::Update(f32 dt) {
 }
 
 void Level::Render(Shader mapShader) {
-    
-    GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(map.scale, map.scale, map.scale));
-    GraphicsManager::Get()->BindTextureBuffer(map.texture);
-    GraphicsManager::Get()->DrawVertexBuffer(map.vertexBuffer, mapShader);
-
+    map.Render(mapShader);
     graphicsSys.Update(em);
 }
 

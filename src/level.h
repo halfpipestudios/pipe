@@ -28,6 +28,10 @@ struct Map {
     TextureBuffer texture;
     
     f32 scale;
+
+    void Initialize(char *filename);
+    void Terminate();
+    void Render(Shader shader);
 };
 
 struct Level {
