@@ -95,7 +95,7 @@ void Editor::Initialize(Game *game) {
     this->selectedEntity = nullptr;
     this->paused = false;
 
-    gizmoShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/staticVert.hlsl",
+    gizmoShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/gizmoVert.hlsl",
                                                                 "./data/shaders/gizmoFrag.hlsl");
 
     transformGizmoX = ModelManager::Get()->GetAsset("transform.twm");
@@ -406,10 +406,26 @@ void Editor::RenderEditorGizmos() {
     if(!selectedEntity) return;
 
     GraphicsManager::Get()->SetDepthStencilState(false);
-    
+
     TransformCMP transform = *selectedEntity->GetComponent<TransformCMP>();
+
+    Level *level = &game->level;
+    Camera camera = level->camera;
+
+    Vec3 p = transform.pos;
+    Vec3 n = camera.front.Normalized();
+    Vec3 o = camera.pos + n * 6;
+   
+    Vec3 v = transform.pos - camera.pos;
+
+    f32 t = 0;
+    if(ABS(v.Dot(n)) > 0.01f)  {
+        t = (o.Dot(n) - p.Dot(n)) / v.Dot(n);
+    }
+    
     transform.rot = Vec3(0,0,0);
     transform.scale = Vec3(1,1,1);
+    transform.pos = p + v * t; 
 
     GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
     ModelManager::Get()->SetTexture(transformGizmoZ, "red.png");
