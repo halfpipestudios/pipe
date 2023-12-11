@@ -3,8 +3,11 @@
 #include "platform_manager.h"
 #include "memory_manager.h"
 #include "graphics_manager.h"
+
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
+#include "mgr/animation_manager.h"
+
 #include "game.h"
 #include "editor.h"
 
@@ -15,6 +18,7 @@ int main() {
     GraphicsManager::Get()->Initialize();
     TextureManager::Get()->Initialize(256);
     ModelManager::Get()->Initialize(256);
+    AnimationManager::Get()->Initialize(256);
 
     GraphicsManager::Get()->SetRasterizerState(RASTERIZER_STATE_CULL_NONE);
     
@@ -69,6 +73,7 @@ int main() {
     editor.Terminate();
     game.Terminate();
 
+    AnimationManager::Get()->Terminate();
     ModelManager::Get()->Terminate();
     TextureManager::Get()->Terminate();
     GraphicsManager::Get()->Terminate();

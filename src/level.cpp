@@ -16,6 +16,7 @@
 
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
+#include "mgr/animation_manager.h"
 
 static Vec3 gCube[] = {
 
@@ -232,31 +233,18 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
     );    
 
+    // NOTE Load entities ------------------------------------------------------------------------------------    
     
-    // Load all level animations
-    numAnimationsSets = 2;
-    animationsSets = (AnimationClipSet *)MemoryManager::Get()->AllocStaticMemory(sizeof(AnimationClipSet) * numAnimationsSets, 1);
-    
-    AnimationImporter animationImporter;
-    animationImporter.Read("./data/models/orc.twa");
-    animationsSets[0].clips    = animationImporter.animations;
-    animationsSets[0].numClips = animationImporter.numAnimations;
-    animationsSets[0].skeleton = animationImporter.skeleton;
-
-    animationImporter.Read("./data/models/hero.twa");
-    animationsSets[1].clips    = animationImporter.animations;
-    animationsSets[1].numClips = animationImporter.numAnimations;
-    animationsSets[1].skeleton = animationImporter.skeleton;
+    AnimationClipSet *heroAnim = AnimationManager::Get()->Dereference(AnimationManager::Get()->GetAsset("hero.twa"));
 
     Model *heroModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("hero.twm"));
     Model *orcModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("orc.twm"));
 
     camera.Initialize();
 
-    // NOTE Load entities ------------------------------------------------------------------------------------    
-    hero = CreateHero(em, *heroModel, animShader, &animationsSets[1], &camera);
-    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, &animationsSets[1]);
-    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8),  *orcModel, animShader, &animationsSets[1], &bhTree);
+    hero = CreateHero(em, *heroModel, animShader, heroAnim, &camera);
+    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim);
+    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree);
     platformHor  = CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
     platformVer0 = CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
     platformVer1 = CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
@@ -269,7 +257,8 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 void Level::Terminate() {
     
     map.Terminate();
-
+    
+    AnimationManager::Get()->ClearAssets();
     ModelManager::Get()->ClearAssets();
     TextureManager::Get()->ClearAssets();
 

@@ -69,9 +69,6 @@ private:
  
     BehaviorTree bhTree;
     
-    AnimationClipSet *animationsSets;
-    u32 numAnimationsSets;
-
     friend struct Editor;
 };
 
