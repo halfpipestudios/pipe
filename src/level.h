@@ -61,11 +61,6 @@ private:
     Map map;
 
     Entity_ *hero;
-    Entity_ *orc;
-    Entity_ *orc1;
-    Entity_ *platformHor;
-    Entity_ *platformVer0;
-    Entity_ *platformVer1;
  
     BehaviorTree bhTree;
     

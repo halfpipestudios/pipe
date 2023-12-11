@@ -670,9 +670,10 @@ void _tgui_float_input_internal(TGuiWidget *widget, TGuiPainter *painter) {
             float_input->cursor = 0;
         }
     
+    } else {
+        float_input_update_buffer(float_input);
     }
-
-    float_input_update_buffer(float_input);
+    
 
     if(state.active == id && state.hot != id && input.mouse_button_was_down && !input.mouse_button_is_down) {
         state.active = 0;

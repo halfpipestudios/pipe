@@ -50,9 +50,9 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(Entity_ *entity, Input 
     if(!anim->transition.InProgress()) {
         if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
             anim->transition.Start(this, &anim->walk, 0.2f);
-        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
-        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
             anim->transition.Start(this, &anim->jump, 0.2f);
         }
     }
@@ -111,11 +111,11 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(Entity_ *entity, Input 
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
     if(!anim->transition.InProgress()) {
-        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > e) {
+        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
             anim->transition.Start(this, &anim->jump, 0.2f);
         } else if(physicsComp->physics.vel.Len() < 0.01f) {
             anim->transition.Start(this, &anim->idle, 0.2f);
-        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+        } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
         }
     }
@@ -162,7 +162,7 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(Entity_ *entity, Input 
     f32 e = 0.01f;
 
     if(!anim->transition.InProgress()) {
-        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < e) {
+        if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
             anim->transition.Start(this, &anim->walk, 0.2f);

@@ -243,11 +243,12 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     camera.Initialize();
 
     hero = CreateHero(em, *heroModel, animShader, heroAnim, &camera);
-    orc = CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim);
-    orc1 = CreateOrc(em, "orc_2", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree);
-    platformHor  = CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
-    platformVer0 = CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
-    platformVer1 = CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
+    
+    CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim);
+    CreateOrc(em, "orc_2", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree);
+    CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
+    CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
+    CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
 
     TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
     gBlackBoard.target = &heroTransform->pos;
