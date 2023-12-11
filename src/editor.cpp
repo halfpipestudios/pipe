@@ -10,6 +10,7 @@
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
 
+#include "graphics_manager.h"
 #include "mgr/texture_manager.h"
 
 void *TGuiCreateShader(char *vert, char *frag) {
@@ -94,10 +95,11 @@ void Editor::Initialize(Game *game) {
     this->selectedEntity = nullptr;
     this->paused = false;
 
+    gizmoShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/staticVert.hlsl",
+                                                                "./data/shaders/gizmoFrag.hlsl");
+
     transformGizmoX = ModelManager::Get()->GetAsset("transform.twm");
-
     transformGizmoY = ModelManager::Get()->GetAsset("transform.twm");
-
     transformGizmoZ = ModelManager::Get()->GetAsset("transform.twm");
 
     tguiBackend.create_program  = TGuiCreateShader;
@@ -124,6 +126,7 @@ void Editor::Initialize(Game *game) {
 }
 
 void Editor::Terminate() {
+    GraphicsManager::Get()->DestroyShader(gizmoShader);
     GraphicsManager::Get()->DestroyFrameBuffer(gameFrameBuffer);
     tgui_terminate();
 }
@@ -378,17 +381,21 @@ void Editor::Update(f32 dt) {
     game->Update(dt);
 }
 
-void Editor::RenderModel(Handle handle) {
+void Editor::RenderModel(Handle handle, Vec3 color) {
     
+    CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
+    ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
+    buffer->color = color;
+    GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
+
     Model *model = ModelManager::Get()->Dereference(handle);
 
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex;
-        GraphicsManager::Get()->BindTextureBuffer(*TextureManager::Get()->Dereference(mesh->texture));
         if(mesh->indexBuffer) {
-            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, game->statShader);
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, gizmoShader);
         } else {
-            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, game->statShader);
+            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, gizmoShader);
         }
     }
 
@@ -401,24 +408,26 @@ void Editor::RenderEditorGizmos() {
     GraphicsManager::Get()->SetDepthStencilState(false);
     
     TransformCMP transform = *selectedEntity->GetComponent<TransformCMP>();
+    transform.rot = Vec3(0,0,0);
+    transform.scale = Vec3(1,1,1);
 
     GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
     ModelManager::Get()->SetTexture(transformGizmoZ, "red.png");
-    RenderModel(transformGizmoX);
+    RenderModel(transformGizmoX, Vec3(1,0,0));
     
     TransformCMP transform1 = transform;
     transform1.rot.z += (f32)TO_RAD(90);
 
     GraphicsManager::Get()->SetWorldMatrix(transform1.GetWorldMatrix());
     ModelManager::Get()->SetTexture(transformGizmoZ, "green.png");
-    RenderModel(transformGizmoY);
+    RenderModel(transformGizmoY, Vec3(0,1,0));
 
     TransformCMP transform2 = transform;
     transform2.rot.y += (f32)TO_RAD(90);
     
     GraphicsManager::Get()->SetWorldMatrix(transform2.GetWorldMatrix());
     ModelManager::Get()->SetTexture(transformGizmoZ, "blue.png");
-    RenderModel(transformGizmoZ);
+    RenderModel(transformGizmoZ, Vec3(0,0,1));
 
     GraphicsManager::Get()->SetDepthStencilState(true);
 }

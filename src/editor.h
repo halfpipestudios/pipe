@@ -20,7 +20,7 @@ struct Editor {
     void Render();
 
     void RenderEditorGizmos();
-    void RenderModel(Handle handle);
+    void RenderModel(Handle handle, Vec3 color);
     
     Game *game;
     Entity_ *selectedEntity;
@@ -38,6 +38,8 @@ struct Editor {
     Handle transformGizmoX;
     Handle transformGizmoY;
     Handle transformGizmoZ;
+
+    Shader gizmoShader;
 
 };
 

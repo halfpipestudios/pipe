@@ -196,11 +196,13 @@ void D3D11Graphics::Initialize() {
     cpuMatrices.view = Mat4();
     cpuMatrices.world = Mat4();
     
-    memset(&cpuTGuiBuffer, 0, sizeof(cpuTGuiBuffer));
+    memset(&cpuTGuiBuffer,  0, sizeof(cpuTGuiBuffer));
+    memset(&cpuGizmoBuffer, 0, sizeof(cpuGizmoBuffer));
 
-    gpuMatrices = CreateConstBuffer((void *)&cpuMatrices, sizeof(cpuMatrices), 0, nullptr);
+    gpuMatrices     = CreateConstBuffer((void *)&cpuMatrices,     sizeof(cpuMatrices),     0, nullptr);
     gpuAnimMatrices = CreateConstBuffer((void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
-    gpuTGuiBuffer = CreateConstBuffer((void *)&cpuTGuiBuffer, sizeof(cpuTGuiBuffer), 2, nullptr);
+    gpuTGuiBuffer   = CreateConstBuffer((void *)&cpuTGuiBuffer,   sizeof(cpuTGuiBuffer),   2, nullptr);
+    gpuGizmoBuffer  = CreateConstBuffer((void *)&cpuGizmoBuffer,  sizeof(cpuGizmoBuffer),  3, nullptr);
 
     lineRenderer.Initialize(200, device);
     batchRenderer.Initialize(200, device);
@@ -227,6 +229,7 @@ void  D3D11Graphics::Terminate() {
     DestroyConstBuffer(gpuMatrices);
     DestroyConstBuffer(gpuAnimMatrices);
     DestroyConstBuffer(gpuTGuiBuffer);
+    DestroyConstBuffer(gpuGizmoBuffer);
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
