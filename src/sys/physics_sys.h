@@ -3,6 +3,7 @@
 
 template<typename EM>
 struct PhysicsSys {
+    void PreUpdate(EM& em, f32 dt);
     void Update(EM& em, f32 dt);
     void PostUpdate(EM& em, f32 dt);
 };

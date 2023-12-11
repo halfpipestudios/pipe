@@ -41,13 +41,11 @@ void InputSys<EM>::Update(EM& em, f32 dt) {
 
         physicsComp->physics.acc += worldFront * inp->input->state[0].leftStickY;
         physicsComp->physics.acc += right      * inp->input->state[0].leftStickX;
+        physicsComp->physics.acc.Normalize();
         physicsComp->physics.acc *= acc * drag;
 
-
-        // TODO: the player orientatin should not depend on the velocity direction,
-        // the velocity direction should depend on the angular velocity. 
-        // TODO: add and angular velocity to the player
-        Vec3 dir = { physicsComp->physics.vel.x, 0.0f, physicsComp->physics.vel.z };
+        // TODO: quick fix for the view direction bug
+        Vec3 dir = { physicsComp->viewDir.x, 0.0f, physicsComp->viewDir.z };
         dir.Normalize();
         f32 orientation = atan2f(dir.z, dir.x);
         physicsComp->physics.orientation = orientation;

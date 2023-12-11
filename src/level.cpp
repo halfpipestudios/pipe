@@ -270,6 +270,7 @@ void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
+    physicsSys.PreUpdate(em, dt);
     inputSys.Update(em, dt);
     aiSys.Update(em, dt);
     physicsSys.Update(em, dt);
