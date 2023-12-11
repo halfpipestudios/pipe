@@ -49,3 +49,11 @@ void ModelManager::Unload(Model *model) {
     }
 }
 
+void ModelManager::SetTexture(Handle handle, char *name) {
+    Model *model = Dereference(handle);
+    for(u32 index = 0; index < model->numMeshes; ++index) {
+        Mesh *mesh = model->meshes + index;
+        mesh->texture = TextureManager::Get()->GetAsset(name);
+    }
+}
+
