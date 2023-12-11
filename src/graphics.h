@@ -40,6 +40,11 @@ struct CBTGui {
     u32 padding[2];
 };
 
+struct CBGizmo{
+    Vec3 color;
+    f32 padding[1];
+};
+
 #define MAX_BONES 100
 struct CBAnimation {
     Mat4 boneMatrix[MAX_BONES];
@@ -167,6 +172,9 @@ struct Graphics {
 
     ConstBuffer gpuTGuiBuffer;
     CBTGui cpuTGuiBuffer;
+
+    ConstBuffer gpuGizmoBuffer;
+    CBGizmo cpuGizmoBuffer;
 };
 
 #endif

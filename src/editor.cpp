@@ -10,6 +10,9 @@
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
 
+#include "graphics_manager.h"
+#include "mgr/texture_manager.h"
+
 void *TGuiCreateShader(char *vert, char *frag) {
     Shader shader = GraphicsManager::Get()->CreateShaderTGui(vert, frag);
     return (void *)shader;
@@ -92,6 +95,13 @@ void Editor::Initialize(Game *game) {
     this->selectedEntity = nullptr;
     this->paused = false;
 
+    gizmoShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/gizmoVert.hlsl",
+                                                                "./data/shaders/gizmoFrag.hlsl");
+
+    transformGizmoX = ModelManager::Get()->GetAsset("transform.twm");
+    transformGizmoY = ModelManager::Get()->GetAsset("transform.twm");
+    transformGizmoZ = ModelManager::Get()->GetAsset("transform.twm");
+
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
     tguiBackend.create_texture  = TGuiCreateTexture;
@@ -116,6 +126,7 @@ void Editor::Initialize(Game *game) {
 }
 
 void Editor::Terminate() {
+    GraphicsManager::Get()->DestroyShader(gizmoShader);
     GraphicsManager::Get()->DestroyFrameBuffer(gameFrameBuffer);
     tgui_terminate();
 }
@@ -260,13 +271,6 @@ static void UpdateAIComponent(TGuiWindowHandle window, Entity_ *entity, i32 x, i
 
 void Editor::Update(f32 dt) {
     
-    if(paused) dt = 0; 
-
-    game->Update(dt);
-    
-    Level *level = &game->level;
-    auto& entities = level->em.GetEntities();
-
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
     tgui_begin(dt);
@@ -307,6 +311,9 @@ void Editor::Update(f32 dt) {
     
     // NOTE: Entity window UI
     {
+        Level *level = &game->level;
+        auto& entities = level->em.GetEntities();
+   
         _tgui_tree_view_begin(entiWindow, TGUI_ID);
         _tgui_tree_view_root_node_begin("Entities", nullptr);
 
@@ -362,45 +369,89 @@ void Editor::Update(f32 dt) {
 
             }
 
-            /*
-            ComponentContainer *container = selectedEntity->componentContainerList;
-            while(container != nullptr) {
-                
-                Component *component =  (Component *)&container->component;
-
-                if(typeid(*component) == typeid(TransformComponent)) {
-                    UpdateTransformComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(PhysicsComponent)) {
-                    UpdatePhysicsComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(CollisionComponent)) {
-                    UpdateCollisionComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(GraphicsComponent)) {
-                    UpdateGraphicComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(InputComponent)) {
-                    UpdateInputComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(PlayerAnimationComponent)) {
-                    UpdatePlayerAnimationComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(MovingPlatformComponent)) {
-                    UpdateMovingPlatformComponent(compWindow, selectedEntity, 10, &y);
-                } else if(typeid(*component) == typeid(AIComponent)) {
-                    UpdateAIComponent(compWindow, selectedEntity, 10, &y);
-                } else {
-                    char *compName = (char *)typeid(*component).name();
-                    _tgui_label(compWindow, compName, 0x222222, 10, y, compName);
-                    y += 20;
-                }
-                
-                container = container->next;
-            }
-            */
-
-
         } else {
             _tgui_label(compWindow, "There is no entity selected!", 0x222222, 10, 10, TGUI_ID);
         }
     }
     
     tgui_end();
+
+    if(paused) dt = 0; 
+
+    game->Update(dt);
+}
+
+void Editor::RenderModel(Handle handle, Vec3 color) {
+    
+    CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
+    ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
+    buffer->color = color;
+    GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
+
+    Model *model = ModelManager::Get()->Dereference(handle);
+
+    for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
+        Mesh *mesh = model->meshes + meshIndex;
+        if(mesh->indexBuffer) {
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, gizmoShader);
+        } else {
+            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, gizmoShader);
+        }
+    }
+
+}
+
+void Editor::RenderEditorGizmos() {
+
+    if(!selectedEntity) return;
+
+    GraphicsManager::Get()->SetDepthStencilState(false);
+
+    TransformCMP transform = *selectedEntity->GetComponent<TransformCMP>();
+
+    Level *level = &game->level;
+    Camera camera = level->camera;
+
+    Vec3 p = transform.pos;
+    Vec3 n = camera.front.Normalized();
+    Vec3 o = camera.pos + n * 6;
+   
+    Vec3 v = transform.pos - camera.pos;
+
+    f32 behindTest = v.Dot(n);
+
+    if(behindTest >= 0) {
+
+        f32 t = 0;
+        if(ABS(v.Dot(n)) > 0.01f)  {
+            t = (o.Dot(n) - p.Dot(n)) / v.Dot(n);
+        }
+
+        transform.rot = Vec3(0,0,0);
+        transform.scale = Vec3(1,1,1);
+        transform.pos = p + v * t; 
+
+        GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
+        ModelManager::Get()->SetTexture(transformGizmoZ, "red.png");
+        RenderModel(transformGizmoX, Vec3(1,0,0));
+        
+        TransformCMP transform1 = transform;
+        transform1.rot.z += (f32)TO_RAD(90);
+
+        GraphicsManager::Get()->SetWorldMatrix(transform1.GetWorldMatrix());
+        ModelManager::Get()->SetTexture(transformGizmoZ, "green.png");
+        RenderModel(transformGizmoY, Vec3(0,1,0));
+
+        TransformCMP transform2 = transform;
+        transform2.rot.y += (f32)TO_RAD(90);
+        
+        GraphicsManager::Get()->SetWorldMatrix(transform2.GetWorldMatrix());
+        ModelManager::Get()->SetTexture(transformGizmoZ, "blue.png");
+        RenderModel(transformGizmoZ, Vec3(0,0,1));
+
+    }
+
+    GraphicsManager::Get()->SetDepthStencilState(true);
 }
 
 void Editor::Render() {
@@ -416,8 +467,9 @@ void Editor::Render() {
     GraphicsManager::Get()->ClearDepthStencilBuffer(gameFrameBuffer);
 
     game->Render();
-    GraphicsManager::Get()->FlushFrameBuffer(gameFrameBuffer);
+    RenderEditorGizmos();
 
+    GraphicsManager::Get()->FlushFrameBuffer(gameFrameBuffer);
     
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, 
                                                            (f32)PlatformManager::Get()->GetWindow()->GetWidth() /
@@ -428,7 +480,7 @@ void Editor::Render() {
     GraphicsManager::Get()->SetViewport(0, 0, PlatformManager::Get()->GetWindow()->GetWidth(), PlatformManager::Get()->GetWindow()->GetHeight());
     GraphicsManager::Get()->BindFrameBuffer(nullptr);
     GraphicsManager::Get()->ClearColorBuffer(nullptr, 1, 0, 1);
-    // GraphicsManager::Get()->ClearDepthStencilBuffer(nullptr);
+    //GraphicsManager::Get()->ClearDepthStencilBuffer(nullptr);
     
     tgui_draw_buffers();
 }
