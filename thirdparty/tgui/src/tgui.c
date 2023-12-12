@@ -1358,6 +1358,15 @@ void _tgui_tree_view_begin(TGuiWindowHandle handle, char *tgui_id) {
     treeview->active_depth = 0;
 }
 
+void _tgui_tree_view_deselect() {
+    if(!tgui_window_update_widget(state.active_window)) {
+        return;
+    }
+
+    TGuiTreeView *treeview = tgui_widget_get_state(state.active_id, TGuiTreeView);
+    treeview->selection_index = 0;
+}
+
 void _tgui_tree_view_end(void **selected_data) {
 
     if(!tgui_window_update_widget(state.active_window)) {
