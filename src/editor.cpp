@@ -439,21 +439,18 @@ void Editor::RenderEditorGizmos() {
         transform.pos = p + v * t; 
 
         GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
-        ModelManager::Get()->SetTexture(transformGizmoZ, "red.png");
         RenderModel(transformGizmoX, Vec3(1,0,0));
         
         TransformCMP transform1 = transform;
         transform1.rot.z += (f32)TO_RAD(90);
 
         GraphicsManager::Get()->SetWorldMatrix(transform1.GetWorldMatrix());
-        ModelManager::Get()->SetTexture(transformGizmoZ, "green.png");
         RenderModel(transformGizmoY, Vec3(0,1,0));
 
         TransformCMP transform2 = transform;
         transform2.rot.y += (f32)TO_RAD(90);
         
         GraphicsManager::Get()->SetWorldMatrix(transform2.GetWorldMatrix());
-        ModelManager::Get()->SetTexture(transformGizmoZ, "blue.png");
         RenderModel(transformGizmoZ, Vec3(0,0,1));
 
     }
