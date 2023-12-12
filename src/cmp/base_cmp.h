@@ -4,7 +4,8 @@
 struct Entity_;
 
 struct CMPBase {
-    i32 id;
+    i32 id           { -1 };
+    Entity_ *entity  { nullptr };
 protected:
     inline static i32 counter { 0 };
 };
@@ -18,7 +19,6 @@ struct CMP : CMPBase {
         static i32 id { ++counter };
         return id;
     }
-    Entity_ *entity;
 };
 
 #endif // _COMPONENT_NEW_H_

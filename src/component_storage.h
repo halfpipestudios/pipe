@@ -7,11 +7,37 @@
 #define COMPONENTS_ARRAY_MAP_SIZE 64
 #define COMPONENTS_ARRAY_MAX_SIZE 256
 
-struct ComponentArrayBase {};
+struct ComponentArrayBase {
+    virtual void DestroyComponent(void *ptr) = 0;
+};
 
 template <typename ComponentType>
 struct ComponentArray : ComponentArrayBase {
     Array<ComponentType> components;
+
+    void DestroyComponent(void *ptr) override {
+       
+        u64 index = (u64)ptr;
+        u64 start = (u64)components.data;
+        u64 end   = (u64)(components.data + components.size);
+
+        ASSERT(index >= start);
+        ASSERT(index < end);
+        
+        u32 i = (index - start) / sizeof(ComponentType);
+        ComponentType *lastCmp = &components[components.size - 1];
+
+        //components[i] = components[components.size - 1];
+        memcpy(components.data + i, components.data + components.size - 1, sizeof(ComponentType));
+        
+        u32 cmpID = ComponentType::GetID();        
+        CMPBase **lastEntityCmp = lastCmp->entity->componentsPtrs.GetPtr(cmpID);
+        *lastEntityCmp = components.data + i;
+
+        memset(components.data + components.size - 1, 0, sizeof(ComponentType));
+
+        --components.size;
+    }
 };
 
 struct ComponentStorage {
@@ -25,6 +51,11 @@ struct ComponentStorage {
         i32 id = ComponentType::GetID(); 
         ComponentArray<ComponentType> *componentArray = (ComponentArray<ComponentType> *)componentsArraysMap.Get(id);
         return componentArray->components;
+    }
+
+    ComponentArrayBase *GetComponentsByID(i32 id) {
+        ComponentArrayBase *componentArray = componentsArraysMap.Get(id);
+        return componentArray;
     }
 
     template <typename ComponentType>

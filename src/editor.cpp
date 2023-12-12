@@ -12,6 +12,7 @@
 
 #include "graphics_manager.h"
 #include "mgr/texture_manager.h"
+#include "entity_manager.h"
 
 void *TGuiCreateShader(char *vert, char *frag) {
     Shader shader = GraphicsManager::Get()->CreateShaderTGui(vert, frag);
@@ -298,13 +299,19 @@ void Editor::Update(f32 dt) {
         tgui_button(toolWindow, "Save Level", x, y);
         tgui_button(toolWindow, "Load Level", x, y +  30 + 10);
         tgui_button(toolWindow, "Add Entity", x, y +  60 + 20);
+        if(tgui_button(toolWindow, "Remove Entity", x, y +  90 + 30)) {
+            if(selectedEntity) {
+                game->level.em.DeleteEntity(selectedEntity); 
+                selectedEntity = nullptr;
+            }
+        }
 
         char *gameStateButton[] = {
             "Pause Game",
             "Play Game",
         };
 
-        if(tgui_button(toolWindow, gameStateButton[paused], x, y + 90 + 30)) {
+        if(tgui_button(toolWindow, gameStateButton[paused], x, y + 120 + 40)) {
             paused = !paused;
         }
     }

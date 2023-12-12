@@ -7,6 +7,7 @@
 struct AiCMP;
 struct PhysicsCMP;
 
+// TODO: fix this ...
 struct AIBlackBoard {
     Vec3 *target;
 };

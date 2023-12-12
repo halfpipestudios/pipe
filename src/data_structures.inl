@@ -96,6 +96,24 @@ Type HashMap<Type>::Get(u64 key) {
 }
 
 template <typename Type>
+Type *HashMap<Type>::GetPtr(u64 key) {
+    u32 id = MurMur2(&key, sizeof(u64), seed);
+    u32 index = (id & mask);
+    u32 counter = 0;
+    
+    while((elements[index].id != 0 && elements[index].id != id) && counter < capacity) {
+        index = (index + 1) % capacity;
+        ++counter;
+    }
+
+    if(elements[index].id != 0 && counter <= capacity) {
+        return &elements[index].value;
+    }
+
+    return nullptr;    
+}
+
+template <typename Type>
 Type *HashMap<Type>::Get(const char *key) {
     u32 id = MurMur2(key, strlen(key), seed);
     u32 index = (id & mask);

@@ -32,6 +32,7 @@ struct Entity_ {
     }
 
     HashMap<CMPBase *> componentsPtrs;
+    Array<u32> componentsIds;
 };
 
 #endif // _ENTITY_H_

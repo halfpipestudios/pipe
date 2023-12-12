@@ -21,7 +21,7 @@ void AiSys<EM>::Update(EM& em, f32 dt) {
             contx.phyComp = phy;
             contx.aiComp = ai;
             ai->bhTree->run(&contx);
-            return;
+            continue;
         }
         
         Steering steering = {};
