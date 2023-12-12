@@ -3,6 +3,7 @@
 #include "game.h"
 #include "graphics_manager.h"
 #include "platform_manager.h"
+#include "gizmo.h"
 
 void *TGuiCreateShader(char *vert, char *frag) {
     Shader shader = GraphicsManager::Get()->CreateShaderTGui(vert, frag);
@@ -86,7 +87,6 @@ void Editor::Initialize(Game *game) {
     this->selectedEntity = nullptr;
     this->paused = false;
 
-
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
     tguiBackend.create_texture  = TGuiCreateTexture;
@@ -99,6 +99,8 @@ void Editor::Initialize(Game *game) {
                     &tguiBackend);
     
     tgui_texture_atlas_generate_atlas();
+    
+    GizmoManager::Get()->Initialize(&gameWindow, &game->level.camera);
 
     gameWindow.Initialize("Game", TGUI_WINDOW_TRANSPARENT, nullptr, (TGuiSplitDirection)0);
     toolWindow.Initialize("Tools", TGUI_WINDOW_SCROLLING, &gameWindow, TGUI_SPLIT_DIR_VERTICAL);
@@ -106,15 +108,16 @@ void Editor::Initialize(Game *game) {
     compWindow.Initialize("Components", TGUI_WINDOW_SCROLLING, &entiWindow, TGUI_SPLIT_DIR_HORIZONTAL);
 
     tgui_try_to_load_data_file();
-    
 }
 
 void Editor::Terminate() {
-
+    
     gameWindow.Terminate();
     toolWindow.Terminate();
     entiWindow.Terminate();
     compWindow.Terminate();
+
+    GizmoManager::Get()->Terminate();
 
     tgui_terminate();
 }
@@ -122,6 +125,7 @@ void Editor::Terminate() {
 void Editor::Update(f32 dt) {
     
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
+    GizmoManager::Get()->UpdateInput();
     
     tgui_begin(dt);
 
@@ -129,6 +133,7 @@ void Editor::Update(f32 dt) {
     compWindow.Update(this, dt);
     entiWindow.Update(this, dt);
     toolWindow.Update(this, dt);
+
     
     tgui_end();
 

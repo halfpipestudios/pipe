@@ -153,7 +153,11 @@ struct Graphics {
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
     virtual void BindTextureBuffer(TextureBuffer textureBufferHandle) = 0;
 
+
+    virtual void FrameBufferMap(FrameBuffer frameBufferHandle, u32 *w, u32 *h, u32 *sizeInBytes, u8 **buffer) = 0;
+    virtual void FrameBufferUnmap(FrameBuffer frameBufferHandle) = 0;
     virtual FrameBuffer CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
+    virtual FrameBuffer CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
     virtual void DestroyFrameBuffer(FrameBuffer frameBufferHandle) = 0;
     virtual void BindFrameBuffer(FrameBuffer frameBufferHandle) = 0;
     virtual TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) = 0;

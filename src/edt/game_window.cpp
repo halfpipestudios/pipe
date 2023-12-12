@@ -13,8 +13,8 @@
 void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *otherWindow, TGuiSplitDirection dir) {
     EditorWindow::Initialize(name, flags, otherWindow, dir);
     gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1280, 720);
-    gizmoShader = GraphicsManager::Get()->CreateShaderVertexMap("./data/shaders/gizmoVert.hlsl",
-                                                                "./data/shaders/gizmoFrag.hlsl");
+    gizmoShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
+                                                       "./data/shaders/gizmoFrag.hlsl");
 
     transformGizmoX = ModelManager::Get()->GetAsset("transform.twm");
     transformGizmoY = ModelManager::Get()->GetAsset("transform.twm");

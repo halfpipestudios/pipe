@@ -754,6 +754,24 @@ void D3D11Graphics::BindTextureBuffer(TextureBuffer textureBufferHandle) {
     deviceContext->PSSetShaderResources(0, 1, &textureArray->srv);
 }
 
+void D3D11Graphics::FrameBufferMap(FrameBuffer frameBufferHandle, u32 *w, u32 *h, u32 *sizeInBytes, u8 **buffer) {
+    D3D11_MAPPED_SUBRESOURCE bufferData;
+    ZeroMemory(&bufferData, sizeof(bufferData));
+    
+    D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+    
+    deviceContext->Map(frameBuffer->texture, 0, D3D11_MAP_READ, 0, &bufferData);
+    *w = (u32)frameBuffer->w;
+    *h = (u32)frameBuffer->h;
+    *buffer = (u8 *)bufferData.pData;
+    *sizeInBytes = bufferData.RowPitch * (u32)frameBuffer->h;
+}
+
+void D3D11Graphics::FrameBufferUnmap(FrameBuffer frameBufferHandle) {
+    D3D11FrameBuffer *frameBuffer = (D3D11FrameBuffer *)frameBufferHandle;
+    deviceContext->Unmap(frameBuffer->texture, 0);
+}
+
 FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
     
     D3D11FrameBuffer frameBuffer = {};
@@ -776,6 +794,103 @@ FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height
     texDesc.Usage = D3D11_USAGE_DEFAULT;
     texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     texDesc.CPUAccessFlags = 0;
+    texDesc.MiscFlags = 0;
+    if(FAILED(device->CreateTexture2D(&texDesc, 0, &frameBuffer.texture))) {
+        printf("Error creating FrameBuffer Texture\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create render target view
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+    rtvDesc.Format = frameBuffer.format;
+    rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvDesc.Texture2D.MipSlice = 0;
+    if(FAILED(device->CreateRenderTargetView(frameBuffer.texture, &rtvDesc, &frameBuffer.renderTargetView))) {
+        printf("Error creating FrameBuffer rtv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create shader resource view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    srvDesc.Format = frameBuffer.format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    if (FAILED(device->CreateShaderResourceView(frameBuffer.texture, &srvDesc, &frameBuffer.shaderResourceView))) {
+        printf("Error creating FrameBuffer srv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    // create the depth stencil texture
+    ID3D11Texture2D* depthStencilTexture = 0;
+    D3D11_TEXTURE2D_DESC depthStencilTextureDesc;
+    depthStencilTextureDesc.Width  = width;
+    depthStencilTextureDesc.Height = height;
+    depthStencilTextureDesc.MipLevels = 1;
+    depthStencilTextureDesc.ArraySize = 1;
+    depthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilTextureDesc.SampleDesc.Count = 1;
+    depthStencilTextureDesc.SampleDesc.Quality = 0;
+    depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilTextureDesc.CPUAccessFlags = 0;
+    depthStencilTextureDesc.MiscFlags = 0;
+ 
+    // create the depth stencil view
+    if(FAILED(device->CreateTexture2D(&depthStencilTextureDesc, NULL, &depthStencilTexture))) {
+        printf("Error creating FrameBuffer depthStencilTexture\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
+    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    descDSV.Texture2D.MipSlice = 0;
+
+    if(FAILED(device->CreateDepthStencilView(depthStencilTexture, &descDSV, &frameBuffer.depthStencilView))) {
+        printf("Error creating FrameBuffer dsv\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    if (depthStencilTexture) {
+        depthStencilTexture->Release();
+    }
+
+    frameBuffer.textureBuffer = {};
+    
+    frameBuffer.textureBuffer.srv = frameBuffer.shaderResourceView;
+    frameBuffer.textureBuffer.gpuTextureArray = frameBuffer.texture;
+    frameBuffer.textureBuffer.mipLevels = 1;
+    frameBuffer.textureBuffer.size = 1;
+
+    D3D11FrameBuffer *frameBufferHandle = frameBufferStorage.Alloc();
+    *frameBufferHandle = frameBuffer;
+
+    return (FrameBuffer)frameBufferHandle;
+}
+
+FrameBuffer D3D11Graphics::CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
+    
+    D3D11FrameBuffer frameBuffer = {};
+    
+    frameBuffer.x = (f32)x;
+    frameBuffer.y = (f32)y;
+    frameBuffer.w = (f32)width;
+    frameBuffer.h = (f32)height;
+    frameBuffer.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    
+    // create texture 2d
+    D3D11_TEXTURE2D_DESC texDesc;
+    texDesc.Width = width;
+    texDesc.Height = height;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 1;
+    texDesc.Format = frameBuffer.format;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.SampleDesc.Quality = 0;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
     texDesc.MiscFlags = 0;
     if(FAILED(device->CreateTexture2D(&texDesc, 0, &frameBuffer.texture))) {
         printf("Error creating FrameBuffer Texture\n");
