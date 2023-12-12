@@ -394,7 +394,7 @@ void _tgui_tree_view_begin(TGuiWindowHandle window, char *tgui_id);
 
 void _tgui_tree_view_end(void **selected_data);
 
-void _tgui_tree_view_deselect();
+void _tgui_tree_view_deselect(char *tgui_id);
 
 void _tgui_tree_view_root_node_begin(char *label, void *user_data);
 
