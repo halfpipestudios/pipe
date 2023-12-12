@@ -287,7 +287,9 @@ void Editor::Update(f32 dt) {
     }
 
     // NOTE: Tools window UI
+    char *treeViewId = TGUI_ID;
     {
+
         // TODO: These are default of the tgui library, make interface to get them
         u32 buttonW = 120;
         u32 buttonH = 30;
@@ -300,10 +302,14 @@ void Editor::Update(f32 dt) {
         tgui_button(toolWindow, "Load Level", x, y +  30 + 10);
         tgui_button(toolWindow, "Add Entity", x, y +  60 + 20);
         if(tgui_button(toolWindow, "Remove Entity", x, y +  90 + 30)) {
+            /*
             if(selectedEntity) {
                 game->level.em.DeleteEntity(selectedEntity); 
                 selectedEntity = nullptr;
+                _tgui_tree_view_deselect(treeViewId);
+
             }
+            */
         }
 
         char *gameStateButton[] = {
@@ -321,7 +327,7 @@ void Editor::Update(f32 dt) {
         Level *level = &game->level;
         auto& entities = level->em.GetEntities();
    
-        _tgui_tree_view_begin(entiWindow, TGUI_ID);
+        _tgui_tree_view_begin(entiWindow, treeViewId);
         _tgui_tree_view_root_node_begin("Entities", nullptr);
 
         for(i32 i = 0; i < entities.size; ++i) {

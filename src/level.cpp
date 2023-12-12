@@ -120,8 +120,8 @@ static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(hero);
     graphicsCmp->Initialize(model, shader);
 
-    //AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(hero);
-    //animationCmp->Initialize(animationClipSet);
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(hero);
+    animationCmp->Initialize(animationClipSet);
 
     InputCMP *inputCmp = em.AddComponent<InputCMP>(hero);
     inputCmp->Initialize(input, camera);
@@ -159,8 +159,8 @@ static Entity_ *CreateOrc(EntityManager& em,
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(orc);
     graphicsCmp->Initialize(model, shader);
 
-    //AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
-    //animationCmp->Initialize(animationClipSet);
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
+    animationCmp->Initialize(animationClipSet);
 
     Cylinder cylinder = {};
     cylinder.c = pos;

@@ -1359,14 +1359,13 @@ void _tgui_tree_view_begin(TGuiWindowHandle handle, char *tgui_id) {
 }
 
 void _tgui_tree_view_deselect(char *tgui_id) {
-    if(!tgui_window_update_widget(state.active_window)) {
-        return;
-    }
-
     tgui_u32 id = tgui_get_widget_id(tgui_id);
 
     TGuiTreeView *treeview = tgui_widget_get_state(id, TGuiTreeView);
-    treeview->selection_index = 0;
+    if(treeview) {
+        treeview->selection_index = 0;
+        treeview->selection_data = NULL;
+    } 
 }
 
 void _tgui_tree_view_end(void **selected_data) {
