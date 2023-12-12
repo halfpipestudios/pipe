@@ -4,7 +4,7 @@
 #include <initializer_list>
 
 #include "common.h"
-#include "math.h"
+#include "algebra.h"
 
 enum BehaviorStatus {
     BEHAVIOR_SUCCESS,

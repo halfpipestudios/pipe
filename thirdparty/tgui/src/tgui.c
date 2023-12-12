@@ -1902,16 +1902,20 @@ TGuiWindow *tgui_window_alloc(TGuiDockerNode *parent, char *name, TGuiWindowFlag
     return window;
 }
 
-TGuiWindow *tgui_window_get_from_handle(TGuiWindowHandle handle) {
-
+TGuiAllocatedWindow *tgui_allocated_window_get_from_handle(TGuiWindowHandle handle) {
     TGuiAllocatedWindow *allocated_window = state.allocated_windows->next;
     while(!tgui_clink_list_end(allocated_window, state.allocated_windows)) {
         TGuiWindow *window = &allocated_window->window;
-        if(window->id == handle) return window;
+        if(window->id == handle) return allocated_window;
         allocated_window = allocated_window->next;
     }
     TGUI_ASSERT(!"Invalid code path");
     return NULL;
+}
+
+TGuiWindow *tgui_window_get_from_handle(TGuiWindowHandle handle) {
+    TGuiAllocatedWindow *allocated_window = tgui_allocated_window_get_from_handle(handle);
+    return &allocated_window->window;
 }
 
 TGuiWindowHandle tgui_create_root_window(char *name, tgui_b32 scroll) {

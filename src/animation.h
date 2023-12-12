@@ -1,8 +1,8 @@
 #ifndef _ANIMATION_H_
 #define _ANIMATION_H_
 
-#include "math.h"
 #include "common.h"
+#include "algebra.h"
 #include "allocators.h"
 
 struct Joint {

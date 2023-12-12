@@ -1,8 +1,8 @@
 #ifndef _ANIMATION_MANAGER_H_
 #define _ANIMATION_MANAGER_H_
 
-#include "../asset_manager.h"
-#include "../animation.h"
+#include "asset_manager.h"
+#include "animation.h"
 
 struct AnimationManager : AssetManager<AnimationClipSet> {
 

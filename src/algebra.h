@@ -1,5 +1,5 @@
-#ifndef _MATH_H_
-#define _MATH_H_
+#ifndef _ALGEBRA_H_
+#define _ALGEBRA_H_ 
 
 #include "common.h"
 

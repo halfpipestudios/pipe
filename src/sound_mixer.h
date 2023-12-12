@@ -2,7 +2,7 @@
 #define _SOUND_MIXER_H_
 
 #include "common.h"
-#include "math.h"
+#include "algebra.h"
 
 #define MAX_SOUND_NAME 256
 

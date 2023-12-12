@@ -1,5 +1,5 @@
 #include "animation_manager.h"
-#include "../model_importer.h"
+#include "model_importer.h"
 
 AnimationManager AnimationManager::animationManager;
 

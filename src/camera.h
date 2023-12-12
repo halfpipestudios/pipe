@@ -2,7 +2,7 @@
 #define _CAMERA_H_
 
 #include "common.h"
-#include "math.h"
+#include "algebra.h"
 
 struct Map;
 struct Input;

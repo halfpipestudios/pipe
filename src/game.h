@@ -17,16 +17,11 @@ struct Game {
 
     void Render();
 
-private:
-
     Shader mapShader;
     Shader animShader;
     Shader statShader;
 
     Level level;
-
-    friend struct Editor;
-
 };
 
 #endif // _GAME_H_

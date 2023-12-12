@@ -1,8 +1,8 @@
 #include "model_manager.h"
 #include "texture_manager.h"
 
-#include "../graphics_manager.h"
-#include "../model_importer.h"
+#include "graphics_manager.h"
+#include "model_importer.h"
 
 #include <stdio.h>
 #include <string>

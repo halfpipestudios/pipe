@@ -42,8 +42,6 @@ struct Level {
     void Update(f32 dt);
     void Render(Shader mapShader);
 
-private:
-    
     MemoryFrame memory; 
     EntityManager em;
 
@@ -63,8 +61,6 @@ private:
     Entity_ *hero;
  
     BehaviorTree bhTree;
-    
-    friend struct Editor;
 };
 
 #endif // _LEVEL_H_

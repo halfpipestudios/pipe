@@ -2,7 +2,7 @@
 #define _STEERING_BEHAVIORS_H_
 
 #include "common.h"
-#include "math.h"
+#include "algebra.h"
 
 struct AiCMP;
 struct PhysicsCMP;

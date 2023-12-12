@@ -1,8 +1,8 @@
 #ifndef _TEXTURE_MANAGER_H_
 #define _TEXTURE_MANAGER_H_
 
-#include "../asset_manager.h"
-#include "../graphics.h"
+#include "asset_manager.h"
+#include "graphics.h"
 
 
 struct TextureManager : AssetManager<TextureBuffer> {

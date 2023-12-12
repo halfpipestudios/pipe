@@ -141,6 +141,8 @@ TGuiAllocatedWindow *tgui_allocated_window_node_alloc(void);
 
 void tgui_allocated_window_node_free(TGuiAllocatedWindow *allocated_window);
 
+TGuiAllocatedWindow *tgui_allocated_window_get_from_handle(TGuiWindowHandle handle);
+
 #define TGUI_MAX_WINDOW_REGISTRY 256
 
 typedef struct TGui {

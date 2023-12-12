@@ -9,7 +9,7 @@
 #include "mgr/animation_manager.h"
 
 #include "game.h"
-#include "editor.h"
+#include "edt/editor.h"
 
 int main() {
 

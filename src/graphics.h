@@ -2,7 +2,7 @@
 #define _GRAPHICS_H_
 
 #include "common.h"
-#include "math.h"
+#include "algebra.h"
 
 typedef void * Shader;
 typedef void * ConstBuffer;

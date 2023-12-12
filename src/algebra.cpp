@@ -1,4 +1,4 @@
-#include "math.h"
+#include "algebra.h"
 
 #include <math.h>
 #include <float.h>

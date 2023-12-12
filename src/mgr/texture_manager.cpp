@@ -1,5 +1,5 @@
 #include "texture_manager.h"
-#include "../graphics_manager.h"
+#include "graphics_manager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
