@@ -54,8 +54,6 @@ void GizmoManager::UpdateInput() {
 
 }
 
-
-
 Gizmo::Gizmo() {
     static u32 autoId = 0;
     id = ++autoId;

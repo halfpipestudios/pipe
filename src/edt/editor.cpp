@@ -134,7 +134,6 @@ void Editor::Update(f32 dt) {
     entiWindow.Update(this, dt);
     toolWindow.Update(this, dt);
 
-    
     tgui_end();
 
     if(paused) dt = 0; 
