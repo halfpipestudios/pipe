@@ -1,7 +1,7 @@
 #ifndef _TRANSFORM_CMP_H_
 #define _TRANSFORM_CMP_H_
 
-#include "math.h"
+#include "algebra.h"
 
 struct TransformCMP : CMP<TransformCMP> {
 
