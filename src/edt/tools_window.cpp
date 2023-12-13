@@ -1,5 +1,6 @@
 #include "tools_window.h"
 #include "editor.h"
+#include "game.h"
 
 void ToolsWindow::Update(Editor *editor, f32 dt) {
 
@@ -14,14 +15,13 @@ void ToolsWindow::Update(Editor *editor, f32 dt) {
     tgui_button(window, "Load Level", x, y +  30 + 10);
     tgui_button(window, "Add Entity", x, y +  60 + 20);
     if(tgui_button(window, "Remove Entity", x, y +  90 + 30)) {
-        /*
-        if(selectedEntity) {
-            game->level.em.DeleteEntity(selectedEntity); 
-            selectedEntity = nullptr;
-            _tgui_tree_view_deselect(EntityWindow::GetTreeviewId());
-
+        
+        if(editor->selectedEntity) {
+            if(editor->game->level.DeleteEntity(*editor->selectedEntity)) {
+                editor->selectedEntity = nullptr;
+                _tgui_tree_view_deselect(EntityWindow::GetTreeviewId());
+            }
         }
-        */
     }
 
     char *gameStateButton[] = {

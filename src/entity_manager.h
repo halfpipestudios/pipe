@@ -23,70 +23,94 @@ struct EntityManager {
         return componentsStorage.GetComponents<ComponentType>();
     }
 
-    Array<Entity_>& GetEntities() {
-        return entities;
-    }
-
-    Entity_ *AddEntity() {
-        Entity_ *entity = entities.Push({});
-        entity->componentsPtrs.Initialize(COMPONENTS_ARRAY_MAP_SIZE);
-        entity->componentsIds.Initialize(COMPONENTS_ARRAY_MAP_SIZE);
-        return entity;
-    }
-
-    void DeleteEntity(Entity_ *entity) {
-
-        u64 index = (u64)entity;
-        u64 start = (u64)entities.data;
-        u64 end   = (u64)(entities.data + entities.size);
-
-        ASSERT(index >= start);
-        ASSERT(index < end);
-        
-        u32 entityIndex = (index - start) / sizeof(Entity_);
-
-        // TODO: first delete all entity components
-        printf("##########################################\n");
-        for(i32 i = 0; i < entity->componentsIds.size; ++i) {
-            u32 cmpID = entity->componentsIds[i]; 
-            CMPBase *cmp = entity->componentsPtrs.Get(cmpID);
-
-            ComponentArrayBase *componets = componentsStorage.GetComponentsByID(cmp->id);
-             
-            componets->DestroyComponent((void *)cmp);
-            printf("Deleting Compoents ID: %d\n", cmp->id);
-
-
-        }
-        printf("##########################################\n");
-
-
-        entities[entityIndex] = entities[entities.size - 1];
-        entities[entities.size - 1] = {};
-        
-        Entity_ *moveEntity = &entities[entityIndex];
-        for(i32 i = 0; i < moveEntity->componentsIds.size; ++i) {
-            CMPBase *cmp = moveEntity->componentsPtrs.Get(moveEntity->componentsIds[i]);
-            i32 before = 0;
-            cmp->entity = moveEntity;
-            i32 after = 0;
-        }
-
-        --entities.size;
-
-    }
-
     template <typename ComponentType>
-    ComponentType *AddComponent(Entity_ *entity) {
-        Array<ComponentType>& componentsArray = GetComponents<ComponentType>();
-        ComponentType *component = componentsArray.Push({});
-        component->entity = entity;
-        entity->componentsPtrs.Add(ComponentType::GetID(), (CMPBase *)component);
-        entity->componentsIds.Push(ComponentType::GetID());
+    ComponentType *GetComponent(SlotmapKey entityKey) {
+        Entity_ *entity = &entities.Get(entityKey);
+        SlotmapKey componentKey = entity->componentsKeys.Get(ComponentType::GetID());
+
+        if(componentKey.gen == INVALID_KEY) {
+            return nullptr;
+        }
+
+        Slotmap<ComponentType>& slotmap = componentsStorage.GetComponentsSlotmap<ComponentType>();
+        ComponentType *component = &slotmap.Get(componentKey);
         return component;
     }
 
-    Array<Entity_> entities;
+#if 0
+    // TODO: see if this is realy necesary
+    template <typename ComponentType>
+    ComponentType *GetComponentFromEntityPtr(Entity_ *entity) {
+        SlotmapKey componentKey = entity->componentsKeys.Get(ComponentType::GetID());
+
+        if(componentKey.gen == INVALID_KEY) {
+            return nullptr;
+        }
+
+        Slotmap<ComponentType>& slotmap = componentsStorage.GetComponentsSlotmap<ComponentType>();
+        ComponentType *component = &slotmap.Get(componentKey);
+        return component;
+    }
+#endif
+
+    Array<Entity_>& GetEntities() {
+        return entities.data;
+    }
+
+    Entity_ *GetEntity(SlotmapKey entityKey) {
+        if(entityKey.gen == INVALID_KEY) {
+            return nullptr;
+        }
+        return &entities.Get(entityKey);
+    }
+
+    SlotmapKey AddEntity() {
+        SlotmapKey entityKey = entities.Add({});
+        Entity_ *entity = &entities.Get(entityKey);
+        entity->componentsKeys.Initialize(COMPONENTS_TYPE_MAX_SIZE);
+        entity->componentsIds.Initialize(COMPONENTS_TYPE_MAX_SIZE);
+        return entityKey;
+    }
+
+
+    void DeleteEntity(SlotmapKey entityKey) {
+
+        Entity_ *entity = &entities.Get(entityKey);
+
+        for(i32 i = 0; i < entity->componentsIds.size; ++i) {
+            u32 cmpID = entity->componentsIds[i]; 
+            printf("Deleting Compoents ID: %d of Entity ID: %lld", cmpID, entityKey.gen);
+            ComponentSlotmapBase* slotmap = componentsStorage.GetComponentsSlotmapById(cmpID);
+            SlotmapKey componentKey = entity->componentsKeys.Get(cmpID);
+            slotmap->DestroyComponent(componentKey);
+            printf(" -------> component Deleted\n");
+        }
+
+        entities.Remove(entityKey);
+    }
+
+
+    template <typename ComponentType>
+    ComponentType *AddComponent(SlotmapKey entityKey) {
+        // get a pointer to the entity
+        Entity_ *entity = &entities.Get(entityKey);
+        // Get the slotmap of the current component type
+        Slotmap<ComponentType>& slotmap = componentsStorage.GetComponentsSlotmap<ComponentType>();
+        // add a new component to the slotmap
+        SlotmapKey componentKey = slotmap.Add(ComponentType{});
+        // get the component to initilize its entity
+        ComponentType *component = &slotmap.Get(componentKey);
+        component->entityKey = entityKey;
+        // the the key and component type id to the entity too
+        entity->componentsKeys.Add(ComponentType::GetID(), componentKey);
+        entity->componentsIds.Push(ComponentType::GetID());
+        // return a pointer to the component 
+        return component;
+    }
+
+private:
+
+    Slotmap<Entity_> entities;
     ComponentStorage componentsStorage;
 };
 

@@ -9,8 +9,9 @@ void InputSys<EM>::Update(EM& em, f32 dt) {
 
     for(i32 i = 0; i < inputs.size; ++i) {
         InputCMP *inp = &inputs[i];
-        Entity_ *entity = inp->entity;
-        PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+        SlotmapKey entityKey = inp->entityKey;
+        Entity_ *entity = em.GetEntity(entityKey);
+        PhysicsCMP *physicsComp = em.GetComponent<PhysicsCMP>(entityKey);
         if(physicsComp == nullptr) continue;
 
         Vec3 worldFront = inp->camera->GetWorldFront();

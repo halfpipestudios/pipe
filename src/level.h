@@ -42,6 +42,8 @@ struct Level {
     void Update(f32 dt);
     void Render(Shader mapShader);
 
+    bool DeleteEntity(SlotmapKey entityKey);
+
     MemoryFrame memory; 
     EntityManager em;
 
@@ -58,7 +60,8 @@ struct Level {
     
     Map map;
 
-    Entity_ *hero;
+    SlotmapKey heroKey;
+    Array<SlotmapKey> entities;
  
     BehaviorTree bhTree;
 };

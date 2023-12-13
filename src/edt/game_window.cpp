@@ -55,14 +55,16 @@ void GameWindow::Render(Editor *editor) {
 }
 
 void GameWindow::RenderEditorGizmos(Editor *editor) {
+
+    if(editor->selectedEntity == nullptr) return;
     
-    Entity_ *selectedEntity = editor->selectedEntity;
+    Entity_ *selectedEntity = editor->game->level.em.GetEntity(*editor->selectedEntity);
 
     if(!selectedEntity) return;
 
     GraphicsManager::Get()->SetDepthStencilState(false);
 
-    TransformCMP transform = *selectedEntity->GetComponent<TransformCMP>();
+    TransformCMP transform = *editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
 
     Level *level = &editor->game->level;
     Camera camera = level->camera;
@@ -104,9 +106,11 @@ void GameWindow::RenderEditorGizmos(Editor *editor) {
     }
 
     GraphicsManager::Get()->SetDepthStencilState(true);
+
 }
 
 void GameWindow::RenderModel(Editor *editor, Handle handle, Vec3 color) {
+    
     CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
     ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
     buffer->color = color;
@@ -122,4 +126,5 @@ void GameWindow::RenderModel(Editor *editor, Handle handle, Vec3 color) {
             GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, gizmoShader);
         }
     }
+    
 }

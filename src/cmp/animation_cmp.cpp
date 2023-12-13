@@ -3,10 +3,12 @@
 #include "../entity.h"
 #include "../memory_manager.h"
 
+#include <entity_manager.h>
+
 // Player Animaton State ------------------------------------
 // ----------------------------------------------------------
 
-void PlayerAnimationState_::CalculateCurrentAnimationFrame(Entity_ *entity, f32 dt) {
+void PlayerAnimationState_::CalculateCurrentAnimationFrame(EntityManager *em, SlotmapKey entityKey, f32 dt) {
     Skeleton *skeleton = anim->animationSet->skeleton;
     ASSERT(skeleton != nullptr);
     
@@ -17,9 +19,9 @@ void PlayerAnimationState_::CalculateCurrentAnimationFrame(Entity_ *entity, f32 
     JointPose *pose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose) * skeleton->numJoints, 8); 
     
     if(anim->transition.InProgress()) {
-        anim->transition.SampleJointPose(pose, entity, dt);
+        anim->transition.SampleJointPose(pose, em, entityKey, dt);
     } else {
-        SampleJointPose(pose, entity, dt);
+        SampleJointPose(pose, em, entityKey, dt);
     }
     
     CalculateFinalTransformMatrices(pose, anim->finalTransformMatrix, skeleton);
@@ -36,18 +38,19 @@ void PlayerAnimationIdleState_::Initialize(AnimationCMP *component) {
     idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
 }
 
-void PlayerAnimationIdleState_::SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) {
+void PlayerAnimationIdleState_::SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) {
     idleAnimation.SampleNextAnimationPose(pose, dt);
 }
 
-PlayerAnimationState_ *PlayerAnimationIdleState_::Update(Entity_ *entity, Input *input, f32 dt) {
+PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt) {
 
-    PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+    PhysicsCMP *physicsComp = em->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicsComp != nullptr);
     
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
     if(!anim->transition.InProgress()) {
+        Entity_ *entity = em->GetEntity(entityKey);
         if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
             anim->transition.Start(this, &anim->walk, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
@@ -57,7 +60,7 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(Entity_ *entity, Input 
         }
     }
     
-    CalculateCurrentAnimationFrame(entity, dt);
+    CalculateCurrentAnimationFrame(em, entityKey, dt);
     
     if(anim->transition.Finished()) {
         return anim->transition.GetNextState();
@@ -67,10 +70,10 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(Entity_ *entity, Input 
 
 }
 
-void PlayerAnimationIdleState_::Enter(Entity_ *entity) {
+void PlayerAnimationIdleState_::Enter(SlotmapKey entityKey) {
 }
 
-void PlayerAnimationIdleState_::Exit(Entity_ *entity) {
+void PlayerAnimationIdleState_::Exit(SlotmapKey entityKey) {
 }
 
 // Walk Animation state -------------------------------
@@ -82,9 +85,9 @@ void PlayerAnimationWalkState_::Initialize(AnimationCMP *component) {
     walkAnimation.Initialize(set->FindAnimationClipByName("walking"), -1, true);
 }
 
-void PlayerAnimationWalkState_::SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) {
+void PlayerAnimationWalkState_::SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) {
 
-    PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+    PhysicsCMP *physicsComp = em->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicsComp != nullptr);
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     
@@ -103,14 +106,15 @@ void PlayerAnimationWalkState_::SampleJointPose(JointPose *pose, Entity_ *entity
     MemoryManager::Get()->EndTemporalMemory();
 }
 
-PlayerAnimationState_ *PlayerAnimationWalkState_::Update(Entity_ *entity, Input *input, f32 dt) {
+PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt) {
 
-    PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+    PhysicsCMP *physicsComp = em->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicsComp != nullptr);
 
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
     if(!anim->transition.InProgress()) {
+        Entity_ *entity = em->GetEntity(entityKey);
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
             anim->transition.Start(this, &anim->jump, 0.2f);
         } else if(physicsComp->physics.vel.Len() < 0.01f) {
@@ -120,7 +124,7 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(Entity_ *entity, Input 
         }
     }
 
-    CalculateCurrentAnimationFrame(entity, dt);
+    CalculateCurrentAnimationFrame(em, entityKey, dt);
     
     if(anim->transition.Finished()) {
         return anim->transition.GetNextState();
@@ -130,10 +134,10 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(Entity_ *entity, Input 
 
 }
 
-void PlayerAnimationWalkState_::Enter(Entity_ *entity) {
+void PlayerAnimationWalkState_::Enter(SlotmapKey entityKey) {
 }
 
-void PlayerAnimationWalkState_::Exit(Entity_ *entity) {
+void PlayerAnimationWalkState_::Exit(SlotmapKey entityKey) {
 }
 
 // Jump Animation state -------------------------------
@@ -144,7 +148,7 @@ void PlayerAnimationJumpState_::Initialize(AnimationCMP *component) {
     jumpAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, false);
 }
 
-void PlayerAnimationJumpState_::SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) {
+void PlayerAnimationJumpState_::SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) {
     
     if(jumpAnimation.time > 0.42f) {
         jumpAnimation.SampleAnimationPose(pose, 0.42f);
@@ -153,15 +157,16 @@ void PlayerAnimationJumpState_::SampleJointPose(JointPose *pose, Entity_ *entity
     }
 }
 
-PlayerAnimationState_ *PlayerAnimationJumpState_::Update(Entity_ *entity, Input *input, f32 dt) {
+PlayerAnimationState_ *PlayerAnimationJumpState_::Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt) {
 
-    PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+    PhysicsCMP *physicsComp = em->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicsComp != nullptr);
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
 
     f32 e = 0.01f;
 
     if(!anim->transition.InProgress()) {
+        Entity_ *entity = em->GetEntity(entityKey);
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
@@ -171,7 +176,7 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(Entity_ *entity, Input 
         }
     }
 
-    CalculateCurrentAnimationFrame(entity, dt);
+    CalculateCurrentAnimationFrame(em, entityKey, dt);
     
     if(anim->transition.Finished()) {
         return anim->transition.GetNextState();
@@ -180,10 +185,10 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(Entity_ *entity, Input 
     return nullptr;
 }
 
-void PlayerAnimationJumpState_::Enter(Entity_ *entity) {
+void PlayerAnimationJumpState_::Enter(SlotmapKey entityKey) {
 }
 
-void PlayerAnimationJumpState_::Exit(Entity_ *entity) {
+void PlayerAnimationJumpState_::Exit(SlotmapKey entityKey) {
     jumpAnimation.time = 0;
 }
 
@@ -195,19 +200,20 @@ void PlayerAnimationFallState_::Initialize(AnimationCMP *component) {
     fallAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, true);
 }
 
-void PlayerAnimationFallState_::SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) {
+void PlayerAnimationFallState_::SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) {
     fallAnimation.SampleAnimationPose(pose, 0.42f);
 }
 
-PlayerAnimationState_ *PlayerAnimationFallState_::Update(Entity_ *entity, Input *input, f32 dt) {
+PlayerAnimationState_ *PlayerAnimationFallState_::Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt) {
 
-    PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+    PhysicsCMP *physicsComp = em->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicsComp != nullptr);
     
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     f32 e = 0.01f;
 
     if(!anim->transition.InProgress()) {
+        Entity_ *entity = em->GetEntity(entityKey);
         if(entity->HaveFlag(ENTITY_GROUNDED) && vel2d.Len() > e) {
             anim->transition.Start(this, &anim->walk, 0.2f);
         } else if(physicsComp->physics.vel.Len() < e) {
@@ -215,7 +221,7 @@ PlayerAnimationState_ *PlayerAnimationFallState_::Update(Entity_ *entity, Input 
         }
     }
 
-    CalculateCurrentAnimationFrame(entity, dt);
+    CalculateCurrentAnimationFrame(em, entityKey, dt);
 
     if(anim->transition.Finished()) {
         return anim->transition.GetNextState();
@@ -224,10 +230,10 @@ PlayerAnimationState_ *PlayerAnimationFallState_::Update(Entity_ *entity, Input 
     return nullptr;
 }
 
-void PlayerAnimationFallState_::Enter(Entity_ *entity) {
+void PlayerAnimationFallState_::Enter(SlotmapKey entityKey) {
 }
 
-void PlayerAnimationFallState_::Exit(Entity_ *entity) {
+void PlayerAnimationFallState_::Exit(SlotmapKey entityKey) {
 }
 
 
@@ -243,7 +249,7 @@ void PlayerAnimationTransition_::Start(PlayerAnimationState_ *src, PlayerAnimati
     this->des = des;
 }
 
-void PlayerAnimationTransition_::SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) {
+void PlayerAnimationTransition_::SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) {
     
     ASSERT(inTransition == true);
     ASSERT(duration > 0);
@@ -258,8 +264,8 @@ void PlayerAnimationTransition_::SampleJointPose(JointPose *pose, Entity_ *entit
     JointPose *srcPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
     JointPose *desPose = (JointPose *)MemoryManager::Get()->AllocTemporalMemory(sizeof(JointPose)*numJoints, 8);
     
-    src->SampleJointPose(srcPose, entity, dt);
-    des->SampleJointPose(desPose, entity, dt);
+    src->SampleJointPose(srcPose, em, entityKey, dt);
+    des->SampleJointPose(desPose, em, entityKey, dt);
     JointPoseMixSamples(pose, srcPose, desPose, numJoints, t);
 
     MemoryManager::Get()->EndTemporalMemory();

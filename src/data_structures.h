@@ -47,4 +47,28 @@ struct Array {
     Type *data { nullptr };
 };
 
+#define INVALID_KEY ((u64)-1)
+
+struct SlotmapKey {
+    u32 id   { 0 };
+    u64 gen { INVALID_KEY };
+};
+
+template <typename Type>
+struct Slotmap {
+
+    void Initialize(u32 size);
+
+    [[nodiscard]] SlotmapKey Add(Type value);
+    Type& Get(SlotmapKey key);
+    void Remove(SlotmapKey key);
+    
+    Array<SlotmapKey> indices {};
+    Array<Type> data                {};
+    Array<u32> erase                {};
+
+    u32 freelist   { 0 };
+    u32 generation { 0 };
+};
+
 #endif _HASH_MAP_H_

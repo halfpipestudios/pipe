@@ -4,71 +4,62 @@
 #include "data_structures.inl"
 #include "cmp/base_cmp.h"
 
-#define COMPONENTS_ARRAY_MAP_SIZE 64
+#define COMPONENTS_TYPE_MAX_SIZE 64
 #define COMPONENTS_ARRAY_MAX_SIZE 256
 
-struct ComponentArrayBase {
-    virtual void DestroyComponent(void *ptr) = 0;
+struct ComponentSlotmapBase {
+    virtual void DestroyComponent(SlotmapKey key) = 0;
 };
 
 template <typename ComponentType>
-struct ComponentArray : ComponentArrayBase {
-    Array<ComponentType> components;
-
-    void DestroyComponent(void *ptr) override {
-       
-        u64 index = (u64)ptr;
-        u64 start = (u64)components.data;
-        u64 end   = (u64)(components.data + components.size);
-
-        ASSERT(index >= start);
-        ASSERT(index < end);
-        
-        u32 i = (index - start) / sizeof(ComponentType);
-        ComponentType *lastCmp = &components[components.size - 1];
-
-        //components[i] = components[components.size - 1];
-        memcpy(components.data + i, components.data + components.size - 1, sizeof(ComponentType));
-        
-        u32 cmpID = ComponentType::GetID();        
-        CMPBase **lastEntityCmp = lastCmp->entity->componentsPtrs.GetPtr(cmpID);
-        *lastEntityCmp = components.data + i;
-
-        memset(components.data + components.size - 1, 0, sizeof(ComponentType));
-
-        --components.size;
+struct ComponentSlotmap : ComponentSlotmapBase {
+    Slotmap<ComponentType> components;
+    void DestroyComponent(SlotmapKey key) override {
+        components.Remove(key);
     }
 };
 
 struct ComponentStorage {
 
     void Initialize() {
-        componentsArraysMap.Initialize(COMPONENTS_ARRAY_MAP_SIZE);
+        slotmaps.Initialize(COMPONENTS_TYPE_MAX_SIZE);
     }
 
     template <typename ComponentType>
     Array<ComponentType>& GetComponents() {
-        i32 id = ComponentType::GetID(); 
-        ComponentArray<ComponentType> *componentArray = (ComponentArray<ComponentType> *)componentsArraysMap.Get(id);
-        return componentArray->components;
-    }
-
-    ComponentArrayBase *GetComponentsByID(i32 id) {
-        ComponentArrayBase *componentArray = componentsArraysMap.Get(id);
-        return componentArray;
+        ComponentSlotmap<ComponentType> *slotmap = (ComponentSlotmap<ComponentType> *)slotmaps.Get(ComponentType::GetID());
+        return slotmap->components.data;
     }
 
     template <typename ComponentType>
-    void AddComponentType() {
-        i32 id = ComponentType::GetID(); 
-        void *buffer = MemoryManager::Get()->AllocStaticMemory(sizeof(ComponentArray<ComponentType>), 1);
-        ComponentArray<ComponentType> *componentArray = new(buffer) ComponentArray<ComponentType>;
-        componentArray->components.Initialize(COMPONENTS_ARRAY_MAX_SIZE);
-        componentsArraysMap.Add(id, (ComponentArrayBase *)componentArray);
+    Slotmap<ComponentType>& GetComponentsSlotmap() {
+        ComponentSlotmap<ComponentType> *slotmap = (ComponentSlotmap<ComponentType> *)slotmaps.Get(ComponentType::GetID());
+        return slotmap->components;
     }
 
-    HashMap<ComponentArrayBase *> componentsArraysMap;
+    ComponentSlotmapBase* GetComponentsSlotmapById(i32 id) {
+        ComponentSlotmapBase*slotmap = slotmaps.Get(id);
+        return slotmap;
+    }
+    /*
+    ComponentSlotmapBase *GetComponentsByID(i32 id) {
+        ComponentSlotmapBase *componentArray = componentsArraysMap.Get(id);
+        return componentArray;
+    }
+    */
 
+    template <typename ComponentType>
+    void AddComponentType() {
+        // alloc memory for the new slotmap and inilialize it
+        void *buffer = MemoryManager::Get()->AllocStaticMemory(sizeof(ComponentSlotmap<ComponentType>), 8);
+        ComponentSlotmap<ComponentType> *slotmap = new(buffer) ComponentSlotmap<ComponentType>;
+        slotmap->components.Initialize(COMPONENTS_ARRAY_MAX_SIZE);
+        // added to the slotmaps map
+        slotmaps.Add(ComponentType::GetID(), (ComponentSlotmapBase *)slotmap);
+    }
+
+
+    HashMap<ComponentSlotmapBase *> slotmaps;
 };
 
 #endif // _COMPONENT_STORAGE_H_

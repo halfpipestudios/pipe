@@ -26,12 +26,7 @@ struct Entity_ {
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
 
-    template <typename ComponentType>
-    ComponentType* GetComponent() {
-        return (ComponentType *)componentsPtrs.Get(ComponentType::GetID());
-    }
-
-    HashMap<CMPBase *> componentsPtrs;
+    HashMap<SlotmapKey> componentsKeys;
     Array<u32> componentsIds;
 };
 

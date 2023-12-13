@@ -8,9 +8,10 @@
 #include "tools_window.h"
 #include "game_window.h"
 
+#include "data_structures.h"
+
 struct Game;
 struct Level;
-struct Entity_;
 
 struct Editor {
     
@@ -21,7 +22,7 @@ struct Editor {
     void Render();
     
     Game *game;
-    Entity_ *selectedEntity;
+    SlotmapKey *selectedEntity;
     bool paused;
 
     TGuiGfxBackend tguiBackend;

@@ -12,40 +12,40 @@
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
 
+#include "game.h"
+
 void ComponentsWindow::Update(Editor *editor, f32 dt) {
     
     current_x = 10;
     current_y = 2;
 
-    Entity_ *selectedEntity = editor->selectedEntity;
+    if(editor->selectedEntity == nullptr) {
+        _tgui_label(window, "There is no entity selected!", 0x222222, 10, 10, TGUI_ID);
+        return;
+    }
+
+    Entity_ *selectedEntity = editor->game->level.em.GetEntity(*editor->selectedEntity);
 
     if(selectedEntity) {
-        
-        auto *elements = selectedEntity->componentsPtrs.elements;
-        u32 elementsCount = selectedEntity->componentsPtrs.capacity;
 
-        for(u32 i = 0; i < elementsCount; ++i) {
-            auto *element = &elements[i];
-            if(element->id == 0) continue;
-
-            CMPBase *component = element->value;
-
-            if(component->id == TransformCMP::GetID()) {
-                UpdateTransformComponent(selectedEntity);
-            } else if(component->id == PhysicsCMP::GetID()) {
-                UpdatePhysicsComponent(selectedEntity);
-            } else if(component->id == CollisionCMP::GetID()) {
-                UpdateCollisionComponent(selectedEntity);
-            } else if(component->id == GraphicsCMP::GetID()) {
-                UpdateGraphicComponent(selectedEntity);
-            } else if(component->id == InputCMP::GetID()) {
-                UpdateInputComponent(selectedEntity);
-            } else if(component->id == AnimationCMP::GetID()) {
-                UpdatePlayerAnimationComponent(selectedEntity);
-            } else if(component->id == MovingPlatformCMP::GetID()) {
-                UpdateMovingPlatformComponent(selectedEntity);
-            } else if(component->id == AiCMP::GetID()) {
-                UpdateAIComponent(selectedEntity);
+        for(u32 i = 0; i < selectedEntity->componentsIds.size; ++i) {
+            u32 id = selectedEntity->componentsIds[i];
+            if(id == TransformCMP::GetID()) {
+                UpdateTransformComponent(editor, *editor->selectedEntity);
+            } else if(id == PhysicsCMP::GetID()) {
+                UpdatePhysicsComponent(editor, *editor->selectedEntity);
+            } else if(id == CollisionCMP::GetID()) {
+                UpdateCollisionComponent(editor, *editor->selectedEntity);
+            } else if(id == GraphicsCMP::GetID()) {
+                UpdateGraphicComponent(editor, *editor->selectedEntity);
+            } else if(id == InputCMP::GetID()) {
+                UpdateInputComponent(editor, *editor->selectedEntity);
+            } else if(id == AnimationCMP::GetID()) {
+                UpdatePlayerAnimationComponent(editor, *editor->selectedEntity);
+            } else if(id == MovingPlatformCMP::GetID()) {
+                UpdateMovingPlatformComponent(editor, *editor->selectedEntity);
+            } else if(id == AiCMP::GetID()) {
+                UpdateAIComponent(editor, *editor->selectedEntity);
             } else {
                 char *compName = "Unknown Component";
                 _tgui_label(window, compName, 0x222222, current_x, current_y, compName);
@@ -63,9 +63,9 @@ void ComponentsWindow::Render(Editor *editor) {
 }
 
 
-void ComponentsWindow::UpdateTransformComponent(Entity_ *entity) {
-    
-    TransformCMP *transform = entity->GetComponent<TransformCMP>();
+void ComponentsWindow::UpdateTransformComponent(Editor *editor, SlotmapKey entityKey) {
+
+    TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(entityKey);
     ASSERT(transform);
     
     u32 w = 72;
@@ -100,8 +100,8 @@ void ComponentsWindow::UpdateTransformComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdatePhysicsComponent(Entity_ *entity) {
-    PhysicsCMP *physicComp = entity->GetComponent<PhysicsCMP>();
+void ComponentsWindow::UpdatePhysicsComponent(Editor *editor, SlotmapKey entityKey) {
+    PhysicsCMP *physicComp = editor->game->level.em.GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicComp);
 
     PhysicsState *p = &physicComp->physics;
@@ -138,8 +138,8 @@ void ComponentsWindow::UpdatePhysicsComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdateCollisionComponent(Entity_ *entity) {
-    CollisionCMP *col = entity->GetComponent<CollisionCMP>();
+void ComponentsWindow::UpdateCollisionComponent(Editor *editor, SlotmapKey entityKey) {
+    CollisionCMP *col = editor->game->level.em.GetComponent<CollisionCMP>(entityKey);
     ASSERT(col);
     u32 w = 72;
     u32 h = 28;
@@ -162,7 +162,7 @@ void ComponentsWindow::UpdateCollisionComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdateGraphicComponent(Entity_ *entity) {
+void ComponentsWindow::UpdateGraphicComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Graphic Component", current_y, false, TGUI_ID)) {
@@ -170,7 +170,7 @@ void ComponentsWindow::UpdateGraphicComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdateInputComponent(Entity_ *entity) {
+void ComponentsWindow::UpdateInputComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Input Component", current_y, false, TGUI_ID)) {
@@ -178,7 +178,7 @@ void ComponentsWindow::UpdateInputComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdatePlayerAnimationComponent(Entity_ *entity) {
+void ComponentsWindow::UpdatePlayerAnimationComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Player Animation Component", current_y, false, TGUI_ID)) {
@@ -186,7 +186,7 @@ void ComponentsWindow::UpdatePlayerAnimationComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdateMovingPlatformComponent(Entity_ *entity) {
+void ComponentsWindow::UpdateMovingPlatformComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Moving Platform Component", current_y, false, TGUI_ID)) {
@@ -194,7 +194,7 @@ void ComponentsWindow::UpdateMovingPlatformComponent(Entity_ *entity) {
     current_y += h;
 }
 
-void ComponentsWindow::UpdateAIComponent(Entity_ *entity) {
+void ComponentsWindow::UpdateAIComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "AI Component", current_y, false, TGUI_ID)) {

@@ -18,7 +18,7 @@ void PhysicsSys<EM>::Update(EM& em, f32 dt) {
 
     for(i32 i = 0; i < physicsComponents.size; ++i) {
         PhysicsCMP *phy = &physicsComponents[i];
-        Entity_ *entity = phy->entity;
+        Entity_ *entity = em.GetEntity(phy->entityKey);
 
         // NOTE: Apply gravity
         if(!entity->HaveFlag(ENTITY_GROUNDED))

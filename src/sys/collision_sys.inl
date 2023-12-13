@@ -2,9 +2,9 @@
 #include <float.h>
 
 template <typename EM>
-void CollisionSys<EM>::ProcessMap(CollisionCMP *collider, PhysicsCMP *phy, Map *map) {
+void CollisionSys<EM>::ProcessMap(EM& em, CollisionCMP *collider, PhysicsCMP *phy, Map *map) {
 
-    Entity_ *entity = collider->entity;
+    Entity_ *entity = em.GetEntity(collider->entityKey);
 
     Segment playerSegment;
     playerSegment.a =  phy->lastPhysics.pos;
@@ -70,10 +70,10 @@ void CollisionSys<EM>::ProcessMap(CollisionCMP *collider, PhysicsCMP *phy, Map *
 }
 
 template <typename EM>
-void CollisionSys<EM>::ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders) {
+void CollisionSys<EM>::ProcessColliders(EM& em, CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders) {
 
     GJK gjk;
-    Entity_ *entity = collider->entity;
+    Entity_ *entity = em.GetEntity(collider->entityKey);
 
     for(i32 i = 0; i < colliders->size; ++i) {
         CollisionCMP *otherCollider = &(*colliders)[i];
@@ -121,7 +121,7 @@ void CollisionSys<EM>::ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy,
 
             // TODO: move this to other place
             // move the player realtive to the platofrm position
-            MovingPlatformCMP *movPlatComp = otherCollider->entity->GetComponent<MovingPlatformCMP>();
+            MovingPlatformCMP *movPlatComp = em.GetComponent<MovingPlatformCMP>(otherCollider->entityKey);
             if(movPlatComp != nullptr) {
                 phy->physics.pos  = phy->physics.pos + movPlatComp->movement;
                 collider->cylinder.c = phy->physics.pos;
@@ -138,8 +138,9 @@ void CollisionSys<EM>::Update(EM& em, Map *map, f32 dt) {
     for(i32 i = 0; i < colliders.size; ++i) {
 
         CollisionCMP *collider = &colliders[i];
-        Entity_ *entity = collider->entity;
-        PhysicsCMP *phy = entity->GetComponent<PhysicsCMP>();
+        SlotmapKey entityKey = collider->entityKey;
+        Entity_ *entity = em.GetEntity(entityKey);
+        PhysicsCMP *phy = em.GetComponent<PhysicsCMP>(entityKey);
         if(phy == nullptr) continue;
 
 
@@ -148,8 +149,8 @@ void CollisionSys<EM>::Update(EM& em, Map *map, f32 dt) {
             collider->cylinder.c = phy->physics.pos;
             entity->RemoveFlag(ENTITY_GROUNDED);
             entity->RemoveFlag(ENTITY_COLLIDING); 
-            ProcessMap(collider, phy, map);
-            ProcessColliders(collider, phy, &colliders);
+            ProcessMap(em, collider, phy, map);
+            ProcessColliders(em, collider, phy, &colliders);
         }
 
 

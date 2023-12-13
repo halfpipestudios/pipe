@@ -11,17 +11,17 @@ void GraphicsSys<EM>::Update(EM& em) {
  
     for(i32 i = 0; i < components.size; ++i) {
         GraphicsCMP* graphic = &components[i];
-        Entity_* e = graphic->entity;
+        SlotmapKey e = graphic->entityKey;
         
         // NOTE: the transform component says where to draw the component
-        TransformCMP *transform = e->template GetComponent<TransformCMP>();
+        TransformCMP *transform = em.template GetComponent<TransformCMP>(e);
         if(transform == nullptr) continue;
 
         TransformCMP renderTransform = *transform;
 
         if(graphic->model.type == MODEL_TYPE_ANIMATED) {
             renderTransform.pos.y -= 0.75f;
-            AnimationCMP *animationCmp = e->template GetComponent<AnimationCMP>();
+            AnimationCMP *animationCmp = em.template GetComponent<AnimationCMP>(e);
             if(animationCmp != nullptr) {
                 GraphicsManager::Get()->SetAnimMatrices(animationCmp->finalTransformMatrix, animationCmp->numFinalTransformMatrix);
             }

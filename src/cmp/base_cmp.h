@@ -1,11 +1,11 @@
 #ifndef _COMPONENT_NEW_H_
 #define _COMPONENT_NEW_H_
 
-struct Entity_;
+#include <data_structures.h>
 
 struct CMPBase {
-    i32 id           { -1 };
-    Entity_ *entity  { nullptr };
+    i32 id               { -1 };
+    SlotmapKey entityKey { };
 protected:
     inline static i32 counter { 0 };
 };

@@ -10,14 +10,13 @@ void AiSys<EM>::Update(EM& em, f32 dt) {
     for(i32 i = 0; i < ais.size; ++i) {
         
         AiCMP *ai = &ais[i];
-        Entity_ *entity = ai->entity;
-        PhysicsCMP *phy = entity->GetComponent<PhysicsCMP>();
+        PhysicsCMP *phy = em.GetComponent<PhysicsCMP>(ai->entityKey);
         
         if(phy == nullptr) continue;
 
         if(ai->bhTree) {
             BehaviorNodeContex contx;
-            contx.entity = entity;
+            contx.entityKey = ai->entityKey;
             contx.phyComp = phy;
             contx.aiComp = ai;
             ai->bhTree->run(&contx);
