@@ -149,4 +149,94 @@ Type *Array<Type>::Push(Type value) {
     return element;
 }
 
+
+// Slotmap -----------------------------------------------------------------------------------------
+
+template <typename Type>
+void Slotmap<Type>::Initialize(u32 size) {
+    // Alloc memory for the arrays
+    indices.Initialize(size);
+    indices.size = size;
+    data.Initialize(size);
+    erase.Initialize(size);
+
+    // initialize the freelist
+    freelist = 0;
+    generation = 0;
+    for(u32 i = 0; i < size; ++i) {
+        indices[i].id = i + 1;
+        indices[i].gen = -1;
+    } 
+}
+
+template <typename Type>
+SlotmapKey<Type> Slotmap<Type>::Add(Type value) {
+    
+    // chek the slotmap is not full
+    ASSERT(freelist < indices.capacity);
+
+    // get a free slot and update the free list to the next free
+    u32 freeIndex = freelist;
+    SlotmapKey<Type>& freeKey = indices[freeIndex];
+    freelist = freeKey.id;
+    
+    // set the id to the data next free position and gen to the generation
+    ASSERT(generation < (u64)-1);
+    freeKey.id = data.size;
+    freeKey.gen = generation++;
+
+    // push the value to the data array
+    data.Push(value);
+    erase.Push(freeIndex);
+
+    return { freeIndex, freeKey.gen };
+}
+
+template <typename Type>
+Type& Slotmap<Type>::Get(SlotmapKey<Type> key) {
+
+    ASSERT(key.id < indices.capacity);
+    
+    // get the internal key and chek if is a valid key
+    SlotmapKey<Type> askKey = indices[key.id];
+    ASSERT(askKey.gen == key.gen);
+    
+    // if it is valid return the data
+    return data[askKey.id];
+}
+
+template <typename Type>
+void Slotmap<Type>::Remove(SlotmapKey<Type> key) {
+
+    ASSERT(key.id < indices.capacity);
+
+    // get the internal key and chek if is a valid key
+    SlotmapKey<Type>& keyToRemove = indices[key.id];
+    if(keyToRemove.gen != key.gen) {
+        printf("key already deleted!!!\n");
+        return;
+    }
+
+    // se the keyToRemove id to the next free and the freelist to the keyToRemove index
+    u32 indexToRemove = keyToRemove.id;
+    keyToRemove.id = freelist;
+    keyToRemove.gen = -1;
+    freelist = key.id;
+
+    // remove the data and arease element
+    if(indexToRemove < (data.size - 1)) { 
+        // copy the last to the remove slot
+        data[indexToRemove] = data[data.size - 1];
+        erase[indexToRemove] = erase[erase.size - 1];
+        // update the indice of the last value
+        indices[erase[indexToRemove]].id = indexToRemove;
+    }
+
+    --data.size;
+    --erase.size;        
+    
+
+    printf("key deleted!!!\n");
+}
+
 #endif

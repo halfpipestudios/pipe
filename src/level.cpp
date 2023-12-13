@@ -254,6 +254,25 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
     gBlackBoard.target = &heroTransform->pos;
 
+    Slotmap<i32> slotmap;
+
+    slotmap.Initialize(10);
+
+    SlotmapKey<i32> a = slotmap.Add(23);
+    SlotmapKey<i32> b = slotmap.Add(26);
+    SlotmapKey<i32> c = slotmap.Add(1);
+    slotmap.Remove(c);
+    SlotmapKey<i32> d = slotmap.Add(2);
+    SlotmapKey<i32> e = slotmap.Add(3);
+    slotmap.Remove(a);
+    slotmap.Remove(a);
+
+    i32 intb = slotmap.Get(b);
+    i32 intd = slotmap.Get(d);
+    i32 inte = slotmap.Get(e);
+
+    i32 StopHere = 0;
+
 }
 
 void Level::Terminate() {
