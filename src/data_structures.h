@@ -47,10 +47,11 @@ struct Array {
     Type *data { nullptr };
 };
 
-template <typename Type>
+#define INVALID_KEY ((u64)-1)
+
 struct SlotmapKey {
     u32 id   { 0 };
-    u64 gen { (u64)-1 };
+    u64 gen { INVALID_KEY };
 };
 
 template <typename Type>
@@ -58,11 +59,11 @@ struct Slotmap {
 
     void Initialize(u32 size);
 
-    [[nodiscard]] SlotmapKey<Type> Add(Type value);
-    Type& Get(SlotmapKey<Type> key);
-    void Remove(SlotmapKey<Type> key);
+    [[nodiscard]] SlotmapKey Add(Type value);
+    Type& Get(SlotmapKey key);
+    void Remove(SlotmapKey key);
     
-    Array<SlotmapKey<Type>> indices {};
+    Array<SlotmapKey> indices {};
     Array<Type> data                {};
     Array<u32> erase                {};
 

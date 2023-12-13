@@ -8,8 +8,8 @@ struct CollisionSys {
     void Update(EM& em, Map *map, f32 dt);
 
 private:
-    void ProcessMap(CollisionCMP *collider, PhysicsCMP *phy, Map *map);
-    void ProcessColliders(CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders);
+    void ProcessMap(EM& em, CollisionCMP *collider, PhysicsCMP *phy, Map *map);
+    void ProcessColliders(EM& em, CollisionCMP *collider, PhysicsCMP *phy, Array<CollisionCMP>* colliders);
 };
 
 #endif // _COLLISION_SYS_H_

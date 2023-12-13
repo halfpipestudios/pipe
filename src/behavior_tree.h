@@ -6,6 +6,8 @@
 #include "common.h"
 #include "algebra.h"
 
+#include "data_structures.h"
+
 enum BehaviorStatus {
     BEHAVIOR_SUCCESS,
     BEHAVIOR_FAIL,
@@ -15,12 +17,11 @@ enum BehaviorStatus {
 #define BEHAVIOR_TREE_MAX_NODES 128
 #define BEHAVIOR_NODE_MAX_CHILDS 16
 
-struct Entity_;
 struct PhysicsCMP;
 struct AiCMP;
 
 struct BehaviorNodeContex {
-    Entity_ *entity;
+    SlotmapKey entityKey;
     PhysicsCMP *phyComp;
     AiCMP      *aiComp;
 };

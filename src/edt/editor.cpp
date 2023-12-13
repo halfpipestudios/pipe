@@ -84,7 +84,7 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 
 void Editor::Initialize(Game *game) {
     this->game = game;
-    this->selectedEntity = nullptr;
+    this->selectedEntity = {};
     this->paused = false;
 
     tguiBackend.create_program  = TGuiCreateShader;

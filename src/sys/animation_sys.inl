@@ -9,11 +9,11 @@ void AnimationSys<EM>::Update(EM& em, f32 dt) {
     for(i32 i = 0; i < animations.size; ++i) {
 
         AnimationCMP *animation = &animations[i];
-        Entity_ *entity = animation->entity;
+        SlotmapKey entity = animation->entityKey;
 
         Input *input = PlatformManager::Get()->GetInput();
         
-        PlayerAnimationState_ *newState = animation->state->Update(entity, input, dt);
+        PlayerAnimationState_ *newState = animation->state->Update(&em, entity, input, dt);
         if(newState != nullptr) {
             animation->state->Exit(entity);
             newState->Enter(entity);

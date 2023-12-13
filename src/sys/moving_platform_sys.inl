@@ -81,10 +81,10 @@ void MovingPlatformSys<EM>::Update(EM& em, f32 dt) {
     for(i32 i = 0; i < platforms.size; ++i) {
         
         MovingPlatformCMP *platform = &platforms[i];
-        Entity_ *entity = platform->entity;
+        SlotmapKey entityKey = platform->entityKey;
 
-        TransformCMP *transform = entity->GetComponent<TransformCMP>();
-        CollisionCMP *collider  = entity->GetComponent<CollisionCMP>();
+        TransformCMP *transform = em.GetComponent<TransformCMP>(entityKey);
+        CollisionCMP *collider  = em.GetComponent<CollisionCMP>(entityKey);
 
         if(transform == nullptr || collider == nullptr) continue;
 

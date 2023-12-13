@@ -5,14 +5,15 @@
 void EntityWindow::Update(Editor *editor, f32 dt) {
 
     Level *level = &editor->game->level;
-    auto& entities = level->em.GetEntities();
+    auto& entities = level->entities;
 
     _tgui_tree_view_begin(window, GetTreeviewId());
     _tgui_tree_view_root_node_begin("Entities", nullptr);
 
     for(i32 i = 0; i < entities.size; ++i) {
-        Entity_ *entity = &entities[i];
-        _tgui_tree_view_node(entity->name, (void *)entity);
+        SlotmapKey *entityKey = &entities[i];
+        Entity_ *entity = level->em.GetEntity(*entityKey);
+        _tgui_tree_view_node(entity->name, (void *)entityKey);
     }
 
     _tgui_tree_view_root_node_end();

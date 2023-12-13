@@ -9,8 +9,8 @@ void TransformSys<EM>::Update(EM& em) {
 
     for(i32 i = 0; i < transforms.size; ++i) {
         TransformCMP *transform = &transforms[i];
-        Entity_ *entity = transform->entity;
-        PhysicsCMP *physicsComp = entity->GetComponent<PhysicsCMP>();
+        SlotmapKey entity = transform->entityKey;
+        PhysicsCMP *physicsComp = em.GetComponent<PhysicsCMP>(entity);
 
         if(physicsComp == nullptr) continue;
 

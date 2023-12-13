@@ -165,23 +165,23 @@ void Slotmap<Type>::Initialize(u32 size) {
     generation = 0;
     for(u32 i = 0; i < size; ++i) {
         indices[i].id = i + 1;
-        indices[i].gen = -1;
+        indices[i].gen = INVALID_KEY;
     } 
 }
 
 template <typename Type>
-SlotmapKey<Type> Slotmap<Type>::Add(Type value) {
+SlotmapKey Slotmap<Type>::Add(Type value) {
     
     // chek the slotmap is not full
     ASSERT(freelist < indices.capacity);
 
     // get a free slot and update the free list to the next free
     u32 freeIndex = freelist;
-    SlotmapKey<Type>& freeKey = indices[freeIndex];
+    SlotmapKey& freeKey = indices[freeIndex];
     freelist = freeKey.id;
     
     // set the id to the data next free position and gen to the generation
-    ASSERT(generation < (u64)-1);
+    ASSERT(generation < INVALID_KEY);
     freeKey.id = data.size;
     freeKey.gen = generation++;
 
@@ -193,12 +193,12 @@ SlotmapKey<Type> Slotmap<Type>::Add(Type value) {
 }
 
 template <typename Type>
-Type& Slotmap<Type>::Get(SlotmapKey<Type> key) {
+Type& Slotmap<Type>::Get(SlotmapKey key) {
 
     ASSERT(key.id < indices.capacity);
     
     // get the internal key and chek if is a valid key
-    SlotmapKey<Type> askKey = indices[key.id];
+    SlotmapKey askKey = indices[key.id];
     ASSERT(askKey.gen == key.gen);
     
     // if it is valid return the data
@@ -206,12 +206,12 @@ Type& Slotmap<Type>::Get(SlotmapKey<Type> key) {
 }
 
 template <typename Type>
-void Slotmap<Type>::Remove(SlotmapKey<Type> key) {
+void Slotmap<Type>::Remove(SlotmapKey key) {
 
     ASSERT(key.id < indices.capacity);
 
     // get the internal key and chek if is a valid key
-    SlotmapKey<Type>& keyToRemove = indices[key.id];
+    SlotmapKey& keyToRemove = indices[key.id];
     if(keyToRemove.gen != key.gen) {
         printf("key already deleted!!!\n");
         return;
@@ -220,7 +220,7 @@ void Slotmap<Type>::Remove(SlotmapKey<Type> key) {
     // se the keyToRemove id to the next free and the freelist to the keyToRemove index
     u32 indexToRemove = keyToRemove.id;
     keyToRemove.id = freelist;
-    keyToRemove.gen = -1;
+    keyToRemove.gen = INVALID_KEY;
     freelist = key.id;
 
     // remove the data and arease element

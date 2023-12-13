@@ -103,27 +103,28 @@ void Map::Render(Shader shader) {
 }
 
 
-static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
+static SlotmapKey CreateHero(EntityManager& em, Model& model, Shader shader,
                            AnimationClipSet *animationClipSet, Camera *camera) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    Entity_ *hero = em.AddEntity();
+    SlotmapKey heroKey = em.AddEntity();
+    Entity_ *hero = em.GetEntity(heroKey);
     hero->name = "Hero";
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(hero);
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(heroKey);
     transformCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
 
-    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(hero);
+    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(heroKey);
     physicsCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3());
 
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(hero);
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(heroKey);
     graphicsCmp->Initialize(model, shader);
 
-    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(hero);
-    animationCmp->Initialize(animationClipSet);
+    // AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(heroKey);
+    // animationCmp->Initialize(animationClipSet);
 
-    InputCMP *inputCmp = em.AddComponent<InputCMP>(hero);
+    InputCMP *inputCmp = em.AddComponent<InputCMP>(heroKey);
     inputCmp->Initialize(input, camera);
 
     Cylinder cylinder = {};
@@ -131,14 +132,14 @@ static Entity_ *CreateHero(EntityManager& em, Model& model, Shader shader,
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.3f;
     cylinder.n = 0.75f;
-    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(hero);
+    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(heroKey);
     collisionCmp->Initialize(cylinder);
 
-    return hero;
+    return heroKey;
     
 }
 
-static Entity_ *CreateOrc(EntityManager& em,
+static SlotmapKey CreateOrc(EntityManager& em,
                           char *name,
                           Vec3 pos,
                           Model& model, Shader shader,
@@ -147,8 +148,9 @@ static Entity_ *CreateOrc(EntityManager& em,
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    Entity_ *orc = em.AddEntity();
-    orc->name = name;
+    SlotmapKey orc = em.AddEntity();
+    Entity_ *orcPtr = em.GetEntity(orc);
+    orcPtr->name = name;
     
     TransformCMP *transformCmp = em.AddComponent<TransformCMP>(orc);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -159,8 +161,8 @@ static Entity_ *CreateOrc(EntityManager& em,
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(orc);
     graphicsCmp->Initialize(model, shader);
 
-    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
-    animationCmp->Initialize(animationClipSet);
+    // AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
+    // animationCmp->Initialize(animationClipSet);
 
     Cylinder cylinder = {};
     cylinder.c = pos;
@@ -178,9 +180,10 @@ static Entity_ *CreateOrc(EntityManager& em,
 }
 
 
-static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
-    Entity_ *platform = em.AddEntity();
-    platform->name = name;
+static SlotmapKey CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
+    SlotmapKey platform = em.AddEntity();
+    Entity_ *platformPtr = em.GetEntity(platform);
+    platformPtr->name = name;
     
     TransformCMP *transformCmp = em.AddComponent<TransformCMP>(platform);
     transformCmp->Initialize(a, Vec3(), scale);
@@ -207,9 +210,30 @@ static Entity_ *CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, 
     return platform;
 }
 
+bool Level::DeleteEntity(SlotmapKey entityKey) {
+    i32 indexToDelete = -1;
+    for(i32 i = 0; i < entities.size; ++i) {
+        if(entityKey.gen == entities[i].gen) {
+            indexToDelete = i;
+            break;
+        }
+    }
+
+    if(indexToDelete == -1) {
+        return false;
+    } else {
+        em.DeleteEntity(entityKey); 
+        entities[indexToDelete] = entities[entities.size - 1];
+        --entities.size;
+        return true;
+    }
+}
+
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
 
     memory.BeginFrame();
+
+    entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     
     em.Initialize();
     em.AddComponentType<TransformCMP>();
@@ -242,37 +266,18 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 
     camera.Initialize();
 
-    hero = CreateHero(em, *heroModel, animShader, heroAnim, &camera);
-    
-    CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim);
-    CreateOrc(em, "orc_2",  Vec3(10, 4, 15), *orcModel, animShader, heroAnim);
-    CreateOrc(em, "orc_3", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree);
-    CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader);
-    CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader);
-    CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader);
+    entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, &camera));
+    entities.Push(CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim));
+    entities.Push(CreateOrc(em, "orc_2",  Vec3(10, 4, 15), *orcModel, animShader, heroAnim));
+    entities.Push(CreateOrc(em, "orc_3", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader));
 
-    TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
+    heroKey = entities[0];
+
+    TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
-
-    Slotmap<i32> slotmap;
-
-    slotmap.Initialize(10);
-
-    SlotmapKey<i32> a = slotmap.Add(23);
-    SlotmapKey<i32> b = slotmap.Add(26);
-    SlotmapKey<i32> c = slotmap.Add(1);
-    slotmap.Remove(c);
-    SlotmapKey<i32> d = slotmap.Add(2);
-    SlotmapKey<i32> e = slotmap.Add(3);
-    slotmap.Remove(a);
-    slotmap.Remove(a);
-
-    i32 intb = slotmap.Get(b);
-    i32 intd = slotmap.Get(d);
-    i32 inte = slotmap.Get(e);
-
-    i32 StopHere = 0;
-
 }
 
 void Level::Terminate() {
@@ -300,7 +305,7 @@ void Level::Update(f32 dt) {
     animationSys.Update(em, dt);
     transformSys.Update(em);
 
-    TransformCMP *heroTransform = hero->GetComponent<TransformCMP>();
+    TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
     camera.target = heroTransform->pos;
     camera.ProcessMovement(input, &map, dt);
     camera.SetViewMatrix();

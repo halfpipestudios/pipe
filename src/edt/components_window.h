@@ -2,21 +2,20 @@
 #define _COMPONENTS_WINDOW_H_
 
 #include "editor_window.h"
-
-struct Entity_;
+#include <data_structures.h>
 
 struct ComponentsWindow : EditorWindow {
     void Update(Editor *editor, f32 dt) override;
     void Render(Editor *editor) override;
 
-    void UpdateTransformComponent(Entity_ *entity);
-    void UpdatePhysicsComponent(Entity_ *entity);
-    void UpdateCollisionComponent(Entity_ *entity);
-    void UpdateGraphicComponent(Entity_ *entity);
-    void UpdateInputComponent(Entity_ *entity);
-    void UpdatePlayerAnimationComponent(Entity_ *entity);
-    void UpdateAIComponent(Entity_ *entity);
-    void UpdateMovingPlatformComponent(Entity_ *entity);
+    void UpdateTransformComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdatePhysicsComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateCollisionComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateGraphicComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateInputComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdatePlayerAnimationComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateAIComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateMovingPlatformComponent(Editor *editor, SlotmapKey entityKey);
 
     i32 current_x;
     i32 current_y;

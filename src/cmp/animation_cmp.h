@@ -9,6 +9,7 @@ struct Entity_;
 struct AnimationCMP;
 struct PlayerAnimationState_;
 struct Input;
+struct EntityManager;
 
 struct PlayerAnimationTransition_ {
     bool inTransition = false;
@@ -18,7 +19,7 @@ struct PlayerAnimationTransition_ {
     PlayerAnimationState_ *des; 
 
     void Start(PlayerAnimationState_ *src, PlayerAnimationState_ *des, f32 duration);
-    void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt);
+    void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt);
     bool InProgress();
     bool Finished();
     PlayerAnimationState_ *GetNextState();
@@ -27,12 +28,12 @@ struct PlayerAnimationTransition_ {
 struct PlayerAnimationState_ {
     virtual void Initialize(AnimationCMP *component) = 0;
     
-    virtual PlayerAnimationState_ *Update(Entity_ *entity, Input *input, f32 dt) = 0;
-    virtual void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt) = 0;
-    virtual void Enter(Entity_ *entity) = 0;
-    virtual void Exit(Entity_ *entity) = 0;
+    virtual PlayerAnimationState_ *Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt) = 0;
+    virtual void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) = 0;
+    virtual void Enter(SlotmapKey entityKey) = 0;
+    virtual void Exit(SlotmapKey entityKey) = 0;
 
-    void CalculateCurrentAnimationFrame(Entity_ *entity, f32 dt);
+    void CalculateCurrentAnimationFrame(EntityManager *em, SlotmapKey entityKey, f32 dt);
 
     AnimationCMP *anim;
     
@@ -42,10 +43,10 @@ struct PlayerAnimationIdleState_ : public PlayerAnimationState_ {
 
     void Initialize(AnimationCMP *component) override;
     
-    PlayerAnimationState_ *Update(Entity_ *entity, Input *input, f32 dt);
-    void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt);
-    void Enter(Entity_ *entity) override;
-    void Exit(Entity_ *entity) override;
+    PlayerAnimationState_ *Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt);
+    void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) override;
+    void Enter(SlotmapKey entityKey) override;
+    void Exit(SlotmapKey entityKey) override;
     
     Animation idleAnimation;
 };
@@ -54,10 +55,10 @@ struct PlayerAnimationWalkState_ : public PlayerAnimationState_ {
 
     void Initialize(AnimationCMP *component) override;
     
-    PlayerAnimationState_ *Update(Entity_ *entity, Input *input, f32 dt);
-    void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt);
-    void Enter(Entity_ *entity) override;
-    void Exit(Entity_ *entity) override;
+    PlayerAnimationState_ *Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt);
+    void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) override;
+    void Enter(SlotmapKey entityKey) override;
+    void Exit(SlotmapKey entityKey) override;
 
     Animation walkAnimation;
     Animation idleAnimation;
@@ -67,10 +68,10 @@ struct PlayerAnimationJumpState_ : public PlayerAnimationState_ {
 
     void Initialize(AnimationCMP *component) override;
 
-    PlayerAnimationState_ *Update(Entity_ *entity, Input *input, f32 dt);
-    void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt);
-    void Enter(Entity_ *entity) override;
-    void Exit(Entity_ *entity) override;
+    PlayerAnimationState_ *Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt);
+    void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) override;
+    void Enter(SlotmapKey entityKey) override;
+    void Exit(SlotmapKey entityKey) override;
     
     Animation jumpAnimation;
 };
@@ -84,10 +85,10 @@ struct PlayerAnimationFallState_ : public PlayerAnimationState_ {
 
     void Initialize(AnimationCMP *component) override;
     
-    PlayerAnimationState_ *Update(Entity_ *entity, Input *input, f32 dt);
-    void SampleJointPose(JointPose *pose, Entity_ *entity, f32 dt);
-    void Enter(Entity_ *entity) override;
-    void Exit(Entity_ *entity) override;
+    PlayerAnimationState_ *Update(EntityManager *em, SlotmapKey entityKey, Input *input, f32 dt);
+    void SampleJointPose(JointPose *pose, EntityManager *em, SlotmapKey entityKey, f32 dt) override;
+    void Enter(SlotmapKey entityKey) override;
+    void Exit(SlotmapKey entityKey) override;
     
     Animation fallAnimation;
 };
