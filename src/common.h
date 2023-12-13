@@ -32,7 +32,7 @@ typedef double f64;
 #define MIN3(a, b, c) MIN(MIN(a, b), c)
 
 #define ABS(a) ((a) >= 0 ? (a) : (-(a)))
-#define CLAMP(value, min, max) MAX(MIN(value, max), min)
+#define CLAMP(value, min, max) MAX(MIN((value), (max)), (min))
 
 #define MAX_NAME_SIZE 256
 

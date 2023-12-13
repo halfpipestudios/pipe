@@ -165,10 +165,12 @@ struct D3D11Graphics : public Graphics {
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
     void BindTextureBuffer(TextureBuffer textureBufferHandle) override;
 
+    void CopyFrameBuffer(FrameBuffer desHandle, FrameBuffer srcHandle) override;
+    FrameBuffer CreateWriteFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
+    FrameBuffer CreateReadFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
     void FrameBufferMap(FrameBuffer frameBufferHandle, u32 *w, u32 *h, u32 *sizeInBytes, u8 **buffer) override;
     void FrameBufferUnmap(FrameBuffer frameBufferHandle) override;
     FrameBuffer CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
-    FrameBuffer CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
     void DestroyFrameBuffer(FrameBuffer frameBufferHandle) override;
     void BindFrameBuffer(FrameBuffer frameBufferHandle) override;
     TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) override;

@@ -196,13 +196,15 @@ void D3D11Graphics::Initialize() {
     cpuMatrices.view = Mat4();
     cpuMatrices.world = Mat4();
     
-    memset(&cpuTGuiBuffer,  0, sizeof(cpuTGuiBuffer));
-    memset(&cpuGizmoBuffer, 0, sizeof(cpuGizmoBuffer));
+    cpuTGuiBuffer  = {};
+    cpuGizmoBuffer = {};
+    cpuIndexBuffer = {};
 
     gpuMatrices     = CreateConstBuffer((void *)&cpuMatrices,     sizeof(cpuMatrices),     0, nullptr);
     gpuAnimMatrices = CreateConstBuffer((void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
     gpuTGuiBuffer   = CreateConstBuffer((void *)&cpuTGuiBuffer,   sizeof(cpuTGuiBuffer),   2, nullptr);
     gpuGizmoBuffer  = CreateConstBuffer((void *)&cpuGizmoBuffer,  sizeof(cpuGizmoBuffer),  3, nullptr);
+    gpuIndexBuffer  = CreateConstBuffer((void *)&cpuIndexBuffer,  sizeof(cpuIndexBuffer),  4, nullptr);
 
     lineRenderer.Initialize(200, device);
     batchRenderer.Initialize(200, device);
@@ -230,6 +232,7 @@ void  D3D11Graphics::Terminate() {
     DestroyConstBuffer(gpuAnimMatrices);
     DestroyConstBuffer(gpuTGuiBuffer);
     DestroyConstBuffer(gpuGizmoBuffer);
+    DestroyConstBuffer(gpuIndexBuffer);
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
@@ -869,7 +872,53 @@ FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height
     return (FrameBuffer)frameBufferHandle;
 }
 
-FrameBuffer D3D11Graphics::CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
+void D3D11Graphics::CopyFrameBuffer(FrameBuffer desHandle, FrameBuffer srcHandle) {
+    D3D11FrameBuffer *des = (D3D11FrameBuffer *)desHandle;
+    D3D11FrameBuffer *src = (D3D11FrameBuffer *)srcHandle;
+    deviceContext->CopyResource(des->texture, src->texture);
+}
+
+FrameBuffer D3D11Graphics::CreateReadFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
+    
+    D3D11FrameBuffer frameBuffer = {};
+    
+    frameBuffer.x = (f32)x;
+    frameBuffer.y = (f32)y;
+    frameBuffer.w = (f32)width;
+    frameBuffer.h = (f32)height;
+    frameBuffer.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    
+    // create texture 2d
+    D3D11_TEXTURE2D_DESC texDesc;
+    texDesc.Width = width;
+    texDesc.Height = height;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 1;
+    texDesc.Format = frameBuffer.format;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.SampleDesc.Quality = 0;
+    texDesc.Usage = D3D11_USAGE_STAGING;
+    texDesc.BindFlags = 0;
+    texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    texDesc.MiscFlags = 0;
+    
+    if(FAILED(device->CreateTexture2D(&texDesc, 0, &frameBuffer.texture))) {
+        printf("Error creating FrameBuffer Texture\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    
+    frameBuffer.textureBuffer = {};
+    frameBuffer.textureBuffer.gpuTextureArray = frameBuffer.texture;
+    frameBuffer.textureBuffer.mipLevels = 1;
+    frameBuffer.textureBuffer.size = 1;
+
+    D3D11FrameBuffer *frameBufferHandle = frameBufferStorage.Alloc();
+    *frameBufferHandle = frameBuffer;
+
+    return (FrameBuffer)frameBufferHandle;
+}
+
+FrameBuffer D3D11Graphics::CreateWriteFrameBuffer(u32 x, u32 y, u32 width, u32 height) {
     
     D3D11FrameBuffer frameBuffer = {};
     
@@ -889,8 +938,8 @@ FrameBuffer D3D11Graphics::CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 h
     texDesc.SampleDesc.Count = 1;
     texDesc.SampleDesc.Quality = 0;
     texDesc.Usage = D3D11_USAGE_DEFAULT;
-    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-    texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+    texDesc.CPUAccessFlags = 0;
     texDesc.MiscFlags = 0;
     if(FAILED(device->CreateTexture2D(&texDesc, 0, &frameBuffer.texture))) {
         printf("Error creating FrameBuffer Texture\n");
@@ -904,17 +953,6 @@ FrameBuffer D3D11Graphics::CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 h
     rtvDesc.Texture2D.MipSlice = 0;
     if(FAILED(device->CreateRenderTargetView(frameBuffer.texture, &rtvDesc, &frameBuffer.renderTargetView))) {
         printf("Error creating FrameBuffer rtv\n");
-        ASSERT(!"INVALID_CODE_PATH");
-    }
-
-    // create shader resource view
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    srvDesc.Format = frameBuffer.format;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    if (FAILED(device->CreateShaderResourceView(frameBuffer.texture, &srvDesc, &frameBuffer.shaderResourceView))) {
-        printf("Error creating FrameBuffer srv\n");
         ASSERT(!"INVALID_CODE_PATH");
     }
 

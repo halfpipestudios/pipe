@@ -13,11 +13,13 @@ struct GameWindow;
 
 struct GizmoManager {
     Shader shader;
-    FrameBuffer idFrameBuffer;
     u32 pressedId;
 
     u32 idFrameBufferW;
     u32 idFrameBufferH;
+
+    FrameBuffer idWriteFrameBuffer;
+    FrameBuffer idReadFrameBuffer;
 
     GameWindow *window;
     Camera *camera;

@@ -45,6 +45,11 @@ struct CBGizmo{
     f32 padding[1];
 };
 
+struct CBIndex {
+    f32 id;
+    f32 padding[3];
+};
+
 #define MAX_BONES 100
 struct CBAnimation {
     Mat4 boneMatrix[MAX_BONES];
@@ -153,11 +158,12 @@ struct Graphics {
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
     virtual void BindTextureBuffer(TextureBuffer textureBufferHandle) = 0;
 
-
+    virtual void CopyFrameBuffer(FrameBuffer desHandle, FrameBuffer srcHandle) = 0;
+    virtual FrameBuffer CreateWriteFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
+    virtual FrameBuffer CreateReadFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
     virtual void FrameBufferMap(FrameBuffer frameBufferHandle, u32 *w, u32 *h, u32 *sizeInBytes, u8 **buffer) = 0;
     virtual void FrameBufferUnmap(FrameBuffer frameBufferHandle) = 0;
     virtual FrameBuffer CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
-    virtual FrameBuffer CreateFloatFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
     virtual void DestroyFrameBuffer(FrameBuffer frameBufferHandle) = 0;
     virtual void BindFrameBuffer(FrameBuffer frameBufferHandle) = 0;
     virtual TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) = 0;
@@ -179,6 +185,9 @@ struct Graphics {
 
     ConstBuffer gpuGizmoBuffer;
     CBGizmo cpuGizmoBuffer;
+
+    ConstBuffer gpuIndexBuffer;
+    CBIndex cpuIndexBuffer;
 };
 
 #endif

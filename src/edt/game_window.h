@@ -3,6 +3,7 @@
 
 #include "algebra.h"
 #include "graphics.h"
+#include "gizmo.h"
 
 #include "editor_window.h"
 #include "asset_manager.h"
@@ -18,9 +19,9 @@ struct GameWindow : EditorWindow {
     void RenderEditorGizmos(Editor *editor);
     void RenderModel(Editor *editor, Handle handle, Vec3 color);
 
-    Handle transformGizmoX;
-    Handle transformGizmoY;
-    Handle transformGizmoZ;
+    Gizmo X;
+    Gizmo Y;
+    Gizmo Z;
 
     Shader gizmoShader;
     FrameBuffer gameFrameBuffer;

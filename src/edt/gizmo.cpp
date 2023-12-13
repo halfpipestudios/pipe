@@ -10,11 +10,13 @@
 GizmoManager GizmoManager::gizmoManager;
 
 void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
-    shader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
-                                                        "./data/shaders/gizmoFrag.hlsl");
+    shader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/pickingVert.hlsl",
+                                                        "./data/shaders/pickingFrag.hlsl");
     idFrameBufferW = 1280;
     idFrameBufferH = 720;
-    idFrameBuffer = GraphicsManager::Get()->CreateFloatFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
+    
+    idWriteFrameBuffer = GraphicsManager::Get()->CreateWriteFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
+    idReadFrameBuffer  = GraphicsManager::Get()->CreateReadFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
 
     pressedId = 0;
 
@@ -24,33 +26,45 @@ void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
 
 void GizmoManager::Terminate() {
     GraphicsManager::Get()->DestroyShader(shader);
-    GraphicsManager::Get()->DestroyFrameBuffer(idFrameBuffer);
+    GraphicsManager::Get()->DestroyFrameBuffer(idWriteFrameBuffer);
+    GraphicsManager::Get()->DestroyFrameBuffer(idReadFrameBuffer);
 }
 
 void GizmoManager::UpdateInput() {
 
-#if 0
     Input *input = PlatformManager::Get()->GetInput();
+
+    i32 w_w = tgui_window_width(window->window);
+    i32 w_h = tgui_window_height(window->window);
+    TGuiWindow *w = tgui_window_get_from_handle(window->window);
+        
+    i32 mouseX = CLAMP(input->state[0].mouseX - w->dim.min_x, 0, w_w-1);
+    i32 mouseY = CLAMP(input->state[0].mouseY - w->dim.min_y, 0, w_h-1);
+    
     if(input->MouseIsPress(MOUSE_BUTTON_L)) {
+        
+        mouseX = (i32)(((f32)mouseX / ((f32)w_w - 1)) * (f32)(idFrameBufferW - 1));
+        mouseY = (i32)(((f32)mouseY / ((f32)w_h - 1)) * (f32)(idFrameBufferH - 1));
+        
+        GraphicsManager::Get()->CopyFrameBuffer(idReadFrameBuffer, idWriteFrameBuffer);
 
         u32 w, h, sizeInBytes;
         u8 *buffer = nullptr;
-        GraphicsManager::Get()->FrameBufferMap(idFrameBuffer, &w, &h, &sizeInBytes, &buffer);
+        GraphicsManager::Get()->FrameBufferMap(idReadFrameBuffer, &w, &h, &sizeInBytes, &buffer);
 
-        f32 *floatBuffer = (f32 *)buffer;
-    
-        u32 mouseX = 0;
-        u32 mouseY = 0;
+        Vec4 *floatBuffer = (Vec4 *)buffer;
 
-        pressedId = (u32)floatBuffer[(mouseX*4) + (mouseY*4*idFrameBufferW)];
+        Vec4 pressedId = floatBuffer[mouseX + mouseY*idFrameBufferW];
+        printf("x:%f, y:%f, z:%f, w:%f\n", pressedId.x, pressedId.y, pressedId.z, pressedId.w);
 
-        GraphicsManager::Get()->FrameBufferUnmap(idFrameBuffer);
+        GraphicsManager::Get()->FrameBufferUnmap(idReadFrameBuffer);
 
     
     } else {
         pressedId = 0;
     }
-#endif
+
+    GraphicsManager::Get()->ClearColorBuffer(idWriteFrameBuffer, 0, 0, 0);
 
 }
 
@@ -70,22 +84,27 @@ void Gizmo::Initialize(char *modelName, Vec3 color) {
 
 void Gizmo::Render() {
     if(visible) {
-        
         GameWindow *window = GizmoManager::Get()->window;
 
         GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
-        
-        // --------------------------------------------------------------- 
-        CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
-        ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
-        buffer->color = color;
-        GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
-        RenderModel(model, color, window->gameFrameBuffer, window->gizmoShader);
-        
-        // --------------------------------------------------------------- 
-        // TODO: Update const buffer for render gizmo id
-        
-        RenderModel(model, color, GizmoManager::Get()->idFrameBuffer, GizmoManager::Get()->shader);
+         
+        {
+            CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
+            ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
+            buffer->color = color;
+            GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
+            RenderModel(model, color, window->gameFrameBuffer, window->gizmoShader);
+        }
+       
+        { 
+            CBIndex *buffer = &GraphicsManager::Get()->cpuIndexBuffer;
+            ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuIndexBuffer;
+            buffer->id = (f32)id;
+            GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
+            RenderModel(model, color, GizmoManager::Get()->idWriteFrameBuffer, GizmoManager::Get()->shader);
+        }
+
+        GraphicsManager::Get()->BindFrameBuffer(window->gameFrameBuffer);
     }
 }
 
@@ -127,8 +146,6 @@ void Gizmo::SetTransform(TransformCMP transform) {
             t = (o.Dot(n) - p.Dot(n)) / v.Dot(n);
         }
 
-        transform.rot = Vec3(0,0,0);
-        transform.scale = Vec3(1,1,1);
         transform.pos = p + v * t; 
 
     } else {

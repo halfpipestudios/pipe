@@ -96,6 +96,27 @@ struct PlayerAnimationFallState_ : public PlayerAnimationState_ {
 #include <stdio.h>
 
 struct AnimationCMP : CMP<AnimationCMP> {
+    
+    AnimationCMP &operator=(AnimationCMP &other) {
+        
+        id = other.id;
+        entityKey = other.entityKey;
+
+        idle = other.idle;
+        walk = other.walk;
+        jump = other.jump;
+        fall = other.fall;
+
+        idle.anim = this;
+        walk.anim = this;
+        jump.anim = this;
+        fall.anim = this;
+        state = &idle;
+
+        transition = other.transition;
+
+        return *this;
+    }
 
     void Initialize(AnimationClipSet* animationSet_) { 
         animationSet = animationSet_;
@@ -105,6 +126,7 @@ struct AnimationCMP : CMP<AnimationCMP> {
         jump.Initialize(this);
         fall.Initialize(this);
         state = &idle;
+        state->anim = this;
     }
 
     AnimationClipSet *animationSet;

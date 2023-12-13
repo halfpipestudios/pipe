@@ -121,8 +121,8 @@ static SlotmapKey CreateHero(EntityManager& em, Model& model, Shader shader,
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(heroKey);
     graphicsCmp->Initialize(model, shader);
 
-    // AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(heroKey);
-    // animationCmp->Initialize(animationClipSet);
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(heroKey);
+    animationCmp->Initialize(animationClipSet);
 
     InputCMP *inputCmp = em.AddComponent<InputCMP>(heroKey);
     inputCmp->Initialize(input, camera);
@@ -161,8 +161,8 @@ static SlotmapKey CreateOrc(EntityManager& em,
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(orc);
     graphicsCmp->Initialize(model, shader);
 
-    // AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
-    // animationCmp->Initialize(animationClipSet);
+    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
+    animationCmp->Initialize(animationClipSet);
 
     Cylinder cylinder = {};
     cylinder.c = pos;
