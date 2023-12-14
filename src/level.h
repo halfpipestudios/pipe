@@ -19,6 +19,8 @@
 #include "sys/collision_sys.inl"
 #include "sys/moving_platform_sys.inl"
 #include "sys/ai_sys.inl"
+#include "sys/trigger_sys.inl"
+#include "sys/gem_sys.inl"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -39,10 +41,14 @@ struct Level {
     void Initialize(char *mapFilePath, Shader mapShader, Shader animShader);
     void Terminate();
 
+    void BeginFrame(f32 dt);
+    void EndFrame(f32 dt);
+
     void Update(f32 dt);
     void Render(Shader mapShader);
 
     bool DeleteEntity(SlotmapKey entityKey);
+    void DeleteEntitiesToRemove();
 
     MemoryFrame memory; 
     EntityManager em;
@@ -55,6 +61,8 @@ struct Level {
     CollisionSys<EntityManager> collisionSys;
     MovingPlatformSys<EntityManager> movingPlatformSys;
     AiSys<EntityManager> aiSys;
+    TriggerSys<EntityManager> triggerSys;
+    GemSys<EntityManager> gemSys;
 
     Camera camera;
     
@@ -62,8 +70,14 @@ struct Level {
 
     SlotmapKey heroKey;
     Array<SlotmapKey> entities;
+    FrameArray<SlotmapKey> entitiesToRemove;
  
     BehaviorTree bhTree;
+
+private:
+
+    void DestroyEntityAndComponents(SlotmapKey entityKey);
+
 };
 
 #endif // _LEVEL_H_

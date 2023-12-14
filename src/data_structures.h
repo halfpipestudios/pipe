@@ -47,6 +47,23 @@ struct Array {
     Type *data { nullptr };
 };
 
+template <typename Type>
+struct FrameArray {
+    
+    void Begin(u32 size);
+    void End();
+
+    Type *Push(Type value);
+
+    Type& operator[] (u32 index){
+        return data[index];
+    }
+
+    u32 capacity { 0 };
+    u32 size     { 0 };
+    Type *data { nullptr };
+};
+
 #define INVALID_KEY ((u64)-1)
 
 struct SlotmapKey {

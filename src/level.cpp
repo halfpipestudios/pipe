@@ -4,6 +4,8 @@
 
 #include <float.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "cmp/transform_cmp.h"
 #include "cmp/graphics_cmp.h"
@@ -13,6 +15,8 @@
 #include "cmp/collision_cmp.h"
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
+#include "cmp/trigger_cmp.h"
+#include "cmp/gem_cmp.h"
 
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
@@ -113,10 +117,10 @@ static SlotmapKey CreateHero(EntityManager& em, Model& model, Shader shader,
     hero->name = "Hero";
     
     TransformCMP *transformCmp = em.AddComponent<TransformCMP>(heroKey);
-    transformCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
+    transformCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
 
     PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(heroKey);
-    physicsCmp->Initialize(Vec3(0, 30, 0), Vec3(), Vec3());
+    physicsCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3());
 
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(heroKey);
     graphicsCmp->Initialize(model, shader);
@@ -173,7 +177,7 @@ static SlotmapKey CreateOrc(EntityManager& em,
     collisionCmp->Initialize(cylinder);
 
     AiCMP *aiCmp = em.AddComponent<AiCMP>(orc);
-    aiCmp->Initialize(STEERING_BEHAVIOR_ARRIVE, 0.75f, 2.0f, true, bhTree);
+    aiCmp->Initialize(STEERING_BEHAVIOR_FACE, 0.75f, 2.0f, true, bhTree);
 
     return orc;
     
@@ -210,7 +214,43 @@ static SlotmapKey CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale
     return platform;
 }
 
+static SlotmapKey CreateGem(EntityManager& em, SlotmapKey whoTriggerThis, Model& model, Vec3 position, Shader shader) {
+
+    SlotmapKey gem = em.AddEntity();
+    Entity_ *gemPtr = em.GetEntity(gem);
+    gemPtr->name = "gem";
+    
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(gem);
+    transformCmp->Initialize(position, Vec3(), Vec3(0.4f, 0.4f, 0.4f));
+
+    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(gem);
+    graphicsCmp->Initialize(model, shader);
+
+    Cylinder cylinder = {};
+    cylinder.c = position;
+    cylinder.u = Vec3(0, 1, 0);
+    cylinder.radii = 0.2f;
+    cylinder.n = 0.25f;
+    TriggerCMP *triggerCmp = em.AddComponent<TriggerCMP>(gem);
+    triggerCmp->Initialize(whoTriggerThis, cylinder);
+
+    GemCMP *gemCmp = em.AddComponent<GemCMP>(gem);
+
+    i32 value = rand() % (50 + 1) + 50;
+
+    gemCmp->Initialize(value);
+
+    return gem;
+}
+
+
+
 bool Level::DeleteEntity(SlotmapKey entityKey) {
+    entitiesToRemove.Push(entityKey);
+    return true;
+}
+
+void Level::DestroyEntityAndComponents(SlotmapKey entityKey) {
     i32 indexToDelete = -1;
     for(i32 i = 0; i < entities.size; ++i) {
         if(entityKey.gen == entities[i].gen) {
@@ -220,17 +260,25 @@ bool Level::DeleteEntity(SlotmapKey entityKey) {
     }
 
     if(indexToDelete == -1) {
-        return false;
+        return;
     } else {
         em.DeleteEntity(entityKey); 
         entities[indexToDelete] = entities[entities.size - 1];
         --entities.size;
-        return true;
+        return;
+    }
+}
+
+
+void Level::DeleteEntitiesToRemove() {
+    for(i32 i = 0; i < entitiesToRemove.size; ++i) {
+        DestroyEntityAndComponents(entitiesToRemove[i]);
     }
 }
 
 void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
-
+    srand(time(NULL));
+    
     memory.BeginFrame();
 
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
@@ -244,6 +292,8 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     em.AddComponentType<CollisionCMP>();
     em.AddComponentType<MovingPlatformCMP>();
     em.AddComponentType<AiCMP>();
+    em.AddComponentType<TriggerCMP>();
+    em.AddComponentType<GemCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath);
@@ -253,7 +303,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     bhTree.AddNode<BehaviorSequence>(
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0,  8)),
         bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
-        bhTree.AddNode<BehaviorArrive>(Vec3(-16, 0, -6)),
+        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0, -6)),
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
     );    
 
@@ -263,16 +313,26 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
 
     Model *heroModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("hero.twm"));
     Model *orcModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("orc.twm"));
+    Model *gemModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("gem.twm"));
 
     camera.Initialize();
 
     entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, &camera));
-    entities.Push(CreateOrc(em, "orc_1",  Vec3(10, 4, 10), *orcModel, animShader, heroAnim));
-    entities.Push(CreateOrc(em, "orc_2",  Vec3(10, 4, 15), *orcModel, animShader, heroAnim));
-    entities.Push(CreateOrc(em, "orc_3", Vec3(10, 4, 8),  *orcModel, animShader, heroAnim, &bhTree));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(10,  3, -5), Vec3(10,  3, 5), statShader));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(2, 0.5f, 4), Vec3(14, 10,  0), Vec3(14,  3, 0), statShader));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_3", Vec3(2, 0.5f, 2), Vec3(14, 10,  4), Vec3(14, 20, 4), statShader));
+    entities.Push(CreateOrc(em, "orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim));
+    entities.Push(CreateOrc(em, "orc_2",  Vec3(0, 4, 15), *orcModel, animShader, heroAnim));
+    entities.Push(CreateOrc(em, "orc_3", Vec3(0, 4, 8),  *orcModel, animShader, heroAnim, &bhTree));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(  1, -0.5f, 67),    Vec3(22,  -0.5f, 67), statShader));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(4, 0.5f, 2), Vec3(  0, -0.5f, 78),    Vec3(26,  -0.5f, 78), statShader));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_3", Vec3(4, 0.5f, 2), Vec3( 22, -0.5f, 86),    Vec3(0, -0.5f, 86),  statShader));
+    entities.Push(CreateMovingPlatform(em, "mov_plat_4", Vec3(4, 0.5f, 2), Vec3(-22,  0.0f, 88.2f), Vec3(0,  0.0f, 88.2f),  statShader));
+
+
+    //entities.Push(CreateGem(em, entities[0], *gemModel, Vec3(8, 2.2f, 8), statShader));
+    for(i32 y = 0; y < 10; y++) {
+        for(i32 x = 0; x < 10; x++) {
+            entities.Push(CreateGem(em, entities[0], *gemModel, Vec3(-4 + (f32)x, 2.2f, 8 + (f32)y), statShader));
+        }
+    }
 
     heroKey = entities[0];
 
@@ -291,24 +351,37 @@ void Level::Terminate() {
     memory.EndFrame();
 }
 
+
+void Level::BeginFrame(f32 dt) {
+    entitiesToRemove.Begin(ENTITY_ARRAY_MAX_SIZE);
+}
+
+void Level::EndFrame(f32 dt) {
+    DeleteEntitiesToRemove();
+    entitiesToRemove.End();
+}
+
 void Level::Update(f32 dt) {
 
     Input *input = PlatformManager::Get()->GetInput();
+
 
     physicsSys.PreUpdate(em, dt);
     inputSys.Update(em, dt);
     aiSys.Update(em, dt);
     physicsSys.Update(em, dt);
     movingPlatformSys.Update(em, dt);
+    triggerSys.Update(em, dt);
     collisionSys.Update(em, &map, dt);
     physicsSys.PostUpdate(em, dt);
     animationSys.Update(em, dt);
+    gemSys.Update(em , this, dt);
     transformSys.Update(em);
 
     TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
     camera.target = heroTransform->pos;
     camera.ProcessMovement(input, &map, dt);
-    camera.SetViewMatrix();
+    camera.SetViewMatrix(); 
 }
 
 void Level::Render(Shader mapShader) {

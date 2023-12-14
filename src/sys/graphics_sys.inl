@@ -18,6 +18,7 @@ void GraphicsSys<EM>::Update(EM& em) {
         if(transform == nullptr) continue;
 
         TransformCMP renderTransform = *transform;
+        renderTransform.pos += transform->renderOffset;
 
         if(graphic->model.type == MODEL_TYPE_ANIMATED) {
             renderTransform.pos.y -= 0.75f;

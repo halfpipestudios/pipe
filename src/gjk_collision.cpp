@@ -2,6 +2,7 @@
 #include <float.h>
 #include <stdio.h>
 
+#define MAX_NUM_OF_ITERATIONS 100
 
 Vec3 ConvexHull::FindFurthestPoint(Vec3 dir) {
     Vec3 maxPoint;
@@ -86,8 +87,9 @@ CollisionData GJK::Intersect(ConvexHull *a, ConvexHull *b) {
     simplex.PushFront(support);
 
     Vec3 dir = support.p * -1.0f;
-
-    while(true) {
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
         support = Support(a, b, dir);
 
         if(support.p.Dot(dir) <= 0) {
@@ -102,6 +104,7 @@ CollisionData GJK::Intersect(ConvexHull *a, ConvexHull *b) {
         }
 
     }
+    return {};
 
 }
 
@@ -113,7 +116,9 @@ CollisionData GJK::Intersect(ConvexHull *a, Cylinder *b) {
 
     Vec3 dir = support.p * -1.0f;
 
-    while(true) {
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
         support = Support(a, b, dir);
 
         if(support.p.Dot(dir) <= 0) {
@@ -128,6 +133,7 @@ CollisionData GJK::Intersect(ConvexHull *a, Cylinder *b) {
         }
 
     }
+    return {};
 }
 
 
@@ -138,8 +144,9 @@ CollisionData GJK::Intersect(Cylinder *a, Cylinder *b) {
     simplex.PushFront(support);
 
     Vec3 dir = support.p * -1.0f;
-
-    while(true) {
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
         support = Support(a, b, dir);
 
         if(support.p.Dot(dir) <= 0) {
@@ -154,6 +161,97 @@ CollisionData GJK::Intersect(Cylinder *a, Cylinder *b) {
         }
 
     }
+    return {};
+}
+
+
+// Intersect Fast
+CollisionData GJK::IntersectFast(ConvexHull *a, ConvexHull *b) {
+
+    Point support = Support(a, b, Vec3(1, 0, 0));
+
+    Simplex simplex = {};
+    simplex.PushFront(support);
+
+    Vec3 dir = support.p * -1.0f;
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
+        support = Support(a, b, dir);
+
+        if(support.p.Dot(dir) <= 0) {
+            return {};
+        }
+
+        simplex.PushFront(support);
+
+        if(DoSimplex(simplex, dir)) {
+            CollisionData collisionData;
+            collisionData.hasCollision = true;
+            return collisionData;
+        }
+
+    }
+    return {};
+
+}
+
+CollisionData GJK::IntersectFast(ConvexHull *a, Cylinder *b) {
+    Point support = Support(a, b, Vec3(1, 0, 0));
+
+    Simplex simplex = {};
+    simplex.PushFront(support);
+
+    Vec3 dir = support.p * -1.0f;
+
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
+        support = Support(a, b, dir);
+
+        if(support.p.Dot(dir) <= 0) {
+            return {};
+        }
+
+        simplex.PushFront(support);
+
+        if(DoSimplex(simplex, dir)) {
+            CollisionData collisionData;
+            collisionData.hasCollision = true;
+            return collisionData;
+        }
+
+    }
+    return {};
+}
+
+
+CollisionData GJK::IntersectFast(Cylinder *a, Cylinder *b) {
+    Point support = Support(a, b, Vec3(1, 0, 0));
+
+    Simplex simplex = {};
+    simplex.PushFront(support);
+
+    Vec3 dir = support.p * -1.0f;
+    i32 counter = 0;
+    while(counter < MAX_NUM_OF_ITERATIONS) {
+        counter++;
+        support = Support(a, b, dir);
+
+        if(support.p.Dot(dir) <= 0) {
+            return {};
+        }
+
+        simplex.PushFront(support);
+
+        if(DoSimplex(simplex, dir)) {
+            CollisionData collisionData;
+            collisionData.hasCollision = true;
+            return collisionData;
+        }
+
+    }
+    return {};
 }
 
 bool GJK::DoSimplex(Simplex &simplex, Vec3 &dir) {

@@ -4,7 +4,7 @@
 #include "component_storage.h"
 #include "entity.h"
 
-#define ENTITY_ARRAY_MAX_SIZE 100
+#define ENTITY_ARRAY_MAX_SIZE 120
 
 struct EntityManager {
 
@@ -79,11 +79,9 @@ struct EntityManager {
 
         for(i32 i = 0; i < entity->componentsIds.size; ++i) {
             u32 cmpID = entity->componentsIds[i]; 
-            printf("Deleting Compoents ID: %d of Entity ID: %lld", cmpID, entityKey.gen);
             ComponentSlotmapBase* slotmap = componentsStorage.GetComponentsSlotmapById(cmpID);
             SlotmapKey componentKey = entity->componentsKeys.Get(cmpID);
             slotmap->DestroyComponent(componentKey);
-            printf(" -------> component Deleted\n");
         }
 
         entities.Remove(entityKey);

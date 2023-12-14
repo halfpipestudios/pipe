@@ -51,6 +51,10 @@ struct GJK {
     CollisionData Intersect(ConvexHull *a, Cylinder *b);
     CollisionData Intersect(Cylinder *a, Cylinder *b);
 
+    CollisionData IntersectFast(ConvexHull *a, ConvexHull *b);
+    CollisionData IntersectFast(ConvexHull *a, Cylinder *b);
+    CollisionData IntersectFast(Cylinder *a, Cylinder *b);
+
 private: 
 
     Point Support(Cylinder *a, Cylinder *b, Vec3 dir);

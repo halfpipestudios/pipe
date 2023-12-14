@@ -14,6 +14,7 @@ struct TransformCMP : CMP<TransformCMP> {
     Vec3 pos { };
     Vec3 rot { };
     Vec3 scale { 1, 1, 1 };
+    Vec3 renderOffset { };
     inline Mat4 GetWorldMatrix() { 
         return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); 
     };

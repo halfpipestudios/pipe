@@ -17,7 +17,7 @@ void Game::Initialize() {
     statShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/staticVert.hlsl",
                                                             "./data/shaders/staticFrag.hlsl");
 
-    level.Initialize("./data/maps/current.map", statShader, animShader);
+    level.Initialize("./data/maps/levelOP.map", statShader, animShader);
 
 }
 
@@ -26,6 +26,14 @@ void Game::Terminate() {
     GraphicsManager::Get()->DestroyShader(mapShader);
     GraphicsManager::Get()->DestroyShader(statShader);
     GraphicsManager::Get()->DestroyShader(animShader);
+}
+
+void Game::BeginFrame(f32 dt) {
+    level.BeginFrame(dt);
+}
+
+void Game::EndFrame(f32 dt) {
+    level.EndFrame(dt);
 }
 
 void Game::Update(f32 dt) {

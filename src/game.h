@@ -10,6 +10,9 @@ struct Game {
     void Initialize();
     void Terminate();
 
+    void BeginFrame(f32 dt);
+    void EndFrame(f32 dt);
+
     void Update(f32 dt);
 
     void FixUpdate(f32 dt);

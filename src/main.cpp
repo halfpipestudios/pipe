@@ -59,6 +59,7 @@ int main() {
         
         // TODO: game.FixUpdate() game.PostUpdate();
         
+        game.BeginFrame(deltaTime);
         if(editorIsActive) {
             editor.Update(deltaTime);
             editor.Render();
@@ -66,8 +67,8 @@ int main() {
             game.Update(deltaTime);
             game.Render();
         }
-
         GraphicsManager::Get()->Present(1);
+        game.EndFrame(deltaTime);
     }
 
     editor.Terminate();

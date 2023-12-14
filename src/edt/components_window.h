@@ -16,6 +16,8 @@ struct ComponentsWindow : EditorWindow {
     void UpdatePlayerAnimationComponent(Editor *editor, SlotmapKey entityKey);
     void UpdateAIComponent(Editor *editor, SlotmapKey entityKey);
     void UpdateMovingPlatformComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateTriggerComponent(Editor *editor, SlotmapKey entityKey);
+    void UpdateGemComponent(Editor *editor, SlotmapKey entityKey);
 
     i32 current_x;
     i32 current_y;

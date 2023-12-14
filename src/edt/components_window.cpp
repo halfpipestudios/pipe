@@ -11,6 +11,8 @@
 #include "cmp/collision_cmp.h"
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/ai_cmp.h"
+#include "cmp/trigger_cmp.h"
+#include "cmp/gem_cmp.h"
 
 #include "game.h"
 
@@ -46,6 +48,10 @@ void ComponentsWindow::Update(Editor *editor, f32 dt) {
                 UpdateMovingPlatformComponent(editor, *editor->selectedEntity);
             } else if(id == AiCMP::GetID()) {
                 UpdateAIComponent(editor, *editor->selectedEntity);
+            } else if (id == TriggerCMP::GetID()){
+                UpdateTriggerComponent(editor, *editor->selectedEntity);
+            } else if (id == GemCMP::GetID()){
+                UpdateGemComponent(editor, *editor->selectedEntity);
             } else {
                 char *compName = "Unknown Component";
                 _tgui_label(window, compName, 0x222222, current_x, current_y, compName);
@@ -187,9 +193,37 @@ void ComponentsWindow::UpdatePlayerAnimationComponent(Editor *editor, SlotmapKey
 }
 
 void ComponentsWindow::UpdateMovingPlatformComponent(Editor *editor, SlotmapKey entityKey) {
+    MovingPlatformCMP *movingComp = editor->game->level.em.GetComponent<MovingPlatformCMP>(entityKey);
+    ASSERT(movingComp);
     u32 w = 72;
     u32 h = 28;
-    if(_tgui_separator(window, "Moving Platform Component", current_y, false, TGUI_ID)) {
+
+    Vec3 *a = &movingComp->a;
+    Vec3 *b = &movingComp->b;
+
+    u32 label_x = current_x + 10;
+    u32 x = label_x + 40;
+
+    if(_tgui_separator(window, "Moving Platform Component", current_y, true, TGUI_ID)) {
+
+        current_y += h + 10;
+
+        _tgui_label(window, "a =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &a->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &a->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &a->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+
+        _tgui_label(window, "b =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &b->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &b->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &b->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+
+        _tgui_label(window, "speed =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &movingComp->speed, 0x00ff00, x + 40, current_y, w, TGUI_ID);
     }
     current_y += h;
 }
@@ -198,6 +232,22 @@ void ComponentsWindow::UpdateAIComponent(Editor *editor, SlotmapKey entityKey) {
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "AI Component", current_y, false, TGUI_ID)) {
+    }
+    current_y += h;
+}
+
+void ComponentsWindow::UpdateTriggerComponent(Editor *editor, SlotmapKey entityKey) {
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Trigger Component", current_y, false, TGUI_ID)) {
+    }
+    current_y += h;
+}
+
+void ComponentsWindow::UpdateGemComponent(Editor *editor, SlotmapKey entityKey) {
+    u32 w = 72;
+    u32 h = 28;
+    if(_tgui_separator(window, "Gem Component", current_y, false, TGUI_ID)) {
     }
     current_y += h;
 }

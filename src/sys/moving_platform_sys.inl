@@ -90,9 +90,13 @@ void MovingPlatformSys<EM>::Update(EM& em, f32 dt) {
 
 
         Vec3 lastPos = transform->pos;
-
-        f32 t = (sinf(platform->dtElapsed) + 1.0f) * 0.5f;
-        transform->pos = platform->a + (platform->b - platform->a) * t;
+        Vec3 ab = platform->b - platform->a;
+        f32 len = ab.Len();
+        
+        if(len > 0.001f) {
+            f32 t = (sinf((platform->dtElapsed / len) * platform->speed) + 1.0f) * 0.5f;
+            transform->pos = platform->a + (platform->b - platform->a) * t;
+        }
 
         platform->movement = transform->pos - lastPos;
 

@@ -149,6 +149,29 @@ Type *Array<Type>::Push(Type value) {
     return element;
 }
 
+// FrameArray -----------------------------------------------------------------------------------------
+
+template <typename Type>
+void FrameArray<Type>::Begin(u32 size) {
+    capacity = size;
+    data = (Type *)MemoryManager::Get()->AllocFrameMemory(sizeof(Type) * capacity, 8);
+    memset(data, 0, sizeof(Type) * capacity);
+}
+
+template <typename Type>
+void FrameArray<Type>::End() {
+    size = 0;
+}
+
+template <typename Type>
+Type *FrameArray<Type>::Push(Type value) {
+    ASSERT(size + 1 <= capacity);
+    Type *element = new (data + size) Type;
+    *element = value;
+    ++size;
+    return element;
+}
+
 
 // Slotmap -----------------------------------------------------------------------------------------
 
@@ -234,9 +257,6 @@ void Slotmap<Type>::Remove(SlotmapKey key) {
 
     --data.size;
     --erase.size;        
-    
-
-    printf("key deleted!!!\n");
 }
 
 #endif
