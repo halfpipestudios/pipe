@@ -16,9 +16,9 @@ void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *oth
     gizmoShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
                                                        "./data/shaders/gizmoFrag.hlsl");
 
-    X.Initialize("transform.twm", Vec3(1, 0, 0));
-    Y.Initialize("transform.twm", Vec3(0, 1, 0));
-    Z.Initialize("transform.twm", Vec3(0, 0, 1));
+    X.Initialize("transform.twm", Vec3(0.8f, 0, 0));
+    Y.Initialize("transform.twm", Vec3(0, 0.8f, 0));
+    Z.Initialize("transform.twm", Vec3(0, 0, 0.8f));
 
 }
 
@@ -28,28 +28,56 @@ void GameWindow::Terminate() {
     GraphicsManager::Get()->DestroyFrameBuffer(gameFrameBuffer);
 }
 
+void GameWindow::UpdateTransformGizmos() {
+    Input *input = PlatformManager::Get()->GetInput();
+    if(X.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            X.SetActive(false);
+        }
+    } else if(X.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            X.SetActive(true);
+        }
+    }
+    if(Y.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            Y.SetActive(false);
+        }
+    } else if(Y.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            Y.SetActive(true);
+        }
+    }
+    if(Z.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            Z.SetActive(false);
+        }
+    } else if(Z.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            Z.SetActive(true);
+        }
+    }
+}
+
 void GameWindow::Update(Editor *editor, f32 dt) {
+    
     if(editor->paused) {
         _tgui_label(window, "game: paused", 0x00ff00, 4, 4, TGUI_ID);
     } else {
         _tgui_label(window, "game: playing", 0x00ff00, 4, 4, TGUI_ID);
     }
     tgui_texture(window, (void *)GraphicsManager::Get()->FrameBufferGetTexture(gameFrameBuffer));
+    
+    UpdateTransformGizmos();
 
-    X.Update();
-    Y.Update();
-    Z.Update();
-
-    if(X.IsPress()) {
-        printf("X gizmo is press\n");
+    if(X.IsActive()) {
+        printf("X Gizmo Active!\n");
     }
-
-    if(Y.WasPress()) {
-        printf("Y gizmo was press\n");
+    if(Y.IsActive()) {
+        printf("Y Gizmo Active!\n");
     }
-
-    if(Z.WasRelease()) {
-        printf("Z gizmo was release\n");
+    if(Z.IsActive()) {
+        printf("Z Gizmo Active!\n");
     }
 
 }
@@ -70,11 +98,27 @@ void GameWindow::Render(Editor *editor) {
     
     if(editor->selectedEntity) {
 
+        if(X.IsHot()) {
+            X.color = Vec3(1,0.2f,0.2f);
+        } else {
+            X.color = Vec3(0.8f,0.1f,0.1f);
+        } 
+        if(Y.IsHot()) {
+            Y.color = Vec3(0.2f,1,0.2f);
+        } else {
+            Y.color = Vec3(0.1f,0.8f,0.1f);
+        } 
+        if(Z.IsHot()) {
+            Z.color = Vec3(0.2f,0.2f,1);
+        } else {
+            Z.color = Vec3(0.1f,0.1f,0.8f);
+        } 
+
         GraphicsManager::Get()->SetDepthStencilState(false);
         
         TransformCMP transform = *editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
         transform.rot   = Vec3(0, 0, 0);
-        transform.scale = Vec3(2, 2, 2);
+        transform.scale = Vec3(1.2f, 1.2f, 1.2f);
         
         X.SetTransform(transform);
         X.Render();

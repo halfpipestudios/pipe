@@ -22,4 +22,9 @@ struct Segment {
     bool HitConvexHull(ConvexHull *convexHull, f32 *tOut);
 };
 
+struct Ray {
+    Vec3 o;
+    Vec3 d;
+};
+
 #endif

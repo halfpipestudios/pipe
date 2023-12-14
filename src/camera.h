@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "algebra.h"
+#include "geometry.h"
 
 struct Map;
 struct Input;
@@ -24,6 +25,9 @@ struct Camera {
     void ProcessMovement(Input *input, Map *map, f32 deltaTime);
     void SetViewMatrix();
     Vec3 GetWorldFront();
+
+    Ray GetMouseRay(f32 w, f32 h, f32 mouseX, f32 mouseY);
+
 };
 
 #endif

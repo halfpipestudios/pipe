@@ -630,6 +630,66 @@ Mat4 Mat4::Rotate(Vec3 rotate) {
     return RotateX(rotate.x) * RotateY(rotate.y) * RotateZ(rotate.z) ;
 }
 
+Mat4 Mat4::Transposed(const Mat4 &m) {
+	return {
+		m.m11, m.m21, m.m31, m.m41,
+		m.m12, m.m22, m.m32, m.m42,
+		m.m13, m.m23, m.m33, m.m43,
+		m.m14, m.m24, m.m34, m.m44
+    };
+}
+
+#define M4_3X3MINOR(c0, c1, c2, r0, r1, r2) \
+    (m.v[c0 * 4 + r0] * (m.v[c1 * 4 + r1] * m.v[c2 * 4 + r2] - m.v[c1 * 4 + r2] * m.v[c2 * 4 + r1]) - \
+     m.v[c1 * 4 + r0] * (m.v[c0 * 4 + r1] * m.v[c2 * 4 + r2] - m.v[c0 * 4 + r2] * m.v[c2 * 4 + r1]) + \
+     m.v[c2 * 4 + r0] * (m.v[c0 * 4 + r1] * m.v[c1 * 4 + r2] - m.v[c0 * 4 + r2] * m.v[c1 * 4 + r1]))
+
+f32 Mat4::Determinant(const Mat4 &m) {
+	return  m.v[0] * M4_3X3MINOR(1, 2, 3, 1, 2, 3)
+		  - m.v[4] * M4_3X3MINOR(0, 2, 3, 1, 2, 3)
+		  + m.v[8] * M4_3X3MINOR(0, 1, 3, 1, 2, 3)
+		  - m.v[12] * M4_3X3MINOR(0, 1, 2, 1, 2, 3);
+}
+
+Mat4 Mat4::Adjugate(const Mat4 &m) {
+	// Cofactor(M[i, j]) = Minor(M[i, j]] * pow(-1, i + j)
+	Mat4 cofactor;
+
+	cofactor.v[0] =  M4_3X3MINOR(1, 2, 3, 1, 2, 3);
+	cofactor.v[1] = -M4_3X3MINOR(1, 2, 3, 0, 2, 3);
+	cofactor.v[2] =  M4_3X3MINOR(1, 2, 3, 0, 1, 3);
+	cofactor.v[3] = -M4_3X3MINOR(1, 2, 3, 0, 1, 2);
+
+	cofactor.v[4] = -M4_3X3MINOR(0, 2, 3, 1, 2, 3);
+	cofactor.v[5] =  M4_3X3MINOR(0, 2, 3, 0, 2, 3);
+	cofactor.v[6] = -M4_3X3MINOR(0, 2, 3, 0, 1, 3);
+	cofactor.v[7] =  M4_3X3MINOR(0, 2, 3, 0, 1, 2);
+
+	cofactor.v[8] =   M4_3X3MINOR(0, 1, 3, 1, 2, 3);
+	cofactor.v[9] =  -M4_3X3MINOR(0, 1, 3, 0, 2, 3);
+	cofactor.v[10] =  M4_3X3MINOR(0, 1, 3, 0, 1, 3);
+	cofactor.v[11] = -M4_3X3MINOR(0, 1, 3, 0, 1, 2);
+
+	cofactor.v[12] = -M4_3X3MINOR(0, 1, 2, 1, 2, 3);
+	cofactor.v[13] =  M4_3X3MINOR(0, 1, 2, 0, 2, 3);
+	cofactor.v[14] = -M4_3X3MINOR(0, 1, 2, 0, 1, 3);
+	cofactor.v[15] =  M4_3X3MINOR(0, 1, 2, 0, 1, 2);
+
+	return Mat4::Transposed(cofactor);
+}
+
+Mat4 Mat4::Inverse(const Mat4 &m) {
+	f32 det = Mat4::Determinant(m);
+
+	if (det == 0.0f) { // Epsilon check would need to be REALLY small
+        ASSERT(!"INVALID_CODE_PATH");
+	}
+	Mat4 adj = Mat4::Adjugate(m);
+
+	return adj * (1.0f / det);
+}
+
+
 // -----------------------------------------
 
 // ----------------Quat---------------------

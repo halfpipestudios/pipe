@@ -18,10 +18,11 @@ void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
     idWriteFrameBuffer = GraphicsManager::Get()->CreateWriteFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
     idReadFrameBuffer  = GraphicsManager::Get()->CreateReadFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
 
-    pressedId = 0;
-
     this->camera = camera;
     this->window = window;
+
+    active = 0;
+    hot    = 0;
 }
 
 void GizmoManager::Terminate() {
@@ -38,10 +39,10 @@ void GizmoManager::UpdateInput() {
     i32 w_h = tgui_window_height(window->window);
     TGuiWindow *w = tgui_window_get_from_handle(window->window);
         
-    i32 mouseX = CLAMP(input->state[0].mouseX - w->dim.min_x, 0, w_w-1);
-    i32 mouseY = CLAMP(input->state[0].mouseY - w->dim.min_y, 0, w_h-1);
-    
-    if(input->MouseIsPress(MOUSE_BUTTON_L)) {
+    if(!active && !tgui_rect_invalid(w->dim) && tgui_rect_point_overlaps(w->dim, input->state[0].mouseX, input->state[0].mouseY)) {
+
+        i32 mouseX = CLAMP(input->state[0].mouseX - w->dim.min_x, 0, w_w-1);
+        i32 mouseY = CLAMP(input->state[0].mouseY - w->dim.min_y, 0, w_h-1);
         
         mouseX = (i32)(((f32)mouseX / ((f32)w_w - 1)) * (f32)(idFrameBufferW - 1));
         mouseY = (i32)(((f32)mouseY / ((f32)w_h - 1)) * (f32)(idFrameBufferH - 1));
@@ -51,19 +52,14 @@ void GizmoManager::UpdateInput() {
         u32 w, h, sizeInBytes;
         Vec4 *buffer = nullptr;
         GraphicsManager::Get()->FrameBufferMap(idReadFrameBuffer, &w, &h, &sizeInBytes, &(u8 *)buffer);
-        Vec4 pressedIdVec = buffer[mouseX + mouseY*idFrameBufferW];
-        pressedId = (u32)pressedIdVec.x;
+        Vec4 id = buffer[mouseX + mouseY*idFrameBufferW];
+        hot = (u32)id.x;
 
         GraphicsManager::Get()->FrameBufferUnmap(idReadFrameBuffer);
-
-    
-    } else {
-        pressedId = 0;
     }
 
-    GraphicsManager::Get()->ClearColorBuffer(idWriteFrameBuffer, 5, 5, 5);
+    GraphicsManager::Get()->ClearColorBuffer(idWriteFrameBuffer, 0, 0, 0);
     GraphicsManager::Get()->ClearDepthStencilBuffer(idWriteFrameBuffer);
-
 }
 
 Gizmo::Gizmo() {
@@ -106,21 +102,28 @@ void Gizmo::Render() {
     }
 }
 
-void Gizmo::Update() {
-    lastPress = press;
-    press = GizmoManager::Get()->pressedId == id;
+bool Gizmo::IsHot() {
+    return GizmoManager::Get()->hot == id;
 }
 
-bool Gizmo::IsPress() {
-    return press;
+bool Gizmo::IsActive() {
+    return GizmoManager::Get()->active == id;
 }
 
-bool Gizmo::WasPress() {
-    return !lastPress && press;
+void Gizmo::SetHot(bool state) {
+    if(state == true) {
+        GizmoManager::Get()->hot = id;
+    } else {
+        GizmoManager::Get()->hot = 0;
+    }
 }
 
-bool Gizmo::WasRelease() {
-    return lastPress && !press;
+void Gizmo::SetActive(bool state) {
+    if(state == true) {
+        GizmoManager::Get()->active = id;
+    } else {
+        GizmoManager::Get()->active = 0;
+    }
 }
 
 void Gizmo::SetTransform(TransformCMP transform) {

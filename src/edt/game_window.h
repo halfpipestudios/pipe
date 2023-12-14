@@ -26,6 +26,9 @@ struct GameWindow : EditorWindow {
     Shader gizmoShader;
     FrameBuffer gameFrameBuffer;
 
+private:
+    void UpdateTransformGizmos();
+
 };
 
 #endif //  _GAME_WINDOW_H_
