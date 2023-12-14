@@ -76,7 +76,7 @@ Vec3 Ray::IntersectPlane(Vec3 p, Vec3 n) {
         t = (p.Dot(n) - o.Dot(n)) / d.Dot(n);
     }
 
-    Vec3 result = p + d * t; 
+    Vec3 result = o + d * t; 
 
     return result;
 }

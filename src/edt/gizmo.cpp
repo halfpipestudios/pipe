@@ -39,7 +39,7 @@ void GizmoManager::UpdateInput() {
     i32 w_h = tgui_window_height(window->window);
     TGuiWindow *w = tgui_window_get_from_handle(window->window);
         
-    if(!active && !tgui_rect_invalid(w->dim) && tgui_rect_point_overlaps(w->dim, input->state[0].mouseX, input->state[0].mouseY)) {
+    if(!active && w_w > 1 && w_h > 1 && tgui_rect_point_overlaps(w->dim, input->state[0].mouseX, input->state[0].mouseY)) {
 
         i32 mouseX = CLAMP(input->state[0].mouseX - w->dim.min_x, 0, w_w-1);
         i32 mouseY = CLAMP(input->state[0].mouseY - w->dim.min_y, 0, w_h-1);

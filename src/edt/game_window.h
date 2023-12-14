@@ -23,6 +23,10 @@ struct GameWindow : EditorWindow {
     Gizmo Y;
     Gizmo Z;
 
+    bool FirstClick;
+    Vec3 Offset;
+    Vec3 StartPos;
+
     Shader gizmoShader;
     FrameBuffer gameFrameBuffer;
 

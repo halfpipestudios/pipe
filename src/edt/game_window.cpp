@@ -37,6 +37,7 @@ void GameWindow::UpdateTransformGizmos() {
     } else if(X.IsHot() ) {
         if(input->MouseJustPress(MOUSE_BUTTON_L)) {
             X.SetActive(true);
+            FirstClick = true;
         }
     }
     if(Y.IsActive()) {
@@ -46,6 +47,7 @@ void GameWindow::UpdateTransformGizmos() {
     } else if(Y.IsHot() ) {
         if(input->MouseJustPress(MOUSE_BUTTON_L)) {
             Y.SetActive(true);
+            FirstClick = true;
         }
     }
     if(Z.IsActive()) {
@@ -55,6 +57,7 @@ void GameWindow::UpdateTransformGizmos() {
     } else if(Z.IsHot() ) {
         if(input->MouseJustPress(MOUSE_BUTTON_L)) {
             Z.SetActive(true);
+            FirstClick = true;
         }
     }
 }
@@ -75,23 +78,87 @@ void GameWindow::Update(Editor *editor, f32 dt) {
     if(X.IsActive()) {
         
         ASSERT(editor->selectedEntity);
-        
+
         TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
-        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0,0,1));
-        transform->pos.x = projTransform.x;
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.x = projTransform.x - Offset.x;
 
         PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
-            physicCmp->physics.pos.x = projTransform.x;
+            physicCmp->physics.pos = transform->pos;
         }
 
     }
+
     if(Y.IsActive()) {
-        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
+
+        ASSERT(editor->selectedEntity);
+
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.y = projTransform.y - Offset.y;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos = transform->pos;
+        }
+
     }
+    
     if(Z.IsActive()) {
-        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
+
+        ASSERT(editor->selectedEntity);
+
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(1, 0, 0));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.z = projTransform.z - Offset.z;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos = transform->pos;
+        }
     }
 
 }

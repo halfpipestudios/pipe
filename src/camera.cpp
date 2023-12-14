@@ -92,12 +92,12 @@ Ray Camera::GetMouseRay(f32 w, f32 h, f32 mouseX, f32 mouseY) {
     Mat4 invProj = Mat4::Inverse(GraphicsManager::Get()->cpuMatrices.proj);
 
     Vec4 rayClip;
-    rayClip.x = 2.0f * mouseX / w - 1.0f;
-    rayClip.y = 1.0f - (2.0f * mouseY) / h;
+    rayClip.x = 2.0f * (mouseX / (w - 1)) - 1.0f;
+    rayClip.y = 1.0f - 2.0f * (mouseY / (h - 1));
     rayClip.z = 1.0f;
     rayClip.w = 1.0f;
     Vec4 rayEye = invProj * rayClip;
-    rayEye.z =  1.0f;
+    rayEye.z = 1.2f;
     rayEye.w =  0.0f;
     Vec4 rayWorld = invView * rayEye;
     rayWorld.Normalize();
