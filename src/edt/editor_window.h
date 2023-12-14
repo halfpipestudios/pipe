@@ -14,6 +14,11 @@ struct EditorWindow {
     virtual void Update(Editor *editor, f32 dt) = 0;
     virtual void Render(Editor *editor) = 0;
 
+    i32 GetWidth();
+    i32 GetHeight();
+    i32 GetMouseX();
+    i32 GetMouseY();
+
     TGuiWindowHandle window; 
 };
 

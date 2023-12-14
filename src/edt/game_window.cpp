@@ -14,11 +14,11 @@ void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *oth
     EditorWindow::Initialize(name, flags, otherWindow, dir);
     gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1280, 720);
     gizmoShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
-                                                       "./data/shaders/gizmoFrag.hlsl");
+                                                             "./data/shaders/gizmoFrag.hlsl");
 
-    X.Initialize("transform.twm", Vec3(1, 0, 0));
-    Y.Initialize("transform.twm", Vec3(0, 1, 0));
-    Z.Initialize("transform.twm", Vec3(0, 0, 1));
+    X.Initialize("transform.twm", Vec3(0.8f, 0, 0));
+    Y.Initialize("transform.twm", Vec3(0, 0.8f, 0));
+    Z.Initialize("transform.twm", Vec3(0, 0, 0.8f));
 
 }
 
@@ -28,28 +28,137 @@ void GameWindow::Terminate() {
     GraphicsManager::Get()->DestroyFrameBuffer(gameFrameBuffer);
 }
 
+void GameWindow::UpdateTransformGizmos() {
+    Input *input = PlatformManager::Get()->GetInput();
+    if(X.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            X.SetActive(false);
+        }
+    } else if(X.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            X.SetActive(true);
+            FirstClick = true;
+        }
+    }
+    if(Y.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            Y.SetActive(false);
+        }
+    } else if(Y.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            Y.SetActive(true);
+            FirstClick = true;
+        }
+    }
+    if(Z.IsActive()) {
+        if(input->MouseJustUp(MOUSE_BUTTON_L)) {
+            Z.SetActive(false);
+        }
+    } else if(Z.IsHot() ) {
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            Z.SetActive(true);
+            FirstClick = true;
+        }
+    }
+}
+
 void GameWindow::Update(Editor *editor, f32 dt) {
+    
+    Camera *camera = &editor->game->level.camera;
+
     if(editor->paused) {
         _tgui_label(window, "game: paused", 0x00ff00, 4, 4, TGUI_ID);
     } else {
         _tgui_label(window, "game: playing", 0x00ff00, 4, 4, TGUI_ID);
     }
     tgui_texture(window, (void *)GraphicsManager::Get()->FrameBufferGetTexture(gameFrameBuffer));
+    
+    UpdateTransformGizmos();
 
-    X.Update();
-    Y.Update();
-    Z.Update();
+    if(X.IsActive()) {
+        
+        ASSERT(editor->selectedEntity);
 
-    if(X.IsPress()) {
-        printf("X gizmo is press\n");
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.x = projTransform.x - Offset.x;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos = transform->pos;
+        }
+
     }
 
-    if(Y.WasPress()) {
-        printf("Y gizmo was press\n");
-    }
+    if(Y.IsActive()) {
 
-    if(Z.WasRelease()) {
-        printf("Z gizmo was release\n");
+        ASSERT(editor->selectedEntity);
+
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.y = projTransform.y - Offset.y;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos = transform->pos;
+        }
+
+    }
+    
+    if(Z.IsActive()) {
+
+        ASSERT(editor->selectedEntity);
+
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        
+        i32 mouseX = GetMouseX();
+        i32 mouseY = GetMouseY();
+        i32 width  = GetWidth();
+        i32 height = GetHeight();
+
+        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(1, 0, 0));
+        
+        if(FirstClick) {
+            Offset = projTransform - transform->pos;
+            FirstClick = false;
+        }
+
+        transform->pos.z = projTransform.z - Offset.z;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos = transform->pos;
+        }
     }
 
 }
@@ -70,11 +179,28 @@ void GameWindow::Render(Editor *editor) {
     
     if(editor->selectedEntity) {
 
+        if(X.IsHot()) {
+            X.color = Vec3(1,0.2f,0.2f);
+        } else {
+            X.color = Vec3(0.8f,0.1f,0.1f);
+        } 
+        if(Y.IsHot()) {
+            Y.color = Vec3(0.2f,1,0.2f);
+        } else {
+            Y.color = Vec3(0.1f,0.8f,0.1f);
+        } 
+        if(Z.IsHot()) {
+            Z.color = Vec3(0.2f,0.2f,1);
+        } else {
+            Z.color = Vec3(0.1f,0.1f,0.8f);
+        } 
+
         GraphicsManager::Get()->SetDepthStencilState(false);
         
+        ASSERT(editor->selectedEntity);
         TransformCMP transform = *editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
         transform.rot   = Vec3(0, 0, 0);
-        transform.scale = Vec3(2, 2, 2);
+        transform.scale = Vec3(1.2f, 1.2f, 1.2f);
         
         X.SetTransform(transform);
         X.Render();

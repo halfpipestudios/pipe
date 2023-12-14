@@ -10,10 +10,13 @@
 
 struct Camera;
 struct GameWindow;
+struct TGuiWindow;
 
 struct GizmoManager {
     Shader shader;
-    u32 pressedId;
+    
+    u32 active;
+    u32 hot;
 
     u32 idFrameBufferW;
     u32 idFrameBufferH;
@@ -30,6 +33,7 @@ struct GizmoManager {
     
     inline static GizmoManager *Get() { return &gizmoManager; }
     static GizmoManager gizmoManager;
+
 };
 
 struct Gizmo {
@@ -45,19 +49,17 @@ struct Gizmo {
     
     void Initialize(char *modelName, Vec3 color);
     void Render();
-    void Update();
+    
+    bool IsHot();
+    bool IsActive();
 
-    bool IsPress();
-    bool WasPress();
-    bool WasRelease();
-
+    void SetHot(bool state);
+    void SetActive(bool state);
+     
     void SetTransform(TransformCMP transform);
     void RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader);
 
 private:
-    
-    bool press;
-    bool lastPress;
 
 };
 
