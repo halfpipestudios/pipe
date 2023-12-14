@@ -14,7 +14,7 @@ void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *oth
     EditorWindow::Initialize(name, flags, otherWindow, dir);
     gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1280, 720);
     gizmoShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
-                                                       "./data/shaders/gizmoFrag.hlsl");
+                                                             "./data/shaders/gizmoFrag.hlsl");
 
     X.Initialize("transform.twm", Vec3(0.8f, 0, 0));
     Y.Initialize("transform.twm", Vec3(0, 0.8f, 0));
@@ -61,6 +61,8 @@ void GameWindow::UpdateTransformGizmos() {
 
 void GameWindow::Update(Editor *editor, f32 dt) {
     
+    Camera *camera = &editor->game->level.camera;
+
     if(editor->paused) {
         _tgui_label(window, "game: paused", 0x00ff00, 4, 4, TGUI_ID);
     } else {
@@ -71,13 +73,25 @@ void GameWindow::Update(Editor *editor, f32 dt) {
     UpdateTransformGizmos();
 
     if(X.IsActive()) {
-        printf("X Gizmo Active!\n");
+        
+        ASSERT(editor->selectedEntity);
+        
+        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0,0,1));
+        transform->pos.x = projTransform.x;
+
+        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        if(physicCmp) {
+            physicCmp->physics.pos.x = projTransform.x;
+        }
+
     }
     if(Y.IsActive()) {
-        printf("Y Gizmo Active!\n");
+        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
     }
     if(Z.IsActive()) {
-        printf("Z Gizmo Active!\n");
+        Ray mouse = camera->GetMouseRay((f32)GetWidth(), (f32)GetHeight(), (f32)GetMouseX(), (f32)GetMouseY());
     }
 
 }
@@ -116,6 +130,7 @@ void GameWindow::Render(Editor *editor) {
 
         GraphicsManager::Get()->SetDepthStencilState(false);
         
+        ASSERT(editor->selectedEntity);
         TransformCMP transform = *editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
         transform.rot   = Vec3(0, 0, 0);
         transform.scale = Vec3(1.2f, 1.2f, 1.2f);

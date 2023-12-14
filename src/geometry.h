@@ -25,6 +25,8 @@ struct Segment {
 struct Ray {
     Vec3 o;
     Vec3 d;
+
+    Vec3 IntersectPlane(Vec3 p, Vec3 n);
 };
 
 #endif

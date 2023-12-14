@@ -68,3 +68,15 @@ bool Segment::HitCollider(CollisionCMP *collider, f32  *tOut) {
     *tOut = -1.0f;
     return false;
 }
+
+Vec3 Ray::IntersectPlane(Vec3 p, Vec3 n) {
+
+    f32 t = 0;
+    if(ABS(d.Dot(n)) > 0.01f)  {
+        t = (p.Dot(n) - o.Dot(n)) / d.Dot(n);
+    }
+
+    Vec3 result = p + d * t; 
+
+    return result;
+}
