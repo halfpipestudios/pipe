@@ -9,5 +9,5 @@ struct PS_Input {
 };
 
 float4 fs_main(PS_Input i) : SV_TARGET {
-    return float4(index, index, index, index);
+    return float4(index, index, index, 1);
 }

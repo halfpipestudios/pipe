@@ -39,6 +39,19 @@ void GameWindow::Update(Editor *editor, f32 dt) {
     X.Update();
     Y.Update();
     Z.Update();
+
+    if(X.IsPress()) {
+        printf("X gizmo is press\n");
+    }
+
+    if(Y.WasPress()) {
+        printf("Y gizmo was press\n");
+    }
+
+    if(Z.WasRelease()) {
+        printf("Z gizmo was release\n");
+    }
+
 }
 
 void GameWindow::Render(Editor *editor) {

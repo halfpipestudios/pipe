@@ -49,13 +49,10 @@ void GizmoManager::UpdateInput() {
         GraphicsManager::Get()->CopyFrameBuffer(idReadFrameBuffer, idWriteFrameBuffer);
 
         u32 w, h, sizeInBytes;
-        u8 *buffer = nullptr;
-        GraphicsManager::Get()->FrameBufferMap(idReadFrameBuffer, &w, &h, &sizeInBytes, &buffer);
-
-        Vec4 *floatBuffer = (Vec4 *)buffer;
-
-        Vec4 pressedId = floatBuffer[mouseX + mouseY*idFrameBufferW];
-        printf("x:%f, y:%f, z:%f, w:%f\n", pressedId.x, pressedId.y, pressedId.z, pressedId.w);
+        Vec4 *buffer = nullptr;
+        GraphicsManager::Get()->FrameBufferMap(idReadFrameBuffer, &w, &h, &sizeInBytes, &(u8 *)buffer);
+        Vec4 pressedIdVec = buffer[mouseX + mouseY*idFrameBufferW];
+        pressedId = (u32)pressedIdVec.x;
 
         GraphicsManager::Get()->FrameBufferUnmap(idReadFrameBuffer);
 
@@ -64,7 +61,8 @@ void GizmoManager::UpdateInput() {
         pressedId = 0;
     }
 
-    GraphicsManager::Get()->ClearColorBuffer(idWriteFrameBuffer, 0, 0, 0);
+    GraphicsManager::Get()->ClearColorBuffer(idWriteFrameBuffer, 5, 5, 5);
+    GraphicsManager::Get()->ClearDepthStencilBuffer(idWriteFrameBuffer);
 
 }
 
