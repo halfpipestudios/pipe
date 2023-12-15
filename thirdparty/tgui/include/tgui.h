@@ -117,6 +117,10 @@ int tgui_window_width(TGuiWindowHandle window);
 
 int tgui_window_height(TGuiWindowHandle window);
 
+tgui_b32 tgui_window_is_grabbing();
+
+tgui_b32 tgui_window_update_widget(TGuiWindow *window);
+
 typedef void (*TGuiWidgetInternalFunc) (struct TGuiWidget *widget, TGuiPainter *painter);
 
 typedef struct TGuiWidget {

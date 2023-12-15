@@ -42,6 +42,11 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
             window->resize = true;
 
         } break;
+        case WM_MOVE: {
+            Win32Window *window = (Win32Window *)platform->GetWindow();
+            window->x = (i32)LOWORD(lParam);
+            window->y = (i32)HIWORD(lParam);
+        } break;
 
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
@@ -88,6 +93,9 @@ static LRESULT CALLBACK WndProcA(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         case WM_CHAR: {
             input->state[0].text[0] = (char)wParam;
             input->state[0].textSize = 1;
+        } break;
+        case WM_MOUSEWHEEL: {
+            input->state[0].wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam) / 120;
         } break;
 
     }
@@ -164,6 +172,8 @@ void Win32Platform::PollEvents() {
     }
 
     input.state[1] = input.state[0];
+
+    input.state[0].wheelDelta = 0;
 
     input.state[0].text[0] = 0;
     input.state[0].textSize = 0;
@@ -325,6 +335,15 @@ File Win32Platform::ReadFileToTemporalMemory(char *filepath) {
     return Win32ReadFile(hFile, data, bytesToRead, filepath);  
 }
 
+void Win32Platform::SetMousePosition(i32 x, i32 y) {
+    SetCursorPos(x, y);
+}
+
+
+void Win32Platform::ShowMouse(bool value) {
+    ShowCursor(value);
+}
+
 
 /*----------------------------------------------*/
 /*              Win32 Window                    */
@@ -386,4 +405,12 @@ i32 Win32Window::GetWidth() {
 
 i32 Win32Window::GetHeight() {
     return height;
+}
+
+i32 Win32Window::GetPosX() {
+    return x;
+}
+
+i32 Win32Window::GetPosY() {
+    return y;
 }

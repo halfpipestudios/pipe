@@ -1878,6 +1878,11 @@ int tgui_window_height(TGuiWindowHandle handle) {
     return tgui_rect_height(window->dim);
 }
 
+
+tgui_b32 tgui_window_is_grabbing() {
+    return docker.grabbing_window; 
+}
+
 TGuiWindow *tgui_window_alloc(TGuiDockerNode *parent, char *name, TGuiWindowFlags flags, TGuiAllocatedWindow *list) {
 
     TGuiAllocatedWindow *allocated_window_node = tgui_allocated_window_node_alloc();
@@ -2331,4 +2336,5 @@ void tgui_draw_buffers(void) {
     tgui_render_state_clear_render_buffers(&state.render_state);
 
 }
+
 

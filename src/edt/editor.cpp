@@ -143,7 +143,7 @@ void Editor::Update(f32 dt) {
 
     tgui_end();
 
-    camera.ProcessMovement(&level->map, dt);
+    camera.ProcessMovement(&gameWindow, dt);
     camera.SetViewMatrix();
 }
 

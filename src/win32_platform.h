@@ -14,9 +14,13 @@ struct Win32Window : public Window {
     void *GetOsWindow() override;
     i32 GetWidth() override;
     i32 GetHeight() override;
+    i32 GetPosX() override;
+    i32 GetPosY() override;
+
     HWND hwnd;
     i32 width;
     i32 height;
+    i32 x, y;
     bool resize;
 };
 
@@ -42,6 +46,9 @@ struct Win32Platform : public Platform {
 
     File ReadFileToStaticMemory(char *filepath) override;
     File ReadFileToTemporalMemory(char *filepath) override;
+
+    void SetMousePosition(i32 x, i32 y) override;
+    void ShowMouse(bool value) override;
 
     bool IsRunning() override;
 

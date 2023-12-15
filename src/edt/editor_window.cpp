@@ -34,3 +34,35 @@ i32 EditorWindow::GetMouseY() {
     i32 mouseY = CLAMP(input->state[0].mouseY - w->dim.min_y, 0, tgui_rect_height(w->dim)-1);
     return mouseY;
 }
+
+i32 EditorWindow::GetPosX() {
+    TGuiWindow *w = tgui_window_get_from_handle(window);
+    return w->dim.min_x;
+}
+
+i32 EditorWindow::GetPosY() {
+    TGuiWindow *w = tgui_window_get_from_handle(window);
+    return w->dim.min_y;
+}
+
+bool EditorWindow::MouseIsHot() {
+    
+    Input *input = PlatformManager::Get()->GetInput();
+    TGuiWindow *w = tgui_window_get_from_handle(window);
+
+    if(!tgui_window_update_widget(w)) {
+        return false;
+    }
+
+    if(tgui_window_is_grabbing()) {
+        return false;
+    }
+
+    if(input->MouseX() >= w->dim.min_x &&
+       input->MouseX() <= w->dim.max_x &&  
+       input->MouseY() >= w->dim.min_y &&
+       input->MouseY() <= w->dim.max_y) {
+        return true;
+    }
+    return false;
+}

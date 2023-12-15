@@ -17,6 +17,9 @@ struct Window {
     virtual void *GetOsWindow() = 0;
     virtual i32 GetWidth() = 0;
     virtual i32 GetHeight() = 0;
+
+    virtual i32 GetPosX() = 0;
+    virtual i32 GetPosY() = 0;
 };
 
 struct Input;
@@ -44,6 +47,9 @@ struct Platform {
 
     virtual File ReadFileToStaticMemory(char *filepath) = 0;
     virtual File ReadFileToTemporalMemory(char *filepath) = 0;
+
+    virtual void SetMousePosition(i32 x, i32 y) = 0;
+    virtual void ShowMouse(bool value) = 0;
 
     virtual bool IsRunning() = 0;
 };

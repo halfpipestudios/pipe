@@ -220,7 +220,7 @@ static SlotmapKey CreateGem(EntityManager& em, SlotmapKey whoTriggerThis, Model&
     gemPtr->name = "gem";
     
     TransformCMP *transformCmp = em.AddComponent<TransformCMP>(gem);
-    transformCmp->Initialize(position, Vec3(), Vec3(0.4f, 0.4f, 0.4f));
+    transformCmp->Initialize(position, Vec3(), Vec3(0.2f, 0.2f, 0.2f));
 
     GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(gem);
     graphicsCmp->Initialize(model, shader);

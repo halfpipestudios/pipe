@@ -14,6 +14,10 @@ struct EditorWindow {
     virtual void Update(Editor *editor, f32 dt) = 0;
     virtual void Render(Editor *editor) = 0;
 
+    bool MouseIsHot();
+
+    i32 GetPosX();
+    i32 GetPosY();
     i32 GetWidth();
     i32 GetHeight();
     i32 GetMouseX();

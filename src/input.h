@@ -8,6 +8,7 @@ struct InputState {
     bool mouseButtons[3];
     i32 mouseX;
     i32 mouseY;
+    i32 wheelDelta;
     bool joyButtons[12];
     f32 leftStickX;
     f32 leftStickY;
@@ -29,6 +30,11 @@ struct Input {
     bool MouseIsPress(u32 button);
     bool MouseJustPress(u32 button);
     bool MouseJustUp(u32 button);
+
+    i32 MouseX();
+    i32 MouseY();
+    i32 MouseLastX();
+    i32 MouseLastY();
     
     bool KeyIsPress(u32 kcode);
     bool KeyJustPress(u32 kcode);

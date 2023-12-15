@@ -35,3 +35,19 @@ bool Input::JoystickJustPress(u32 button) {
 bool Input::JoystickJustUp(u32 button) {
     return !state[0].joyButtons[button] && state[1].joyButtons[button];
 }
+
+i32 Input::MouseX() {
+    return state[0].mouseX;
+}
+
+i32 Input::MouseY() {
+    return state[0].mouseY;
+}
+
+i32 Input::MouseLastX() {
+    return state[1].mouseX;
+}
+
+i32 Input::MouseLastY() {
+    return state[1].mouseY;
+}
