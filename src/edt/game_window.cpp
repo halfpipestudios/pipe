@@ -92,7 +92,17 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
         
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        Vec3 normal = {};
+        Vec3 n0 = Vec3(0, 0, 1);
+        Vec3 n1 = Vec3(0, 1, 0);
+
+        if(ABS(mouse.d.Dot(n0)) > ABS(mouse.d.Dot(n1))) {
+            normal = n0;
+        } else {
+            normal = n1;
+        }
+
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, normal);
         
         if(FirstClick) {
             Offset = projTransform - transform->pos;
@@ -150,8 +160,18 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         i32 height = GetHeight();
 
         Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+
+        Vec3 normal = {};
+        Vec3 n0 = Vec3(1, 0, 0);
+        Vec3 n1 = Vec3(0, 1, 0);
+
+        if(ABS(mouse.d.Dot(n0)) > ABS(mouse.d.Dot(n1))) {
+            normal = n0;
+        } else {
+            normal = n1;
+        }
         
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(1, 0, 0));
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, normal);
         
         if(FirstClick) {
             Offset = projTransform - transform->pos;
