@@ -86,10 +86,10 @@ Vec3 Camera::GetWorldFront() {
     return right.Cross(Vec3(0, 1, 0)).Normalized();
 }
 
-Ray Camera::GetMouseRay(f32 w, f32 h, f32 mouseX, f32 mouseY) {
+Ray Camera::GetMouseRay(Mat4 proj, f32 w, f32 h, f32 mouseX, f32 mouseY) {
     
     Mat4 invView = Mat4::Inverse(GraphicsManager::Get()->cpuMatrices.view);
-    Mat4 invProj = Mat4::Inverse(GraphicsManager::Get()->cpuMatrices.proj);
+    Mat4 invProj = Mat4::Inverse(proj);
 
     Vec4 rayClip;
     rayClip.x = 2.0f * (mouseX / (w - 1)) - 1.0f;
@@ -97,7 +97,7 @@ Ray Camera::GetMouseRay(f32 w, f32 h, f32 mouseX, f32 mouseY) {
     rayClip.z = 1.0f;
     rayClip.w = 1.0f;
     Vec4 rayEye = invProj * rayClip;
-    rayEye.z = 1.2f;
+    rayEye.z = 1.0f;
     rayEye.w =  0.0f;
     Vec4 rayWorld = invView * rayEye;
     rayWorld.Normalize();

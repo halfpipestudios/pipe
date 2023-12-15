@@ -75,6 +75,8 @@ void GameWindow::Update(Editor *editor, f32 dt) {
     
     UpdateTransformGizmos();
 
+    Mat4 proj = Mat4::Perspective(60, (f32)GetWidth()/(f32)GetHeight(), 0.01f, 1000.0f);
+
     if(X.IsActive()) {
         
         ASSERT(editor->selectedEntity);
@@ -86,7 +88,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         i32 width  = GetWidth();
         i32 height = GetHeight();
 
-        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
         
         Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
         
@@ -115,9 +117,10 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         i32 width  = GetWidth();
         i32 height = GetHeight();
 
-        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
         
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(0, 0, 1));
+        Vec3 n = (transform->pos - camera->pos);
+        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(n.x, 0, n.z).Normalized());
         
         if(FirstClick) {
             Offset = projTransform - transform->pos;
@@ -144,7 +147,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         i32 width  = GetWidth();
         i32 height = GetHeight();
 
-        Ray mouse = camera->GetMouseRay((f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
         
         Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(1, 0, 0));
         
@@ -167,7 +170,7 @@ void GameWindow::Render(Editor *editor) {
     
     i32 tguiWindowW = tgui_window_width(window); 
     i32 tguiWindowH = tgui_window_height(window); 
-    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)tguiWindowW/(f32)tguiWindowH, 0.01f, 1000.0f));
+    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)GetWidth()/(f32)GetHeight(), 0.01f, 1000.0f));
 
     GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
     GraphicsManager::Get()->SetViewport(0, 0, 1280, 720);

@@ -26,7 +26,7 @@ struct Camera {
     void SetViewMatrix();
     Vec3 GetWorldFront();
 
-    Ray GetMouseRay(f32 w, f32 h, f32 mouseX, f32 mouseY);
+    Ray GetMouseRay(Mat4 proj, f32 w, f32 h, f32 mouseX, f32 mouseY);
 
 };
 

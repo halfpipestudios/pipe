@@ -125,7 +125,10 @@ void Editor::Terminate() {
 void Editor::Update(f32 dt) {
     
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
-    GizmoManager::Get()->UpdateInput();
+    
+    if(selectedEntity) {
+        GizmoManager::Get()->UpdateInput();
+    }
     
     tgui_begin(dt);
 
