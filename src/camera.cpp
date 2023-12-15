@@ -95,12 +95,12 @@ void Camera::ProcessFreeCamera(EditorWindow *window, f32 deltaTime) {
     }
 
     if((input->MouseJustUp(MOUSE_BUTTON_L) && rotActive)) { 
-        RestoreMouseToLastClick(input);
+        if(!panActive) RestoreMouseToLastClick(input);
         PlatformManager::Get()->ShowMouse(true);
         rotActive = false;
     }
     if((input->MouseJustUp(MOUSE_BUTTON_R) && panActive)) {
-        RestoreMouseToLastClick(input);
+        if(!rotActive) RestoreMouseToLastClick(input);
         PlatformManager::Get()->ShowMouse(true);
         panActive = false;
     }
