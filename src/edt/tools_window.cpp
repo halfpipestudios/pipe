@@ -17,7 +17,7 @@ void ToolsWindow::Update(Editor *editor, f32 dt) {
     if(tgui_button(window, "Remove Entity", x, y +  90 + 30)) {
         
         if(editor->selectedEntity) {
-            if(editor->game->level.DeleteEntity(*editor->selectedEntity)) {
+            if(editor->level->DeleteEntity(*editor->selectedEntity)) {
                 editor->selectedEntity = nullptr;
                 _tgui_tree_view_deselect(EntityWindow::GetTreeviewId());
             }

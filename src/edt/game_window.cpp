@@ -64,7 +64,9 @@ void GameWindow::UpdateTransformGizmos() {
 
 void GameWindow::Update(Editor *editor, f32 dt) {
     
-    Camera *camera = &editor->game->level.camera;
+    if(editor->paused) dt = 0;
+
+    Camera *camera = &editor->camera;
 
     if(editor->paused) {
         _tgui_label(window, "game: paused", 0x00ff00, 4, 4, TGUI_ID);
@@ -81,7 +83,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
         
         i32 mouseX = GetMouseX();
         i32 mouseY = GetMouseY();
@@ -99,7 +101,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         transform->pos.x = projTransform.x - Offset.x;
 
-        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
@@ -110,7 +112,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
         
         i32 mouseX = GetMouseX();
         i32 mouseY = GetMouseY();
@@ -129,7 +131,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         transform->pos.y = projTransform.y - Offset.y;
 
-        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
@@ -140,7 +142,7 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
         
         i32 mouseX = GetMouseX();
         i32 mouseY = GetMouseY();
@@ -158,12 +160,13 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         transform->pos.z = projTransform.z - Offset.z;
 
-        PhysicsCMP *physicCmp = editor->game->level.em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
     }
 
+    editor->level->Update(dt);
 }
 
 void GameWindow::Render(Editor *editor) {
@@ -178,7 +181,7 @@ void GameWindow::Render(Editor *editor) {
     GraphicsManager::Get()->ClearColorBuffer(gameFrameBuffer, 0.1f, 0.05f, 0.4f);
     GraphicsManager::Get()->ClearDepthStencilBuffer(gameFrameBuffer);
 
-    editor->game->Render();
+    editor->level->Render();
     
     if(editor->selectedEntity) {
 
@@ -201,21 +204,21 @@ void GameWindow::Render(Editor *editor) {
         GraphicsManager::Get()->SetDepthStencilState(false);
         
         ASSERT(editor->selectedEntity);
-        TransformCMP transform = *editor->game->level.em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP transform = *editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
         transform.rot   = Vec3(0, 0, 0);
         transform.scale = Vec3(1.2f, 1.2f, 1.2f);
         
-        X.SetTransform(transform);
+        X.SetTransform(&editor->camera, transform);
         X.Render();
         
         TransformCMP transform1 = transform;
         transform1.rot.z += (f32)TO_RAD(90);
-        Y.SetTransform(transform1);
+        Y.SetTransform(&editor->camera, transform1);
         Y.Render();
         
         TransformCMP transform2 = transform;
         transform2.rot.y += (f32)TO_RAD(90);
-        Z.SetTransform(transform2);
+        Z.SetTransform(&editor->camera, transform2);
         Z.Render();
 
         GraphicsManager::Get()->SetDepthStencilState(true);

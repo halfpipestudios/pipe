@@ -7,16 +7,29 @@
 #include <float.h>
 #include <stdio.h>
 
-void Camera::Initialize() {
+void Camera::Initialize(CameraType type) {
     maxDist = 5;
-    dist = 5; 
+    dist = 5;
+    this->type = type;
 }
 
 void Camera::SetViewMatrix() {
-    GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, target, Vec3(0, 1, 0)));
+    switch(type) {
+        case THIRD_PERSON_CAMERA: { GraphicsManager::Get()->SetViewMatrix(Mat4::LookAt(pos, target, Vec3(0, 1, 0))); } break;
+        case FREE_CAMERA        : { GraphicsManager::Get()->SetViewMatrix(Mat4()); } break;
+    }
+
 }
 
-void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
+void Camera::ProcessFreeCamera(Map *map, f32 deltaTime) {
+
+
+}
+
+void Camera::ProcessThirdPersonCamera(Map *map, f32 deltaTime) {
+    
+    Input *input = PlatformManager::Get()->GetInput();
+
     // TODO: mouse
     if(input->KeyIsPress(KEY_LEFT)) {
         rot.y += 2.5f * deltaTime;
@@ -30,7 +43,6 @@ void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
     if(input->KeyIsPress(KEY_DOWN)) {
         rot.x -= 2.5f * deltaTime;
     }
-
 
     rot.y -= input->state[0].rightStickX * 2.5f * deltaTime;
     rot.x += input->state[0].rightStickY * 2.5f * deltaTime;
@@ -79,6 +91,16 @@ void Camera::ProcessMovement(Input *input, Map *map, f32 deltaTime) {
     }
 
     pos = target - (front * dist);
+}
+
+
+void Camera::ProcessMovement(Map *map, f32 deltaTime) {
+
+    switch(type) {
+        case THIRD_PERSON_CAMERA: { ProcessThirdPersonCamera(map, deltaTime); } break;
+        case FREE_CAMERA        : { ProcessFreeCamera(map, deltaTime); } break;
+    }
+
 }
 
 

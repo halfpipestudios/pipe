@@ -4,24 +4,22 @@
 #include <tgui.h>
 
 #include "components_window.h"
+#include "data_structures.h"
 #include "entity_window.h"
 #include "tools_window.h"
 #include "game_window.h"
+#include "camera.h"
 
-#include "data_structures.h"
-
-struct Game;
 struct Level;
 
 struct Editor {
     
-    void Initialize(Game *game);
+    void Initialize(Level *level);
     void Terminate();
     
     void Update(f32 dt);
     void Render();
     
-    Game *game;
     SlotmapKey *selectedEntity;
     bool paused;
 
@@ -31,6 +29,10 @@ struct Editor {
     ComponentsWindow compWindow;
     EntityWindow     entiWindow;
     ToolsWindow      toolWindow;
+
+    Level *level;
+    Camera camera;
+
 };
 
 #endif // _EDITOR_H_

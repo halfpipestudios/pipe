@@ -25,6 +25,7 @@ struct Game {
     Shader statShader;
 
     Level level;
+    Camera camera;
 };
 
 #endif // _GAME_H_

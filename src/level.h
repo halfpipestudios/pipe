@@ -26,29 +26,32 @@ struct Map {
     MapImporter::ConvexHullArray covexHulls;
     MapImporter::EntityArray entities;
     VertexBuffer vertexBuffer;
+    Shader shader;
 
     TextureBuffer texture;
     
     f32 scale;
 
-    void Initialize(char *filename);
+    void Initialize(char *filename, Shader mapShader);
     void Terminate();
-    void Render(Shader shader);
+    void Render();
 };
 
 struct Level {
 
-    void Initialize(char *mapFilePath, Shader mapShader, Shader animShader);
+    void Initialize(char *mapFilePath, Camera *camera, Shader mapShader, Shader statShader, Shader animShader);
     void Terminate();
 
     void BeginFrame(f32 dt);
     void EndFrame(f32 dt);
 
     void Update(f32 dt);
-    void Render(Shader mapShader);
+    void Render();
 
     bool DeleteEntity(SlotmapKey entityKey);
     void DeleteEntitiesToRemove();
+
+    void SetCamera(Camera *camera) { this->camera = camera; }
 
     MemoryFrame memory; 
     EntityManager em;
@@ -64,8 +67,7 @@ struct Level {
     TriggerSys<EntityManager> triggerSys;
     GemSys<EntityManager> gemSys;
 
-    Camera camera;
-    
+    Camera *camera;
     Map map;
 
     SlotmapKey heroKey;

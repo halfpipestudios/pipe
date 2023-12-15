@@ -25,7 +25,6 @@ struct GizmoManager {
     FrameBuffer idReadFrameBuffer;
 
     GameWindow *window;
-    Camera *camera;
 
     void Initialize(GameWindow *window, Camera *camera);
     void Terminate();
@@ -56,7 +55,7 @@ struct Gizmo {
     void SetHot(bool state);
     void SetActive(bool state);
      
-    void SetTransform(TransformCMP transform);
+    void SetTransform(Camera *camera, TransformCMP transform);
     void RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader);
 
 private:

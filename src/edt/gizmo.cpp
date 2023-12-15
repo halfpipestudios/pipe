@@ -18,7 +18,6 @@ void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
     idWriteFrameBuffer = GraphicsManager::Get()->CreateWriteFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
     idReadFrameBuffer  = GraphicsManager::Get()->CreateReadFrameBuffer(0, 0, idFrameBufferW, idFrameBufferH);
 
-    this->camera = camera;
     this->window = window;
 
     active = 0;
@@ -126,10 +125,8 @@ void Gizmo::SetActive(bool state) {
     }
 }
 
-void Gizmo::SetTransform(TransformCMP transform) {
+void Gizmo::SetTransform(Camera *camera, TransformCMP transform) {
     
-    Camera *camera = GizmoManager::Get()->camera;
-
     Vec3 p = transform.pos;
     Vec3 n = camera->front.Normalized();
     Vec3 o = camera->pos + n * 6;

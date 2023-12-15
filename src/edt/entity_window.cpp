@@ -4,7 +4,7 @@
 
 void EntityWindow::Update(Editor *editor, f32 dt) {
 
-    Level *level = &editor->game->level;
+    Level *level = editor->level;
     auto& entities = level->entities;
 
     _tgui_tree_view_begin(window, GetTreeviewId());

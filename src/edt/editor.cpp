@@ -1,6 +1,6 @@
 #include "editor.h"
 
-#include "game.h"
+#include "level.h"
 #include "graphics_manager.h"
 #include "platform_manager.h"
 #include "gizmo.h"
@@ -82,10 +82,12 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 }
 
 
-void Editor::Initialize(Game *game) {
-    this->game = game;
+void Editor::Initialize(Level *level) {
+    this->level = level;
     this->selectedEntity = {};
     this->paused = false;
+
+    camera.Initialize(FREE_CAMERA);
 
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
@@ -100,7 +102,7 @@ void Editor::Initialize(Game *game) {
     
     tgui_texture_atlas_generate_atlas();
     
-    GizmoManager::Get()->Initialize(&gameWindow, &game->level.camera);
+    GizmoManager::Get()->Initialize(&gameWindow, &camera);
 
     gameWindow.Initialize("Game", TGUI_WINDOW_TRANSPARENT, nullptr, (TGuiSplitDirection)0);
     toolWindow.Initialize("Tools", TGUI_WINDOW_SCROLLING, &gameWindow, TGUI_SPLIT_DIR_VERTICAL);
@@ -123,6 +125,8 @@ void Editor::Terminate() {
 }
 
 void Editor::Update(f32 dt) {
+
+    level->SetCamera(&camera);
     
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
@@ -139,9 +143,8 @@ void Editor::Update(f32 dt) {
 
     tgui_end();
 
-    if(paused) dt = 0; 
-
-    game->Update(dt);
+    camera.ProcessMovement(&level->map, dt);
+    camera.SetViewMatrix();
 }
 
 void Editor::Render() {

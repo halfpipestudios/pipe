@@ -2,6 +2,8 @@
 #include "platform_manager.h" 
 
 void Game::Initialize() {
+
+    camera.Initialize(THIRD_PERSON_CAMERA);
     
     GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(
                 60, 
@@ -17,8 +19,7 @@ void Game::Initialize() {
     statShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/staticVert.hlsl",
                                                             "./data/shaders/staticFrag.hlsl");
 
-    level.Initialize("./data/maps/levelOP.map", statShader, animShader);
-
+    level.Initialize("./data/maps/levelOP.map", &camera, mapShader, statShader, animShader);
 }
 
 void Game::Terminate() {
@@ -37,12 +38,15 @@ void Game::EndFrame(f32 dt) {
 }
 
 void Game::Update(f32 dt) {
+    level.SetCamera(&camera);
     level.Update(dt);
+    camera.ProcessMovement(&level.map, dt);
+    camera.SetViewMatrix();
 }
 
 
 void Game::Render() { 
-    level.Render(mapShader);
+    level.Render();
 }
 
 

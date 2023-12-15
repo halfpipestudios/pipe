@@ -78,7 +78,7 @@ Vec3 *CreateCube() {
     return cube;
 }
 
-void Map::Initialize(char *filename) {
+void Map::Initialize(char *filename, Shader mapShader) {
 
     MapImporter mapImporter;
     mapImporter.LoadMapFromFile(filename);
@@ -90,6 +90,7 @@ void Map::Initialize(char *filename) {
     vertexBuffer = GraphicsManager::Get()->CreateVertexBuffer(mapVertices.data, mapVertices.count, sizeof(VertexMap));
     texture = GraphicsManager::Get()->CreateTextureBuffer(mapTextures.data, mapTextures.count);
     scale = 1.0f/32.0f;
+    shader = mapShader;
 }
 
 void Map::Terminate() {
@@ -98,12 +99,10 @@ void Map::Terminate() {
 }
 
 
-void Map::Render(Shader shader) {
-
+void Map::Render() {
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
     GraphicsManager::Get()->BindTextureBuffer(texture);
     GraphicsManager::Get()->DrawVertexBuffer(vertexBuffer, shader);
-
 }
 
 
@@ -276,10 +275,12 @@ void Level::DeleteEntitiesToRemove() {
     }
 }
 
-void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) {
+void Level::Initialize(char *mapFilePath, Camera *camera, Shader mapShader, Shader statShader, Shader animShader) {
     srand(time(NULL));
     
     memory.BeginFrame();
+    
+    this->camera = camera;
 
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     
@@ -296,7 +297,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     em.AddComponentType<GemCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
-    map.Initialize(mapFilePath);
+    map.Initialize(mapFilePath, mapShader);
 
     // Load the BehaviorTree
     bhTree.Initialize();
@@ -315,9 +316,7 @@ void Level::Initialize(char *mapFilePath, Shader statShader, Shader animShader) 
     Model *orcModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("orc.twm"));
     Model *gemModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("gem.twm"));
 
-    camera.Initialize();
-
-    entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, &camera));
+    entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, camera));
     entities.Push(CreateOrc(em, "orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim));
     entities.Push(CreateOrc(em, "orc_2",  Vec3(0, 4, 15), *orcModel, animShader, heroAnim));
     entities.Push(CreateOrc(em, "orc_3", Vec3(0, 4, 8),  *orcModel, animShader, heroAnim, &bhTree));
@@ -379,13 +378,11 @@ void Level::Update(f32 dt) {
     transformSys.Update(em);
 
     TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
-    camera.target = heroTransform->pos;
-    camera.ProcessMovement(input, &map, dt);
-    camera.SetViewMatrix(); 
+    camera->SetTarget(heroTransform->pos);
 }
 
-void Level::Render(Shader mapShader) {
-    map.Render(mapShader);
+void Level::Render() {
+    map.Render();
     graphicsSys.Update(em);
 }
 
