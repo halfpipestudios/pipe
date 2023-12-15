@@ -31,7 +31,10 @@ struct Camera {
     Vec3 right;
     Vec3 up;
 
-    bool active { false };
+    bool rotActive { false };
+    bool panActive { false };
+    i32 mouseClickX { 0 };
+    i32 mouseClickY { 0 };
 
     void Initialize(CameraType type);
     void ProcessMovement(void *data, f32 deltaTime);
@@ -44,6 +47,12 @@ struct Camera {
 private:
     void ProcessThirdPersonCamera(Map *map, f32 deltaTime);
     void ProcessFreeCamera(EditorWindow *window, f32 deltaTime);
+
+    void ProcessPan(Input *input);
+    void ProcessRot(Input *input);
+    void ProcessCommon(EditorWindow *window, Input *input);
+    void UpdateCameraVectors();
+    void RestoreMouseToLastClick(Input *input);
 
 };
 

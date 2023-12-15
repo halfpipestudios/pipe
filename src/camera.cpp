@@ -23,78 +23,108 @@ void Camera::SetViewMatrix() {
 
 }
 
+void Camera::ProcessPan(Input *input) {
+    f32 deltaX = ((f32)input->MouseX() - (f32)input->MouseLastX()) * 0.015f;
+    f32 deltaY = ((f32)input->MouseY() - (f32)input->MouseLastY()) * 0.015f;
+    pos = pos + right *  deltaX;
+    pos = pos + up    * -deltaY;
+}
+
+void Camera::ProcessRot(Input *input) {
+    f32 deltaX = ((f32)input->MouseX() - (f32)input->MouseLastX()) * 0.0015f;
+    f32 deltaY = ((f32)input->MouseY() - (f32)input->MouseLastY()) * 0.0015f;
+    rot.y -= deltaX;
+    rot.x -= deltaY;
+    if (rot.x >  (89.0f/180.0f) * (f32)PI)
+        rot.x =  (89.0f/180.0f) * (f32)PI;
+    if (rot.x < -(89.0f/180.0f) * (f32)PI)
+        rot.x = -(89.0f/180.0f) * (f32)PI;
+}
+
+
+void Camera::ProcessCommon(EditorWindow *window, Input *input) {
+    Window *osWindow = PlatformManager::Get()->GetWindow();
+    i32 mouseSetPositionX = osWindow->GetPosX() + window->GetPosX() + (window->GetWidth()/2);     
+    i32 mouseSetPositionY = osWindow->GetPosY() + window->GetPosY() + (window->GetHeight()/2);     
+    PlatformManager::Get()->SetMousePosition(mouseSetPositionX, mouseSetPositionY);
+    input->state[0].mouseX = window->GetPosX() + (window->GetWidth()/2);
+    input->state[0].mouseY = window->GetPosY() + (window->GetHeight()/2);
+    input->state[1].mouseX = window->GetPosX() + (window->GetWidth()/2);
+    input->state[1].mouseY = window->GetPosY() + (window->GetHeight()/2);  
+}
+
+
+void Camera::UpdateCameraVectors() {
+    front = {0, 0, 1};
+    front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
+    front = Mat4::TransformVector(Mat4::RotateY(rot.y), front);
+    front.Normalize();
+    right = Vec3(0, 1, 0).Cross(front).Normalized();
+    up = front.Cross(right).Normalized();
+}
+
+
+void Camera::RestoreMouseToLastClick(Input *input) {
+    Window *osWindow = PlatformManager::Get()->GetWindow();
+    i32 mouseSetPositionX = osWindow->GetPosX() + mouseClickX; 
+    i32 mouseSetPositionY = osWindow->GetPosY() + mouseClickY;  
+    PlatformManager::Get()->SetMousePosition(mouseSetPositionX, mouseSetPositionY);
+    input->state[0].mouseX = mouseClickX;
+    input->state[0].mouseY = mouseClickX;
+    input->state[1].mouseX = mouseClickY;
+    input->state[1].mouseY = mouseClickY;  
+}
+
 void Camera::ProcessFreeCamera(EditorWindow *window, f32 deltaTime) {
 
     Input *input = PlatformManager::Get()->GetInput();
-
-    i32 mouseWheelDelta = input->state[0].wheelDelta;
     
-
     if(window->MouseIsHot() && (GizmoManager::Get()->hot == 0)) {
-        if(input->MouseJustPress(MOUSE_BUTTON_L) || input->MouseJustPress(MOUSE_BUTTON_R) || mouseWheelDelta != 0) {
-            active = true;
+        if(input->MouseJustPress(MOUSE_BUTTON_L)) {
+            mouseClickX = input->MouseX();
+            mouseClickY = input->MouseY();
+            PlatformManager::Get()->ShowMouse(false);
+            rotActive = true;
+        }
+        if(input->MouseJustPress(MOUSE_BUTTON_R)) {
+            mouseClickX = input->MouseX();
+            mouseClickY = input->MouseY();
+            PlatformManager::Get()->ShowMouse(false);
+            panActive = true;
         }
     }
 
-    if((input->MouseJustUp(MOUSE_BUTTON_L) || input->MouseJustUp(MOUSE_BUTTON_R)) && active) {
-        active = false;
+    if((input->MouseJustUp(MOUSE_BUTTON_L) && rotActive)) { 
+        RestoreMouseToLastClick(input);
+        PlatformManager::Get()->ShowMouse(true);
+        rotActive = false;
     }
-
+    if((input->MouseJustUp(MOUSE_BUTTON_R) && panActive)) {
+        RestoreMouseToLastClick(input);
+        PlatformManager::Get()->ShowMouse(true);
+        panActive = false;
+    }
 
     if(GizmoManager::Get()->active != 0) {
-        active = false;
+        panActive = false;
+        rotActive = false;
     }
 
-    if(active) {
-        Window *osWindow = PlatformManager::Get()->GetWindow();
-            
-        if(input->MouseIsPress(MOUSE_BUTTON_L)) {
-            f32 deltaX = ((f32)input->MouseX() - (f32)input->MouseLastX()) * 0.0015f;
-            f32 deltaY = ((f32)input->MouseY() - (f32)input->MouseLastY()) * 0.0015f;
-
-            rot.y -= deltaX;
-            rot.x -= deltaY;
-
-            if (rot.x >  (89.0f/180.0f) * (f32)PI)
-                rot.x =  (89.0f/180.0f) * (f32)PI;
-            if (rot.x < -(89.0f/180.0f) * (f32)PI)
-                rot.x = -(89.0f/180.0f) * (f32)PI;
-        }
-
-        if(input->MouseIsPress(MOUSE_BUTTON_R)) {
-            f32 deltaX = ((f32)input->MouseX() - (f32)input->MouseLastX()) * 0.015f;
-            f32 deltaY = ((f32)input->MouseY() - (f32)input->MouseLastY()) * 0.015f;
-            pos = pos + right *  deltaX;
-            pos = pos + up    * -deltaY;
-        }
-
-        if(mouseWheelDelta != 0) {
-            pos = pos + front * ((f32)mouseWheelDelta);
-        }
-
-        if(input->MouseIsPress(MOUSE_BUTTON_L) || input->MouseIsPress(MOUSE_BUTTON_R)) {
-            i32 mouseSetPositionX = osWindow->GetPosX() + window->GetPosX() + (window->GetWidth()/2);     
-            i32 mouseSetPositionY = osWindow->GetPosY() + window->GetPosY() + (window->GetHeight()/2);     
-
-            PlatformManager::Get()->SetMousePosition(mouseSetPositionX, mouseSetPositionY);
-
-            input->state[0].mouseX = window->GetPosX() + (window->GetWidth()/2);
-            input->state[0].mouseY = window->GetPosY() + (window->GetHeight()/2);
-            input->state[1].mouseX = window->GetPosX() + (window->GetWidth()/2);
-            input->state[1].mouseY = window->GetPosY() + (window->GetHeight()/2);
-            
-            
-        }
-
-        front = {0, 0, 1};
-        front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
-        front = Mat4::TransformVector(Mat4::RotateY(rot.y), front);
-        front.Normalize();
-
-        right = Vec3(0, 1, 0).Cross(front).Normalized();
-        up = front.Cross(right).Normalized();
+    if(panActive) {
+        ProcessPan(input);
+    }
+    if(rotActive) {
+        ProcessRot(input);
+    }
+    if(rotActive || panActive) {
+        ProcessCommon(window, input); 
     }
 
+    i32 mouseWheelDelta = input->state[0].wheelDelta;
+    if(mouseWheelDelta != 0 && window->MouseIsHot()) {
+        pos = pos + front * ((f32)mouseWheelDelta);
+    }
+    UpdateCameraVectors();
 }
 
 void Camera::ProcessThirdPersonCamera(Map *map, f32 deltaTime) {
@@ -141,14 +171,7 @@ void Camera::ProcessThirdPersonCamera(Map *map, f32 deltaTime) {
     if (rot.x < -(89.0f/180.0f) * (f32)PI)
         rot.x = -(89.0f/180.0f) * (f32)PI;
 
-    front = {0, 0, 1};
-    front = Mat4::TransformVector(Mat4::RotateX(rot.x), front);
-    front = Mat4::TransformVector(Mat4::RotateY(rot.y), front);
-    front.Normalize();
-
-    right = Vec3(0, 1, 0).Cross(front).Normalized();
-    up = front.Cross(right).Normalized();
-
+    UpdateCameraVectors();
 
     Segment cameraSegment;
     cameraSegment.a = target;
