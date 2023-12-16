@@ -81,14 +81,18 @@ void Camera::ProcessFreeCamera(EditorWindow *window, f32 deltaTime) {
     
     if(window->MouseIsHot() && (GizmoManager::Get()->hot == 0)) {
         if(input->MouseJustPress(MOUSE_BUTTON_L)) {
-            mouseClickX = input->MouseX();
-            mouseClickY = input->MouseY();
+            if(!panActive) {
+                mouseClickX = input->MouseX();
+                mouseClickY = input->MouseY();
+            }
             PlatformManager::Get()->ShowMouse(false);
             rotActive = true;
         }
         if(input->MouseJustPress(MOUSE_BUTTON_R)) {
-            mouseClickX = input->MouseX();
-            mouseClickY = input->MouseY();
+            if(!rotActive) {
+                mouseClickX = input->MouseX();
+                mouseClickY = input->MouseY();
+            }
             PlatformManager::Get()->ShowMouse(false);
             panActive = true;
         }
@@ -131,13 +135,30 @@ void Camera::ProcessThirdPersonCamera(Map *map, f32 deltaTime) {
     
     Input *input = PlatformManager::Get()->GetInput();
 
+    if(input->MouseJustPress(MOUSE_BUTTON_R)) {
+        PlatformManager::Get()->ShowMouse(false);
 
-    if(input->MouseIsPress(MOUSE_BUTTON_L)) {
+    }
+    if(input->MouseJustUp(MOUSE_BUTTON_R)) {
+        PlatformManager::Get()->ShowMouse(true);
+    }
+
+    if(input->MouseIsPress(MOUSE_BUTTON_R)) {
         f32 deltaX = ((f32)input->MouseX() - (f32)input->MouseLastX()) * 0.0015f;
         f32 deltaY = ((f32)input->MouseY() - (f32)input->MouseLastY()) * 0.0015f;
         rot.y -= deltaX;
         rot.x -= deltaY;
         // TODO: set mouse position
+
+        Window *osWindow = PlatformManager::Get()->GetWindow();
+        i32 mouseSetPositionX = osWindow->GetPosX() + (osWindow->GetWidth()/2);     
+        i32 mouseSetPositionY = osWindow->GetPosY() + (osWindow->GetHeight()/2);     
+        PlatformManager::Get()->SetMousePosition(mouseSetPositionX, mouseSetPositionY);
+        input->state[0].mouseX = (osWindow->GetWidth()/2);  
+        input->state[0].mouseY = (osWindow->GetHeight()/2); 
+        input->state[1].mouseX = (osWindow->GetWidth()/2);  
+        input->state[1].mouseY = (osWindow->GetHeight()/2);  
+
     } else {
 
         if(input->KeyIsPress(KEY_LEFT)) {
@@ -165,6 +186,10 @@ void Camera::ProcessThirdPersonCamera(Map *map, f32 deltaTime) {
     if(input->KeyIsPress(KEY_R) || input->JoystickIsPress(JOYSTICK_BUTTON_UP)) {
         maxDist = MAX(maxDist - zoomSpeed, 1.0f);
     }
+
+    i32 mouseWheelDelta = input->state[0].wheelDelta;
+    maxDist = MAX(MIN(maxDist - (zoomSpeed * (f32)mouseWheelDelta), 15.0f), 1.0f);
+
 
     if (rot.x >  (89.0f/180.0f) * (f32)PI)
         rot.x =  (89.0f/180.0f) * (f32)PI;
