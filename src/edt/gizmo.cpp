@@ -79,7 +79,7 @@ void Gizmo::Render() {
     if(visible) {
         GameWindow *window = GizmoManager::Get()->window;
 
-        GraphicsManager::Get()->SetWorldMatrix(transform.GetWorldMatrix());
+        GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
          
         {
             CBGizmo *buffer = &GraphicsManager::Get()->cpuGizmoBuffer;
@@ -127,6 +127,8 @@ void Gizmo::SetActive(bool state) {
 
 void Gizmo::SetTransform(Camera *camera, TransformCMP transform) {
     
+    TransformCMP renderTransform = transform;
+
     Vec3 p = transform.pos;
     Vec3 n = camera->front.Normalized();
     Vec3 o = camera->pos + n * 6;
@@ -144,13 +146,14 @@ void Gizmo::SetTransform(Camera *camera, TransformCMP transform) {
             t = (o.Dot(n) - p.Dot(n)) / v.Dot(n);
         }
 
-        transform.pos = p + v * t; 
+        renderTransform.pos = p + v * t; 
 
     } else {
         visible = false;
     }
 
     this->transform = transform;
+    this->renderTransform = renderTransform;
 }
 
 void Gizmo::RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader) {

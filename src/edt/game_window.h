@@ -25,13 +25,13 @@ struct GameWindow : EditorWindow {
 
     bool FirstClick;
     Vec3 Offset;
-    Vec3 StartPos;
 
     Shader gizmoShader;
     FrameBuffer gameFrameBuffer;
 
 private:
     void UpdateTransformGizmos();
+    Vec3 CalculateNewTransformPosition(Camera *camera, Gizmo *gizmo, Vec3 n0, Vec3 n1);
 
 };
 

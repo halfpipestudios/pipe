@@ -62,6 +62,41 @@ void GameWindow::UpdateTransformGizmos() {
     }
 }
 
+Vec3 GameWindow::CalculateNewTransformPosition(Camera *camera, Gizmo *gizmo, Vec3 n0, Vec3 n1) {
+
+    Mat4 proj = Mat4::Perspective(60, (f32)GetWidth()/(f32)GetHeight(), 0.01f, 1000.0f);
+
+    i32 mouseX = GetMouseX();
+    i32 mouseY = GetMouseY();
+    i32 width  = GetWidth();
+    i32 height = GetHeight();
+
+    Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
+
+    Vec3 normal = {};
+    if(ABS(mouse.d.Dot(n0)) > ABS(mouse.d.Dot(n1))) {
+        normal = n0;
+    } else {
+        normal = n1;
+    }
+
+    Vec3 mousePosition = mouse.IntersectPlane(gizmo->renderTransform.pos, normal);
+    
+    if(FirstClick) {
+        Offset = mousePosition - gizmo->renderTransform.pos;
+        FirstClick = false;
+    }
+    
+    Vec3 newRenderPos = mousePosition - Offset;
+
+    Ray movementRay = {};
+    movementRay.o = camera->pos;
+    movementRay.d = (newRenderPos - camera->pos).Normalized();
+
+    return movementRay.IntersectPlane(gizmo->transform.pos, normal);
+
+}
+
 void GameWindow::Update(Editor *editor, f32 dt) {
     
     if(editor->paused) dt = 0;
@@ -83,33 +118,12 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
-        
-        i32 mouseX = GetMouseX();
-        i32 mouseY = GetMouseY();
-        i32 width  = GetWidth();
-        i32 height = GetHeight();
-
-        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
-        
         Vec3 normal = {};
         Vec3 n0 = Vec3(0, 0, 1);
         Vec3 n1 = Vec3(0, 1, 0);
-
-        if(ABS(mouse.d.Dot(n0)) > ABS(mouse.d.Dot(n1))) {
-            normal = n0;
-        } else {
-            normal = n1;
-        }
-
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, normal);
         
-        if(FirstClick) {
-            Offset = projTransform - transform->pos;
-            FirstClick = false;
-        }
-
-        transform->pos.x = projTransform.x - Offset.x;
+        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        transform->pos.x = CalculateNewTransformPosition(camera, &X, n0, n1).x;
 
         PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
@@ -123,23 +137,8 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         ASSERT(editor->selectedEntity);
 
         TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
-        
-        i32 mouseX = GetMouseX();
-        i32 mouseY = GetMouseY();
-        i32 width  = GetWidth();
-        i32 height = GetHeight();
-
-        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
-        
         Vec3 n = (transform->pos - camera->pos);
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, Vec3(n.x, 0, n.z).Normalized());
-        
-        if(FirstClick) {
-            Offset = projTransform - transform->pos;
-            FirstClick = false;
-        }
-
-        transform->pos.y = projTransform.y - Offset.y;
+        transform->pos.y = CalculateNewTransformPosition(camera, &X, n, n).y;
 
         PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
@@ -152,33 +151,12 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
-        
-        i32 mouseX = GetMouseX();
-        i32 mouseY = GetMouseY();
-        i32 width  = GetWidth();
-        i32 height = GetHeight();
-
-        Ray mouse = camera->GetMouseRay(proj, (f32)width, (f32)height, (f32)mouseX, (f32)mouseY);
-
         Vec3 normal = {};
         Vec3 n0 = Vec3(1, 0, 0);
         Vec3 n1 = Vec3(0, 1, 0);
 
-        if(ABS(mouse.d.Dot(n0)) > ABS(mouse.d.Dot(n1))) {
-            normal = n0;
-        } else {
-            normal = n1;
-        }
-        
-        Vec3 projTransform = mouse.IntersectPlane(transform->pos, normal);
-        
-        if(FirstClick) {
-            Offset = projTransform - transform->pos;
-            FirstClick = false;
-        }
-
-        transform->pos.z = projTransform.z - Offset.z;
+        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        transform->pos.z = CalculateNewTransformPosition(camera, &X, n0, n1).z;
 
         PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {

@@ -43,6 +43,7 @@ struct Gizmo {
     bool visible;
 
     TransformCMP transform;
+    TransformCMP renderTransform;
     
     Gizmo();
     
@@ -54,7 +55,7 @@ struct Gizmo {
 
     void SetHot(bool state);
     void SetActive(bool state);
-     
+
     void SetTransform(Camera *camera, TransformCMP transform);
     void RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader);
 
