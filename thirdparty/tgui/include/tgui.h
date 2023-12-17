@@ -51,6 +51,8 @@ typedef struct TGuiInput {
     tgui_u32 text_size;
     
     TGuiKeyboard keyboard;
+
+    tgui_s32 wheel_delta;
  
 } TGuiInput;
 

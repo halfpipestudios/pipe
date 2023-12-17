@@ -2236,6 +2236,10 @@ void tgui_process_scroll_window(TGuiWindow *window, TGuiPainter *painter) {
             tgui_f32 mouse_offset = (tgui_f32)(input.mouse_y - window->v_scroll_bar.min_y)/(tgui_f32)tgui_rect_height(window->v_scroll_bar);
             window->v_scroll_offset = TGUI_CLAMP(mouse_offset, 0, 1);
         }
+
+        if(tgui_rect_point_overlaps(window->dim, input.mouse_x, input.mouse_y)) {
+            window->v_scroll_offset = TGUI_CLAMP(window->v_scroll_offset - (input.wheel_delta * 0.02f), 0, 1);
+        }
         
         tgui_u32 handle_h = (tgui_u32)(((tgui_f32)tgui_rect_height(window->dim) / (tgui_f32)tgui_rect_height(window->scroll_saved_rect)) * tgui_rect_height(window->v_scroll_bar)); 
 

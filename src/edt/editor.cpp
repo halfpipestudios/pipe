@@ -57,6 +57,8 @@ static void TGuiUpdateInput(Input *input, TGuiInput *tguiInput) {
 
     tguiInput->mouse_x = input->state[0].mouseX;
     tguiInput->mouse_y = input->state[0].mouseY;
+
+    tguiInput->wheel_delta = input->state[0].wheelDelta;
     
     u32 w = PlatformManager::Get()->GetWindow()->GetWidth();
     u32 h = PlatformManager::Get()->GetWindow()->GetHeight();
