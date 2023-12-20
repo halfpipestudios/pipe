@@ -186,12 +186,11 @@ void D3D11ParticleSystem::Draw(ID3D11Device *device, ID3D11DeviceContext *device
     // ping-pong the vertex buffers
     std::swap(drawVB, streamOutVB);
  
-    // TODO: set additive blend state 
+    GraphicsManager::Get()->SetDepthStencilWriteZeroState(true); 
     GraphicsManager::Get()->SetAdditiveBlendState(true);
     
     // Draw the update particle system we just stream out
     deviceContext->IASetVertexBuffers(0, 1, &drawVB, &stride, &offset);
-
 
     GraphicsManager::Get()->BindTextureBuffer(*TextureManager::Get()->Dereference(texture));
     GraphicsManager::Get()->BindShader(drawShader);
@@ -199,14 +198,11 @@ void D3D11ParticleSystem::Draw(ID3D11Device *device, ID3D11DeviceContext *device
 
     deviceContext->DrawAuto();
     
-
-    // TODO: set default blend state 
+    GraphicsManager::Get()->SetDepthStencilWriteZeroState(false); 
     GraphicsManager::Get()->SetAdditiveBlendState(false);
-
 
     GraphicsManager::Get()->DisableVertexShader();
     GraphicsManager::Get()->DisablePixelShader();
     GraphicsManager::Get()->DisableGeometryShader();
 
-    GraphicsManager::Get()->SetDepthStencilState(true);
 }

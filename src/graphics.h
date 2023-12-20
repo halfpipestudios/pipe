@@ -135,6 +135,7 @@ struct Graphics {
 
     virtual void SetRasterizerState(RasterizerState state) = 0;
     virtual void SetDepthStencilState(bool value) = 0;
+    virtual void SetDepthStencilWriteZeroState(bool value) = 0;
     virtual void SetAlphaBlendState(bool value) = 0;
     virtual void SetAdditiveBlendState(bool value) = 0;
     virtual void SetSamplerState(SamplerState state) = 0;

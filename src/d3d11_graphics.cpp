@@ -119,6 +119,11 @@ void D3D11Graphics::Initialize() {
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     device->CreateDepthStencilState(&depthStencilDesc, &depthStencilOff);
 
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.StencilEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    device->CreateDepthStencilState(&depthStencilDesc, &depthStencilOnWriteMaskZero);
+
     // TODO: create more blend state for particle system
     // additive blend state
     // Alpha blending
@@ -241,6 +246,7 @@ void  D3D11Graphics::Terminate() {
     if(fillRasterizerCullNone) fillRasterizerCullNone->Release();
     if(depthStencilOn) depthStencilOn->Release();
     if(depthStencilOff) depthStencilOff->Release();
+    if(depthStencilOnWriteMaskZero) depthStencilOnWriteMaskZero->Release();
     if(alphaBlendEnable) alphaBlendEnable->Release();
     if(alphaBlendDisable) alphaBlendDisable->Release();
     if(additiveBlending) additiveBlending->Release();
@@ -346,6 +352,13 @@ void  D3D11Graphics::SetDepthStencilState(bool value) {
         deviceContext->OMSetDepthStencilState(depthStencilOn, 1);
     else
         deviceContext->OMSetDepthStencilState(depthStencilOff, 1);
+}
+
+void  D3D11Graphics::SetDepthStencilWriteZeroState(bool value) {
+    if(value)
+        deviceContext->OMSetDepthStencilState(depthStencilOnWriteMaskZero, 1);
+    else
+        deviceContext->OMSetDepthStencilState(depthStencilOn, 1);
 }
 
 void D3D11Graphics::SetAlphaBlendState(bool value) {
