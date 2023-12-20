@@ -15,17 +15,24 @@ struct Game {
 
     void Update(f32 dt);
 
-    void FixUpdate(f32 dt);
-    void PostUpdate(f32 t);
-
     void Render();
 
     Shader mapShader;
     Shader animShader;
     Shader statShader;
 
+    Shader soShader;
+    GeometryShader soGeoShader;
+
+    Shader drawShader;
+    GeometryShader drawGeoShader;
+
     Level level;
     Camera camera;
+
+    ParticleSystem particleSystem;
+
+    f32 gameTime { 0.0f };
 };
 
 #endif // _GAME_H_

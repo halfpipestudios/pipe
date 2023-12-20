@@ -5,11 +5,13 @@
 #include "algebra.h"
 
 typedef void * Shader;
+typedef void * GeometryShader;
 typedef void * ConstBuffer;
 typedef void * VertexBuffer;
 typedef void * IndexBuffer;
 typedef void * TextureBuffer;
 typedef void * FrameBuffer;
+typedef void * ParticleSystem;
 
 
 #include "asset_manager.h"
@@ -48,6 +50,17 @@ struct CBGizmo{
 struct CBIndex {
     f32 id;
     f32 padding[3];
+};
+
+struct CBParticle {
+    Vec3 eyePosW;
+    f32 gameTime;
+    
+    Vec3 emitPosW;
+    f32 timeStep;
+    
+    Vec3 emitDirW;
+    f32 padding[1];
 };
 
 #define MAX_BONES 100
@@ -123,6 +136,7 @@ struct Graphics {
     virtual void SetRasterizerState(RasterizerState state) = 0;
     virtual void SetDepthStencilState(bool value) = 0;
     virtual void SetAlphaBlendState(bool value) = 0;
+    virtual void SetAdditiveBlendState(bool value) = 0;
     virtual void SetSamplerState(SamplerState state) = 0;
     
     virtual void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) = 0;
@@ -133,12 +147,23 @@ struct Graphics {
     virtual Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderTGui(char *vertpath, char *fragpath) = 0;
+    virtual Shader CreateShaderParticle(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
     virtual void BindShader(Shader shaderHandle) = 0;
+
+    virtual GeometryShader CreateGeometryShader(char *filepath) = 0;
+    virtual GeometryShader CreateGeometryShaderWithStreamOutput(char *filepath) = 0;
+    virtual void DestroyGeometryShader(GeometryShader geometryShaderHandle) = 0;
+    virtual void BindGeometryShader(GeometryShader geometryShaderHandle) = 0;
+
+    virtual void DisablePixelShader() = 0;
+    virtual void DisableVertexShader()  = 0;
+    virtual void DisableGeometryShader() = 0;
 
     virtual ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) = 0;
     virtual void DestroyConstBuffer(ConstBuffer constBufferHandle) = 0;
     virtual void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData) = 0;
+    virtual void BindConstBuffer(ConstBuffer constBufferHandle, u32 slot) = 0;
 
     virtual void SetProjMatrix(Mat4 proj) = 0;
     virtual void SetViewMatrix(Mat4 view) = 0;
@@ -169,6 +194,12 @@ struct Graphics {
     virtual TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) = 0;
     virtual void FlushFrameBuffer(FrameBuffer frameBufferHandle) = 0;
 
+    virtual ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader) = 0;
+    virtual void DestroyParticleSystem(ParticleSystem particleSystemHandle) = 0;
+    virtual void ResetParticleSystem(ParticleSystem particleSystemHandle) = 0;
+    virtual void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) = 0;
+    virtual void RenderParticleSystem(ParticleSystem particleSystemHandle) = 0;
+
     virtual void SetViewport(u32 x, u32 y, u32 w, u32 h) = 0;
 
     virtual void DrawLine(Vec3 a, Vec3 b, u32 color) = 0;
@@ -188,6 +219,8 @@ struct Graphics {
 
     ConstBuffer gpuIndexBuffer;
     CBIndex cpuIndexBuffer;
+
+    ConstBuffer gpuParticleBuffer;
 };
 
 #endif

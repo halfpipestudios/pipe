@@ -113,10 +113,14 @@ void D3D11Graphics::Initialize() {
     depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
     device->CreateDepthStencilState(&depthStencilDesc, &depthStencilOn);
+
     depthStencilDesc.DepthEnable = false;
     depthStencilDesc.StencilEnable = false;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     device->CreateDepthStencilState(&depthStencilDesc, &depthStencilOff);
 
+    // TODO: create more blend state for particle system
+    // additive blend state
     // Alpha blending
     D3D11_BLEND_DESC blendStateDesc = {};
     blendStateDesc.RenderTarget[0].BlendEnable = true;
@@ -132,6 +136,16 @@ void D3D11Graphics::Initialize() {
     blendStateDesc.RenderTarget[0].BlendEnable = false;
     blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device->CreateBlendState(&blendStateDesc, &alphaBlendDisable);
+
+    blendStateDesc.RenderTarget[0].BlendEnable = true;
+    blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+    blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device->CreateBlendState(&blendStateDesc, &additiveBlending);
 
     // Create Rasterizers Types
     D3D11_RASTERIZER_DESC fillRasterizerFrontDesc = {};
@@ -191,6 +205,7 @@ void D3D11Graphics::Initialize() {
     deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
     deviceContext->RSSetState(fillRasterizerCullBack);
     deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
+    deviceContext->GSSetSamplers(0, 1, &samplerStateLinear);
 
     cpuMatrices.proj = Mat4();
     cpuMatrices.view = Mat4();
@@ -200,11 +215,14 @@ void D3D11Graphics::Initialize() {
     cpuGizmoBuffer = {};
     cpuIndexBuffer = {};
 
-    gpuMatrices     = CreateConstBuffer((void *)&cpuMatrices,     sizeof(cpuMatrices),     0, nullptr);
-    gpuAnimMatrices = CreateConstBuffer((void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
-    gpuTGuiBuffer   = CreateConstBuffer((void *)&cpuTGuiBuffer,   sizeof(cpuTGuiBuffer),   2, nullptr);
-    gpuGizmoBuffer  = CreateConstBuffer((void *)&cpuGizmoBuffer,  sizeof(cpuGizmoBuffer),  3, nullptr);
-    gpuIndexBuffer  = CreateConstBuffer((void *)&cpuIndexBuffer,  sizeof(cpuIndexBuffer),  4, nullptr);
+    CBParticle particlesData;
+
+    gpuMatrices     = CreateConstBuffer(  (void *)&cpuMatrices,     sizeof(cpuMatrices),     0, nullptr);
+    gpuAnimMatrices = CreateConstBuffer(  (void *)&cpuAnimMatrices, sizeof(cpuAnimMatrices), 1, nullptr);
+    gpuParticleBuffer = CreateConstBuffer((void *)&particlesData,   sizeof(CBParticle),      2, nullptr);
+    gpuGizmoBuffer  = CreateConstBuffer(  (void *)&cpuGizmoBuffer,  sizeof(cpuGizmoBuffer),  3, nullptr);
+    gpuIndexBuffer  = CreateConstBuffer(  (void *)&cpuIndexBuffer,  sizeof(cpuIndexBuffer),  4, nullptr);
+    gpuTGuiBuffer   = CreateConstBuffer(  (void *)&cpuTGuiBuffer,   sizeof(cpuTGuiBuffer),   5, nullptr);
 
     lineRenderer.Initialize(200, device);
     batchRenderer.Initialize(200, device);
@@ -225,6 +243,7 @@ void  D3D11Graphics::Terminate() {
     if(depthStencilOff) depthStencilOff->Release();
     if(alphaBlendEnable) alphaBlendEnable->Release();
     if(alphaBlendDisable) alphaBlendDisable->Release();
+    if(additiveBlending) additiveBlending->Release();
     if(samplerStatePoint) samplerStatePoint->Release();
     if(samplerStateLinear) samplerStateLinear->Release();
 
@@ -233,6 +252,7 @@ void  D3D11Graphics::Terminate() {
     DestroyConstBuffer(gpuTGuiBuffer);
     DestroyConstBuffer(gpuGizmoBuffer);
     DestroyConstBuffer(gpuIndexBuffer);
+    DestroyConstBuffer(gpuParticleBuffer);
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
@@ -256,7 +276,8 @@ void D3D11Graphics::ResizeBuffers() {
     ID3D11Texture2D* backBuffer = nullptr;
     swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
     device->CreateRenderTargetView(backBuffer, 0, &renderTargetView);
-    if(backBuffer) backBuffer->Release(); backBuffer = nullptr;
+    if(backBuffer) backBuffer->Release();
+    backBuffer = nullptr;
 
     // set up the viewport
     D3D11_VIEWPORT viewport;
@@ -333,6 +354,15 @@ void D3D11Graphics::SetAlphaBlendState(bool value) {
     else
         deviceContext->OMSetBlendState(alphaBlendDisable, 0, 0xffffffff);
 }
+
+void D3D11Graphics::SetAdditiveBlendState(bool value) {
+    if(value)
+        deviceContext->OMSetBlendState(additiveBlending, 0, 0xffffffff);
+    else
+        deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
+}
+
+
 
 void D3D11Graphics::ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) {
     float clearColor[] = { r, g, b, 1.0f };
@@ -494,6 +524,25 @@ Shader D3D11Graphics::CreateShaderTGui(char *vertpath, char *fragpath) {
     return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
 }
 
+Shader D3D11Graphics::CreateShaderParticle(char *vertpath, char *fragpath) {
+    // create input layout
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,
+         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 2, DXGI_FORMAT_R32_FLOAT,
+         0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 3, DXGI_FORMAT_R32_UINT,
+         0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
+    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
+}
+
 void D3D11Graphics::DestroyShader(Shader shaderHandle) {
     D3D11Shader *shader = (D3D11Shader *)shaderHandle;
     if(shader->vertex) shader->vertex->Release();
@@ -507,6 +556,119 @@ void D3D11Graphics::BindShader(Shader shaderHandle) {
     deviceContext->VSSetShader(shader->vertex, 0, 0);
     deviceContext->PSSetShader(shader->fragment, 0, 0);
     deviceContext->IASetInputLayout(shader->layout);
+}
+
+GeometryShader D3D11Graphics::CreateGeometryShader(char *filepath) {
+    D3D11GeometryShader shader;
+
+    MemoryManager::Get()->BeginTemporalMemory();
+    File file = PlatformManager::Get()->ReadFileToTemporalMemory(filepath);
+
+    ID3DBlob *shaderCompiled = 0;
+    
+    HRESULT result = 0;
+    ID3DBlob *errorShader = 0;
+    result = D3DCompile(file.data, file.size,
+                        0, 0, 0, "GS", "gs_4_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &shaderCompiled,
+                        &errorShader);
+    if(errorShader != 0) {
+        char *errorString = (char *)errorShader->GetBufferPointer();
+        printf("error compiling geometry shader (%s): %s", filepath, errorString);
+        errorShader->Release();
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    result = device->CreateGeometryShader(
+        shaderCompiled->GetBufferPointer(),
+        shaderCompiled->GetBufferSize(),
+        nullptr,
+        &shader.geometry);
+
+    if(FAILED(result)) {
+        printf("Error: Failed Creating Geometry Shader\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+    D3D11GeometryShader *shaderHandle = geometryShadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (GeometryShader)shaderHandle;
+}
+
+GeometryShader  D3D11Graphics::CreateGeometryShaderWithStreamOutput(char *filepath) {
+
+    D3D11GeometryShader shader;
+
+    MemoryManager::Get()->BeginTemporalMemory();
+    File file = PlatformManager::Get()->ReadFileToTemporalMemory(filepath);
+
+    ID3DBlob *shaderCompiled = 0;
+    
+    HRESULT result = 0;
+    ID3DBlob *errorShader = 0;
+    result = D3DCompile(file.data, file.size,
+                        0, 0, 0, "GS", "gs_4_0",
+                        D3DCOMPILE_ENABLE_STRICTNESS, 0,
+                        &shaderCompiled,
+                        &errorShader);
+    if(errorShader != 0) {
+        char *errorString = (char *)errorShader->GetBufferPointer();
+        printf("error compiling geometry shader (%s): %s", filepath, errorString);
+        errorShader->Release();
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    D3D11_SO_DECLARATION_ENTRY pDecl[] = {
+        { 0, "POSITION",   0, 0, 3, 0 }, 
+        { 0, "TEXCOORD",   0, 0, 3, 0 }, 
+        { 0, "TEXCOORD",   1, 0, 2, 0 }, 
+        { 0, "TEXCOORD",   2, 0, 1, 0 }, 
+        { 0, "TEXCOORD",   3, 0, 1, 0 }
+    };
+
+    result = device->CreateGeometryShaderWithStreamOutput(
+        shaderCompiled->GetBufferPointer(),
+        shaderCompiled->GetBufferSize(),
+        pDecl, ARRAY_LENGTH(pDecl),
+        nullptr, 0, 0, nullptr,
+        &shader.geometry);
+    
+    if(FAILED(result)) {
+        printf("Error: Failed Creating Geometry Shader\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+    D3D11GeometryShader *shaderHandle = geometryShadersStorage.Alloc();
+    *shaderHandle = shader;
+    return (GeometryShader)shaderHandle;
+}
+
+void D3D11Graphics::DestroyGeometryShader(GeometryShader geometryShaderHandle) {
+    D3D11GeometryShader *shader = (D3D11GeometryShader *)geometryShaderHandle;
+    if(shader->geometry) shader->geometry->Release();
+    geometryShadersStorage.Free(shader);
+}
+
+void D3D11Graphics::BindGeometryShader(GeometryShader geometryShaderHandle) {
+    D3D11GeometryShader *shader = (D3D11GeometryShader *)geometryShaderHandle;
+    deviceContext->GSSetShader(shader->geometry, 0, 0);
+}
+
+void D3D11Graphics::DisablePixelShader() {
+    deviceContext->PSSetShader(nullptr, 0, 0);
+}
+
+void D3D11Graphics::DisableVertexShader() {
+    deviceContext->VSSetShader(nullptr, 0, 0);
+}
+
+void D3D11Graphics::DisableGeometryShader() {
+    deviceContext->GSSetShader(nullptr, 0, 0);
 }
 
 ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) {
@@ -525,6 +687,7 @@ ConstBuffer D3D11Graphics::CreateConstBuffer(void *bufferData, u64 bufferSize, u
     deviceContext->UpdateSubresource(constBuffer.buffer, 0, 0, bufferData, 0, 0);
     deviceContext->VSSetConstantBuffers(index, 1, &constBuffer.buffer);
     deviceContext->PSSetConstantBuffers(index, 1, &constBuffer.buffer);
+    deviceContext->GSSetConstantBuffers(index, 1, &constBuffer.buffer);
     constBuffer.index = index;
 
     D3D11ConstBuffer *constBufferHandle = constBufferStorage.Alloc();
@@ -544,7 +707,15 @@ void D3D11Graphics::UpdateConstBuffer(ConstBuffer constBufferHandle, void *buffe
     deviceContext->UpdateSubresource(constBuffer->buffer, 0, 0, bufferData, 0, 0);
     deviceContext->VSSetConstantBuffers(constBuffer->index, 1, &constBuffer->buffer);
     deviceContext->PSSetConstantBuffers(constBuffer->index, 1, &constBuffer->buffer);
+    deviceContext->GSSetConstantBuffers(constBuffer->index, 1, &constBuffer->buffer);
 }
+
+
+void D3D11Graphics::BindConstBuffer(ConstBuffer constBufferHandle, u32 slot) {
+    D3D11ConstBuffer *constBuffer = (D3D11ConstBuffer *)constBufferHandle;
+    constBuffer->index = slot;
+}
+
 
 void D3D11Graphics::SetProjMatrix(Mat4 proj) {
     cpuMatrices.proj = proj;
@@ -1033,6 +1204,43 @@ TextureBuffer D3D11Graphics::FrameBufferGetTexture(FrameBuffer frameBufferHandle
 
 void D3D11Graphics::FlushFrameBuffer(FrameBuffer frameBufferHandle) {
     lineRenderer.Render(deviceContext);
+}
+
+ParticleSystem D3D11Graphics::CreateParticleSystem(u32 maxParticle,
+        Shader soShader, GeometryShader soGeoShader,
+        Shader drawShader, GeometryShader drawGeoShader) {
+
+    D3D11ParticleSystem particleSystem;
+    D3D11ParticleSystem *particleSystemHandle = particleSystemStoraget.Alloc();
+    *particleSystemHandle = particleSystem;
+
+    particleSystemHandle->Initialize(device, maxParticle, soShader, soGeoShader, drawShader, drawGeoShader, gpuParticleBuffer);
+
+    return (ParticleSystem)particleSystemHandle;
+
+}
+
+void D3D11Graphics::DestroyParticleSystem(ParticleSystem particleSystemHandle) {
+
+    D3D11ParticleSystem *particleSystem = (D3D11ParticleSystem *)particleSystemHandle;
+    particleSystem->Terminate();
+    particleSystemStoraget.Free(particleSystem);
+
+}
+
+void D3D11Graphics::ResetParticleSystem(ParticleSystem particleSystemHandle) {
+    D3D11ParticleSystem *particleSystem = (D3D11ParticleSystem *)particleSystemHandle;
+    particleSystem->Reset();
+}
+
+void D3D11Graphics::UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) {
+    D3D11ParticleSystem *particleSystem = (D3D11ParticleSystem *)particleSystemHandle;
+    particleSystem->Update(startPos, cameraPos, gameTime, dt);
+}
+
+void D3D11Graphics::RenderParticleSystem(ParticleSystem particleSystemHandle) {
+    D3D11ParticleSystem *particleSystem = (D3D11ParticleSystem *)particleSystemHandle;
+    particleSystem->Draw(device, deviceContext);
 }
 
 void D3D11Graphics::SetViewport(u32 x, u32 y, u32 w, u32 h) {

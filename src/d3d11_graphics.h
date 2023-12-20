@@ -7,6 +7,8 @@
 #include "graphics.h"
 #include "allocators.h"
 
+#include "d3d11_particle_sys.h"
+
 struct D3D11VertexBuffer {
     ID3D11Buffer *buffer;
     u32 verticesCount;
@@ -44,6 +46,10 @@ struct D3D11Shader {
     ID3D11VertexShader *vertex;
     ID3D11PixelShader *fragment;
     ID3D11InputLayout *layout; 
+};
+
+struct D3D11GeometryShader {
+    ID3D11GeometryShader *geometry;
 };
 
 struct D3D11ConstBuffer {
@@ -117,6 +123,7 @@ struct D3D11Graphics : public Graphics {
     ID3D11DepthStencilState* depthStencilOff;
     ID3D11BlendState* alphaBlendEnable;
     ID3D11BlendState* alphaBlendDisable;
+    ID3D11BlendState* additiveBlending; 
     ID3D11SamplerState *samplerStateLinear;
     ID3D11SamplerState *samplerStatePoint;
 
@@ -128,6 +135,7 @@ struct D3D11Graphics : public Graphics {
     void SetRasterizerState(RasterizerState state) override;
     void SetDepthStencilState(bool value) override;
     void SetAlphaBlendState(bool value) override;
+    void SetAdditiveBlendState(bool value) override;
     void SetSamplerState(SamplerState state) override;
 
     void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) override;
@@ -139,13 +147,23 @@ struct D3D11Graphics : public Graphics {
     Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
     Shader CreateShaderTGui(char *vertpath, char *fragpath) override;
-
+    Shader CreateShaderParticle(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
     void BindShader(Shader shaderHandle) override;
 
-    ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName);
-    void DestroyConstBuffer(ConstBuffer constBufferHandle);
-    void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData);
+    GeometryShader CreateGeometryShader(char *filepath) override;
+    GeometryShader CreateGeometryShaderWithStreamOutput(char *filepath) override;
+    void DestroyGeometryShader(GeometryShader geometryShaderHandle) override;
+    void BindGeometryShader(GeometryShader geometryShaderHandle) override;
+
+    void DisablePixelShader() override;
+    void DisableVertexShader() override;
+    void DisableGeometryShader() override;
+
+    ConstBuffer CreateConstBuffer(void *bufferData, u64 bufferSize, u32 index, char *bufferName) override;
+    void DestroyConstBuffer(ConstBuffer constBufferHandle) override;
+    void UpdateConstBuffer(ConstBuffer constBufferHandle, void *bufferData) override;
+    void BindConstBuffer(ConstBuffer constBufferHandle, u32 slot) override;
 
     void SetProjMatrix(Mat4 proj)   override; 
     void SetViewMatrix(Mat4 view)   override; 
@@ -176,22 +194,30 @@ struct D3D11Graphics : public Graphics {
     TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) override;
     void FlushFrameBuffer(FrameBuffer frameBufferHandle) override;
 
+    ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader) override;
+    void DestroyParticleSystem(ParticleSystem particleSystemHandle) override;
+    void ResetParticleSystem(ParticleSystem particleSystemHandle) override;
+    void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) override;
+    void RenderParticleSystem(ParticleSystem particleSystemHandle) override;
+
     void SetViewport(u32 x, u32 y, u32 w, u32 h) override;
 
     void DrawLine(Vec3 a, Vec3 b, u32 color) override;
     void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) override;
-
 private:
 
     ObjectAllocator<D3D11Shader> shadersStorage;
+    ObjectAllocator<D3D11GeometryShader> geometryShadersStorage;
     ObjectAllocator<D3D11ConstBuffer> constBufferStorage;
     ObjectAllocator<D3D11VertexBuffer> vertexBufferStorage;
     ObjectAllocator<D3D11TextureArray> textureArrayStorage;
     ObjectAllocator<D3D11IndexBuffer> indexBufferStorage;
     ObjectAllocator<D3D11FrameBuffer> frameBufferStorage;
+    ObjectAllocator<D3D11ParticleSystem> particleSystemStoraget;
 
     D3D11LineRenderer lineRenderer;
     D3D11BatchRenderer batchRenderer;
+
 
 };
 

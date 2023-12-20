@@ -1,4 +1,4 @@
-cbuffer CBuffer : register(b2)
+cbuffer CBuffer : register(b5)
 {
 	unsigned int resX;
 	unsigned int resY;

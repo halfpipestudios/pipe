@@ -3,8 +3,18 @@
 #include <math.h>
 #include <float.h>
 
+#include <stdlib.h>
+
 static inline f32 lerp(f32 a, f32 b, f32 t) {
     return a*(1-t) + b*t;
+}
+
+f32 RandF32() {
+    return (f32)(rand()) / (f32)RAND_MAX;
+}
+
+f32 RandF32(f32 a, f32 b) {
+    return a + RandF32() * (b - a);
 }
 
 // ----------------Vec2---------------------
@@ -283,6 +293,15 @@ Vec3 Vec3::Lerp(Vec3 a, Vec3 b, f32 t) {
     result.y = lerp(a.y, b.y, t);
     result.z = lerp(a.z, b.z, t);
     return result;
+}
+
+// TODO: simd the hell out of this
+Vec3 Vec3::RandUnitVec() {
+    while(true) {
+        Vec3 v = Vec3(RandF32(-1, 1), RandF32(-1, 1), RandF32(-1, 1));
+        if(v.Len() > 1.0f) continue;
+        return v.Normalized();
+    }
 }
 
 // -----------------------------------------

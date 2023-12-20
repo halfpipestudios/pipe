@@ -11,6 +11,9 @@
 
 #define TO_RAD(angle) ((angle)/180.0f * PI)
 
+f32 RandF32();
+f32 RandF32(f32 a, f32 b);
+
 struct Vec2 {
     union {
         struct {
@@ -87,6 +90,7 @@ struct Vec3 {
 
 
     static Vec3 Lerp(Vec3 a, Vec3 b, f32 t);
+    static Vec3 RandUnitVec();
 
 };
 
