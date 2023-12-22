@@ -55,7 +55,7 @@ void GS(point Particle gin[1],
             for(int i = 0; i < 5; ++i) {
 
                 float3 vRandom = 35.0f*RandomVec3((float)i/5.0f);
-                vRandom.y = 20.0f;
+                vRandom.y = 24.0f;
 
                 Particle p;
                 p.pos = emitPosW + vRandom;
