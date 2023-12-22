@@ -1221,13 +1221,14 @@ void D3D11Graphics::FlushFrameBuffer(FrameBuffer frameBufferHandle) {
 
 ParticleSystem D3D11Graphics::CreateParticleSystem(u32 maxParticle,
         Shader soShader, GeometryShader soGeoShader,
-        Shader drawShader, GeometryShader drawGeoShader) {
+        Shader drawShader, GeometryShader drawGeoShader,
+        Handle texture) {
 
     D3D11ParticleSystem particleSystem;
     D3D11ParticleSystem *particleSystemHandle = particleSystemStoraget.Alloc();
     *particleSystemHandle = particleSystem;
 
-    particleSystemHandle->Initialize(device, maxParticle, soShader, soGeoShader, drawShader, drawGeoShader, gpuParticleBuffer);
+    particleSystemHandle->Initialize(device, maxParticle, soShader, soGeoShader, drawShader, drawGeoShader, gpuParticleBuffer, texture);
 
     return (ParticleSystem)particleSystemHandle;
 

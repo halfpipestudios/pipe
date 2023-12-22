@@ -23,7 +23,8 @@ struct D3D11ParticleSystem {
                     u32 maxParticles_,
                     Shader soShader_, GeometryShader soGeoShader_,
                     Shader drawShader_, GeometryShader drawGeoShader_,
-                    ConstBuffer constBuffer_);
+                    ConstBuffer constBuffer_,
+                    Handle texture);
 
     void Terminate();
 

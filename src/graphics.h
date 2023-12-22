@@ -195,7 +195,7 @@ struct Graphics {
     virtual TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) = 0;
     virtual void FlushFrameBuffer(FrameBuffer frameBufferHandle) = 0;
 
-    virtual ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader) = 0;
+    virtual ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader, Handle texture) = 0;
     virtual void DestroyParticleSystem(ParticleSystem particleSystemHandle) = 0;
     virtual void ResetParticleSystem(ParticleSystem particleSystemHandle) = 0;
     virtual void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) = 0;

@@ -101,7 +101,7 @@ void D3D11ParticleSystem::Initialize(ID3D11Device *device,
                 u32 maxParticles_,
                 Shader soShader_, GeometryShader soGeoShader_,
                 Shader drawShader_, GeometryShader drawGeoShader_,
-                ConstBuffer constBuffer_) {
+                ConstBuffer constBuffer_, Handle texture_) {
 
     maxParticles = maxParticles_;
 
@@ -111,7 +111,7 @@ void D3D11ParticleSystem::Initialize(ID3D11Device *device,
     drawGeoShader = drawGeoShader_;
     
     constBuffer = constBuffer_;
-    texture = TextureManager::Get()->GetAsset("flare.png");
+    texture = texture_;
     
     firstRun = true;
     

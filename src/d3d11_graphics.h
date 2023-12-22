@@ -198,7 +198,7 @@ struct D3D11Graphics : public Graphics {
     TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) override;
     void FlushFrameBuffer(FrameBuffer frameBufferHandle) override;
 
-    ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader) override;
+    ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader, Handle texture) override;
     void DestroyParticleSystem(ParticleSystem particleSystemHandle) override;
     void ResetParticleSystem(ParticleSystem particleSystemHandle) override;
     void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) override;
