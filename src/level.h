@@ -78,12 +78,7 @@ struct Level : Serializable {
     BehaviorTree bhTree;
     
     // NOTE: Function used to serialize all the level
-    
-    void Save() override;
-    void Load(char *path) override;
-    
-    void SerializeEntity(Entity_ *entity);
-    void SerializeComponent(u32 componentId);
+    void Serialize(Serializer *s) override;
 
 private:
 

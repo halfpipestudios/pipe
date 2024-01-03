@@ -341,7 +341,12 @@ void Level::Initialize(char *mapFilePath, Camera *camera, Shader mapShader, Shad
 
 void Level::Terminate() {
     
-    Save();
+    // NOTE: Level serialization test
+    Serializer s;
+    s.Begin();
+    Serialize(&s);
+    s.End();
+    // -------------------------------
 
     map.Terminate();
     
@@ -388,52 +393,17 @@ void Level::Render() {
     graphicsSys.Update(em);
 }
 
-void Level::Save() {
-    Begin();
 
-    BeginObject("level");
-    Write("num_entities", (i32)entities.size);
+void Level::Serialize(Serializer *s) {
+    BeginObject(s, "level");
     
-    BeginArray("entities");
+    Write(s, "num_entities", (i32)entities.size);
+    BeginArray(s, "entities");
     for(i32 i = 0; i <  entities.size; ++i) {
         Entity_ *entity = em.GetEntity(entities[i]);
-        SerializeEntity(entity);
+        entity->Serialize(s);
     }
-    EndArray();
-    
-    EndObject();
+    EndArray(s);
 
-
-    End("level.data");
+    EndObject(s);
 }
-
-void Level::Load(char *levelPath) {
-    (void)levelPath;
-    ASSERT(!"Function not implemented!");
-}
-
-void Level::SerializeEntity(Entity_ *entity) {
-    
-    BeginObject("entity");
-
-    Write("name", entity->name);
-    Write("num_components", (i32)entity->componentsIds.size);
-    
-    BeginArray("components");
-    for(u32 i = 0; i < entity->componentsIds.size; ++i) {
-        SerializeComponent(entity->componentsIds[i]);
-    }
-    EndArray();
-
-    EndObject();
-
-}
-
-void Level::SerializeComponent(u32 componentId) {
-    BeginObject("component");
-
-    
-
-    EndObject();
-}
-

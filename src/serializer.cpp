@@ -60,75 +60,83 @@ void Serializer::WriteReal(f32 number) {
 // Serializable functions 
 // -----------------------------------------------------------
 
-void Serializable::Begin() {
-    serializer.Begin();
+void Serializable::Write(Serializer *s, char *name, f32 num) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteReal(num);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
 }
 
-void Serializable::End(char *filepath) {
-    (void)filepath;
-    serializer.End();
+void Serializable::Write(Serializer *s, char *name, i32 num) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteInt(num);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
 }
 
-void Serializable::Write(char *name, f32 num) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": ");
-    serializer.WriteReal(num);
-    serializer.WriteCharacter('\n');
+void Serializable::Write(Serializer *s, char *name, u32 num) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteInt(num);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
 }
 
-void Serializable::Write(char *name, i32 num) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": ");
-    serializer.WriteInt(num);
-    serializer.WriteCharacter('\n');
+void Serializable::Write(Serializer *s, char *name, char *str) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteCharacter('\"');
+    s->WriteString(str);
+    s->WriteCharacter('\"');
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
 }
 
-void Serializable::Write(char *name, char *str) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": ");
-    serializer.WriteString(str);
-    serializer.WriteCharacter('\n');
+void Serializable::Write(Serializer *s, char *name, char c) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteCharacter('\'');
+    s->WriteCharacter(c);
+    s->WriteCharacter('\'');
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
 }
 
-void Serializable::Write(char *name, char c) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": ");
-    serializer.WriteCharacter(c);
-    serializer.WriteCharacter('\n');
+void Serializable::BeginObject(Serializer *s, char *name) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": {\n");
+    s->curTabOffset += s->tabOffset;
 }
 
-void Serializable::BeginObject(char *name) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": {\n");
-    curTabOffset += tabOffset;
+void Serializable::EndObject(Serializer *s) {
+    s->curTabOffset -= s->tabOffset;
+    AdvanceTabs(s);
+    s->WriteString("}\n");
 }
 
-void Serializable::EndObject() {
-    curTabOffset -= tabOffset;
-    AdvanceTabs();
-    serializer.WriteString("}\n");
+void Serializable::BeginArray(Serializer *s, char *name) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": [\n");
+    s->curTabOffset += s->tabOffset;
 }
 
-void Serializable::BeginArray(char *name) {
-    AdvanceTabs();
-    serializer.WriteString(name);
-    serializer.WriteString(": [\n");
-    curTabOffset += tabOffset;
+void Serializable::EndArray(Serializer *s) {
+    s->curTabOffset -= s->tabOffset;
+    AdvanceTabs(s);
+    s->WriteString("]\n");
 }
 
-void Serializable::EndArray() {
-    curTabOffset -= tabOffset;
-    AdvanceTabs();
-    serializer.WriteString("]\n");
-}
-
-void Serializable::AdvanceTabs() {
-    for(u32 i = 0; i < curTabOffset; ++i) {
-        serializer.WriteCharacter(' ');
+void Serializable::AdvanceTabs(Serializer *s) {
+    for(u32 i = 0; i < s->curTabOffset; ++i) {
+        s->WriteCharacter(' ');
     }
 }

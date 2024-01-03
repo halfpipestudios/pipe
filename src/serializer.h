@@ -21,32 +21,29 @@ struct Serializer {
     
     u8 *data;
     u32 size;
+    
+    u32 tabOffset = 2;
+    u32 curTabOffset = 0;
 
 };
 
 struct Serializable {
-    virtual void Save() = 0;
-    virtual void Load(char *path) = 0;
+    virtual void Serialize(Serializer *s) = 0;
 
-    void Begin();
-    void End(char *filepath);
-    
-    void Write(char *name, f32 num);
-    void Write(char *name, i32 num);
-    void Write(char *name, char *str);
-    void Write(char *name, char c);
+    void Write(Serializer *s, char *name, f32 num);
+    void Write(Serializer *s, char *name, i32 num);
+    void Write(Serializer *s, char *name, u32 num);
+    void Write(Serializer *s, char *name, char *str);
+    void Write(Serializer *s, char *name, char c);
 
-    void BeginObject(char *name);
-    void EndObject();
+    void BeginObject(Serializer *s, char *name);
+    void EndObject(Serializer *s);
 
-    void BeginArray(char *name);
-    void EndArray();
+    void BeginArray(Serializer *s, char *name);
+    void EndArray(Serializer *s);
 
-    void AdvanceTabs();
-
-    Serializer serializer;
-    u32 tabOffset = 2;
-    u32 curTabOffset = 0;
+private:
+    void AdvanceTabs(Serializer *s);
 };
 
 #endif // _SERIALIZER_H_
