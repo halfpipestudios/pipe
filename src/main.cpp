@@ -11,8 +11,6 @@
 #include "game.h"
 #include "edt/editor.h"
 
-#include "serializer.h"
-
 int main() {
 
     PlatformManager::Get()->Initialize();
@@ -30,18 +28,6 @@ int main() {
     Editor editor;
     editor.Initialize(&game.level);
     
-    // NOTE: Serializer test
-    Serializer serializer;
-    serializer.Begin();
-    serializer.WriteInt(-92312);
-    serializer.WriteCharacter('\n');
-    serializer.WriteReal(123.321f);
-    serializer.WriteCharacter('\n');
-    serializer.WriteString("Tomas Cabrerizo!");
-    serializer.WriteCharacter('\n');
-    serializer.End();
-
-
     bool editorIsActive = false;
 
     f64 lastTimer = PlatformManager::Get()->GetTimeInSeconds();

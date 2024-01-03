@@ -24,4 +24,29 @@ struct Serializer {
 
 };
 
+struct Serializable {
+    virtual void Save() = 0;
+    virtual void Load(char *path) = 0;
+
+    void Begin();
+    void End(char *filepath);
+    
+    void Write(char *name, f32 num);
+    void Write(char *name, i32 num);
+    void Write(char *name, char *str);
+    void Write(char *name, char c);
+
+    void BeginObject(char *name);
+    void EndObject();
+
+    void BeginArray(char *name);
+    void EndArray();
+
+    void AdvanceTabs();
+
+    Serializer serializer;
+    u32 tabOffset = 2;
+    u32 curTabOffset = 0;
+};
+
 #endif // _SERIALIZER_H_
