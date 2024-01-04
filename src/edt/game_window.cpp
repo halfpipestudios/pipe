@@ -122,10 +122,10 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         Vec3 n0 = Vec3(0, 0, 1);
         Vec3 n1 = Vec3(0, 1, 0);
         
-        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = EntityManager::Get()->GetComponent<TransformCMP>(*editor->selectedEntity);
         transform->pos.x = CalculateNewTransformPosition(camera, &X, n0, n1).x;
 
-        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = EntityManager::Get()->GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
@@ -136,11 +136,11 @@ void GameWindow::Update(Editor *editor, f32 dt) {
 
         ASSERT(editor->selectedEntity);
 
-        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = EntityManager::Get()->GetComponent<TransformCMP>(*editor->selectedEntity);
         Vec3 n = (transform->pos - camera->pos);
         transform->pos.y = CalculateNewTransformPosition(camera, &X, n, n).y;
 
-        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = EntityManager::Get()->GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
@@ -155,10 +155,10 @@ void GameWindow::Update(Editor *editor, f32 dt) {
         Vec3 n0 = Vec3(1, 0, 0);
         Vec3 n1 = Vec3(0, 1, 0);
 
-        TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP *transform = EntityManager::Get()->GetComponent<TransformCMP>(*editor->selectedEntity);
         transform->pos.z = CalculateNewTransformPosition(camera, &X, n0, n1).z;
 
-        PhysicsCMP *physicCmp = editor->level->em.GetComponent<PhysicsCMP>(*editor->selectedEntity);
+        PhysicsCMP *physicCmp = EntityManager::Get()->GetComponent<PhysicsCMP>(*editor->selectedEntity);
         if(physicCmp) {
             physicCmp->physics.pos = transform->pos;
         }
@@ -202,7 +202,7 @@ void GameWindow::Render(Editor *editor) {
         GraphicsManager::Get()->SetDepthStencilState(false);
         
         ASSERT(editor->selectedEntity);
-        TransformCMP transform = *editor->level->em.GetComponent<TransformCMP>(*editor->selectedEntity);
+        TransformCMP transform = *EntityManager::Get()->GetComponent<TransformCMP>(*editor->selectedEntity);
         transform.rot   = Vec3(0, 0, 0);
         transform.scale = Vec3(1.2f, 1.2f, 1.2f);
         

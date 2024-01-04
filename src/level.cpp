@@ -107,28 +107,28 @@ void Map::Render() {
 }
 
 
-static SlotmapKey CreateHero(EntityManager& em, Model& model, Shader shader,
-                           AnimationClipSet *animationClipSet, Camera *camera) {
+static SlotmapKey CreateHero(Model& model, Shader shader,
+                             AnimationClipSet *animationClipSet, Camera *camera) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    SlotmapKey heroKey = em.AddEntity();
-    Entity_ *hero = em.GetEntity(heroKey);
+    SlotmapKey heroKey = EntityManager::Get()->AddEntity();
+    Entity_ *hero = EntityManager::Get()->GetEntity(heroKey);
     hero->name = "Hero";
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(heroKey);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(heroKey);
     transformCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
 
-    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(heroKey);
+    PhysicsCMP *physicsCmp = EntityManager::Get()->AddComponent<PhysicsCMP>(heroKey);
     physicsCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3());
 
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(heroKey);
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(heroKey);
     graphicsCmp->Initialize(model, shader);
 
-    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(heroKey);
+    AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(heroKey);
     animationCmp->Initialize(animationClipSet);
 
-    InputCMP *inputCmp = em.AddComponent<InputCMP>(heroKey);
+    InputCMP *inputCmp = EntityManager::Get()->AddComponent<InputCMP>(heroKey);
     inputCmp->Initialize(input, camera);
 
     Cylinder cylinder = {};
@@ -136,42 +136,41 @@ static SlotmapKey CreateHero(EntityManager& em, Model& model, Shader shader,
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.3f;
     cylinder.n = 0.75f;
-    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(heroKey);
+    CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(heroKey);
     collisionCmp->Initialize(cylinder);
 
     return heroKey;
     
 }
 
-static SlotmapKey CreateOrc(EntityManager& em,
-                          char *name,
-                          Vec3 pos,
-                          Model& model, Shader shader,
-                          AnimationClipSet *animationClipSet,
-                          
-                          u32 maxParticles,
-                          Shader soShader, GeometryShader soGeoShader,
-                          Shader dwShader, GeometryShader dwGeoShader,
-                          Handle texture,
+static SlotmapKey CreateOrc(char *name,
+                            Vec3 pos,
+                            Model& model, Shader shader,
+                            AnimationClipSet *animationClipSet,
+                            
+                            u32 maxParticles,
+                            Shader soShader, GeometryShader soGeoShader,
+                            Shader dwShader, GeometryShader dwGeoShader,
+                            Handle texture,
 
-                          BehaviorTree *bhTree = nullptr) {
+                            BehaviorTree *bhTree = nullptr) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
-    SlotmapKey orc = em.AddEntity();
-    Entity_ *orcPtr = em.GetEntity(orc);
+    SlotmapKey orc = EntityManager::Get()->AddEntity();
+    Entity_ *orcPtr = EntityManager::Get()->GetEntity(orc);
     orcPtr->name = name;
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(orc);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(orc);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
 
-    PhysicsCMP *physicsCmp = em.AddComponent<PhysicsCMP>(orc);
+    PhysicsCMP *physicsCmp = EntityManager::Get()->AddComponent<PhysicsCMP>(orc);
     physicsCmp->Initialize(pos, Vec3(), Vec3());
 
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(orc);
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(orc);
     graphicsCmp->Initialize(model, shader);
 
-    AnimationCMP *animationCmp = em.AddComponent<AnimationCMP>(orc);
+    AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(orc);
     animationCmp->Initialize(animationClipSet);
 
     Cylinder cylinder = {};
@@ -179,13 +178,13 @@ static SlotmapKey CreateOrc(EntityManager& em,
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.3f;
     cylinder.n = 0.75f;
-    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(orc);
+    CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(orc);
     collisionCmp->Initialize(cylinder);
 
-    AiCMP *aiCmp = em.AddComponent<AiCMP>(orc);
+    AiCMP *aiCmp = EntityManager::Get()->AddComponent<AiCMP>(orc);
     aiCmp->Initialize(STEERING_BEHAVIOR_FACE, 0.75f, 2.0f, true, bhTree);
 
-    ParticleCMP *parCmp = em.AddComponent<ParticleCMP>(orc);
+    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(orc);
     parCmp->Initialize(maxParticles, soShader, soGeoShader, dwShader, dwGeoShader, texture);
 
 
@@ -193,18 +192,19 @@ static SlotmapKey CreateOrc(EntityManager& em,
     
 }
 
-static SlotmapKey CreateRain(EntityManager& em, char *name, Vec3 pos,
-        Shader soRainShader, GeometryShader soRainGeoShader, Shader dwRainShader, GeometryShader dwRainGeoShader) {
+static SlotmapKey CreateRain(char *name, Vec3 pos,
+                             Shader soRainShader, GeometryShader soRainGeoShader,
+                             Shader dwRainShader, GeometryShader dwRainGeoShader) {
 
-    SlotmapKey rain = em.AddEntity();
+    SlotmapKey rain = EntityManager::Get()->AddEntity();
 
-    Entity_ *rainPtr = em.GetEntity(rain);
+    Entity_ *rainPtr = EntityManager::Get()->GetEntity(rain);
     rainPtr->name = name;
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(rain);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(rain);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
 
-    ParticleCMP *parCmp = em.AddComponent<ParticleCMP>(rain);
+    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(rain);
     parCmp->Initialize(1000, 
             soRainShader, soRainGeoShader,
             dwRainShader, dwRainGeoShader,
@@ -213,18 +213,19 @@ static SlotmapKey CreateRain(EntityManager& em, char *name, Vec3 pos,
     return rain;
 }
 
-static SlotmapKey CreateLava(EntityManager& em, char *name, Vec3 pos,
-        Shader soRainShader, GeometryShader soRainGeoShader, Shader dwRainShader, GeometryShader dwRainGeoShader) {
+static SlotmapKey CreateLava(char *name, Vec3 pos,
+                             Shader soRainShader, GeometryShader soRainGeoShader,
+                             Shader dwRainShader, GeometryShader dwRainGeoShader) {
 
-    SlotmapKey rain = em.AddEntity();
+    SlotmapKey rain = EntityManager::Get()->AddEntity();
 
-    Entity_ *rainPtr = em.GetEntity(rain);
+    Entity_ *rainPtr = EntityManager::Get()->GetEntity(rain);
     rainPtr->name = name;
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(rain);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(rain);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
 
-    ParticleCMP *parCmp = em.AddComponent<ParticleCMP>(rain);
+    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(rain);
     parCmp->Initialize(2000, 
             soRainShader, soRainGeoShader,
             dwRainShader, dwRainGeoShader,
@@ -234,16 +235,16 @@ static SlotmapKey CreateLava(EntityManager& em, char *name, Vec3 pos,
 }
 
 
-static SlotmapKey CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
-    SlotmapKey platform = em.AddEntity();
-    Entity_ *platformPtr = em.GetEntity(platform);
+static SlotmapKey CreateMovingPlatform(char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
+    SlotmapKey platform = EntityManager::Get()->AddEntity();
+    Entity_ *platformPtr = EntityManager::Get()->GetEntity(platform);
     platformPtr->name = name;
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(platform);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(platform);
     transformCmp->Initialize(a, Vec3(), scale);
 
     Model *model = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("cube.twm"));
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(platform);
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(platform);
     graphicsCmp->Initialize(*model, shader);
 
     // Collider
@@ -255,25 +256,25 @@ static SlotmapKey CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale
     memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
     entity.facesCount = 6;
 
-    CollisionCMP *collisionCmp = em.AddComponent<CollisionCMP>(platform);
+    CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(platform);
     collisionCmp->Initialize(convexHull, entity);
 
-    MovingPlatformCMP *movingCmp = em.AddComponent<MovingPlatformCMP>(platform);
+    MovingPlatformCMP *movingCmp = EntityManager::Get()->AddComponent<MovingPlatformCMP>(platform);
     movingCmp->Initialize(a, b);
 
     return platform;
 }
 
-static SlotmapKey CreateGem(EntityManager& em, SlotmapKey whoTriggerThis, Model& model, Vec3 position, Shader shader) {
+static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Model& model, Vec3 position, Shader shader) {
 
-    SlotmapKey gem = em.AddEntity();
-    Entity_ *gemPtr = em.GetEntity(gem);
+    SlotmapKey gem = EntityManager::Get()->AddEntity();
+    Entity_ *gemPtr = EntityManager::Get()->GetEntity(gem);
     gemPtr->name = "gem";
     
-    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(gem);
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(gem);
     transformCmp->Initialize(position, Vec3(), Vec3(0.2f, 0.2f, 0.2f));
 
-    GraphicsCMP *graphicsCmp = em.AddComponent<GraphicsCMP>(gem);
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(gem);
     graphicsCmp->Initialize(model, shader);
 
     Cylinder cylinder = {};
@@ -281,10 +282,10 @@ static SlotmapKey CreateGem(EntityManager& em, SlotmapKey whoTriggerThis, Model&
     cylinder.u = Vec3(0, 1, 0);
     cylinder.radii = 0.2f;
     cylinder.n = 0.25f;
-    TriggerCMP *triggerCmp = em.AddComponent<TriggerCMP>(gem);
+    TriggerCMP *triggerCmp = EntityManager::Get()->AddComponent<TriggerCMP>(gem);
     triggerCmp->Initialize(whoTriggerThis, cylinder);
 
-    GemCMP *gemCmp = em.AddComponent<GemCMP>(gem);
+    GemCMP *gemCmp = EntityManager::Get()->AddComponent<GemCMP>(gem);
 
     i32 value = rand() % (50 + 1) + 50;
 
@@ -314,7 +315,7 @@ void Level::DestroyEntityAndComponents(SlotmapKey entityKey) {
     if(indexToDelete == -1) {
         return;
     } else {
-        em.DeleteEntity(entityKey); 
+        EntityManager::Get()->DeleteEntity(entityKey); 
         entities[indexToDelete] = entities[entities.size - 1];
         --entities.size;
         return;
@@ -339,18 +340,18 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
 
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     
-    em.Initialize();
-    em.AddComponentType<TransformCMP>();
-    em.AddComponentType<GraphicsCMP>();
-    em.AddComponentType<PhysicsCMP>();
-    em.AddComponentType<AnimationCMP>();
-    em.AddComponentType<InputCMP>();
-    em.AddComponentType<CollisionCMP>();
-    em.AddComponentType<MovingPlatformCMP>();
-    em.AddComponentType<AiCMP>();
-    em.AddComponentType<TriggerCMP>();
-    em.AddComponentType<GemCMP>();
-    em.AddComponentType<ParticleCMP>();
+    EntityManager::Get()->Initialize();
+    EntityManager::Get()->AddComponentType<TransformCMP>();
+    EntityManager::Get()->AddComponentType<GraphicsCMP>();
+    EntityManager::Get()->AddComponentType<PhysicsCMP>();
+    EntityManager::Get()->AddComponentType<AnimationCMP>();
+    EntityManager::Get()->AddComponentType<InputCMP>();
+    EntityManager::Get()->AddComponentType<CollisionCMP>();
+    EntityManager::Get()->AddComponentType<MovingPlatformCMP>();
+    EntityManager::Get()->AddComponentType<AiCMP>();
+    EntityManager::Get()->AddComponentType<TriggerCMP>();
+    EntityManager::Get()->AddComponentType<GemCMP>();
+    EntityManager::Get()->AddComponentType<ParticleCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath, mapShader);
@@ -390,34 +391,33 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwLavaShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwLavaVert.hlsl", "./data/shaders/dwLavaFrag.hlsl");
     dwLavaGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwLavaGeo.hlsl");
 
-    entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, camera));
+    entities.Push(CreateHero(*heroModel, animShader, heroAnim, camera));
 
-    entities.Push(CreateOrc(em, "orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim, 
+    entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png")));
-    entities.Push(CreateOrc(em, "orc_2",  Vec3(0, 4, 15), *orcModel, animShader, heroAnim, 
+    entities.Push(CreateOrc("orc_2",  Vec3(0, 4, 15), *orcModel, animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("raindrop1.png")));
-    entities.Push(CreateOrc(em, "orc_3", Vec3(0, 4, 8),  *orcModel, animShader, heroAnim,
+    entities.Push(CreateOrc("orc_3", Vec3(0, 4, 8),  *orcModel, animShader, heroAnim,
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png"), &bhTree));
 
-    entities.Push(CreateRain(em, "rain", Vec3(), soRainShader, soRainGeoShader, dwRainShader, dwRainGeoShader)); 
-    entities.Push(CreateLava(em, "lava", Vec3(0, -11.11f, 73.5f), soLavaShader, soLavaGeoShader, dwLavaShader, dwLavaGeoShader)); 
+    entities.Push(CreateRain("rain", Vec3(), soRainShader, soRainGeoShader, dwRainShader, dwRainGeoShader)); 
+    entities.Push(CreateLava("lava", Vec3(0, -11.11f, 73.5f), soLavaShader, soLavaGeoShader, dwLavaShader, dwLavaGeoShader)); 
 
-    entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(  1, -0.5f, 67),    Vec3(22,  -0.5f, 67), statShader));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(4, 0.5f, 2), Vec3(  0, -0.5f, 78),    Vec3(26,  -0.5f, 78), statShader));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_3", Vec3(4, 0.5f, 2), Vec3( 22, -0.5f, 86),    Vec3(0, -0.5f, 86),  statShader));
-    entities.Push(CreateMovingPlatform(em, "mov_plat_4", Vec3(4, 0.5f, 2), Vec3(-22,  0.0f, 88.2f), Vec3(0,  0.0f, 88.2f),  statShader));
-
+    entities.Push(CreateMovingPlatform("mov_plat_1", Vec3(2, 0.5f, 2), Vec3(  1, -0.5f, 67),    Vec3(22,  -0.5f, 67), statShader));
+    entities.Push(CreateMovingPlatform("mov_plat_2", Vec3(4, 0.5f, 2), Vec3(  0, -0.5f, 78),    Vec3(26,  -0.5f, 78), statShader));
+    entities.Push(CreateMovingPlatform("mov_plat_3", Vec3(4, 0.5f, 2), Vec3( 22, -0.5f, 86),    Vec3(0, -0.5f, 86),  statShader));
+    entities.Push(CreateMovingPlatform("mov_plat_4", Vec3(4, 0.5f, 2), Vec3(-22,  0.0f, 88.2f), Vec3(0,  0.0f, 88.2f),  statShader));
 
     //entities.Push(CreateGem(em, entities[0], *gemModel, Vec3(8, 2.2f, 8), statShader));
     for(i32 y = 0; y < 10; y++) {
         for(i32 x = 0; x < 10; x++) {
-            entities.Push(CreateGem(em, entities[0], *gemModel, Vec3(-4 + (f32)x, 2.2f, 8 + (f32)y), statShader));
+            entities.Push(CreateGem(entities[0], *gemModel, Vec3(-4 + (f32)x, 2.2f, 8 + (f32)y), statShader));
         }
     }
 
     heroKey = entities[0];
 
-    TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
+    TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
 }
 
@@ -451,7 +451,7 @@ void Level::Terminate() {
     GraphicsManager::Get()->DestroyShader(dwLavaShader);
     GraphicsManager::Get()->DestroyGeometryShader(dwLavaGeoShader);
 
-    em.Terminate();
+    EntityManager::Get()->Terminate();
 
     memory.EndFrame();
 }
@@ -470,8 +470,9 @@ void Level::Update(f32 dt) {
 
     if(dt > 0) gameTime += dt;
 
-    Input *input = PlatformManager::Get()->GetInput();
-
+    // TODO: Remove this pointer to EntityManager
+    EntityManager em = *EntityManager::Get();
+    
     physicsSys.PreUpdate(em, dt);
     inputSys.Update(em, dt);
     aiSys.Update(em, dt);
@@ -484,7 +485,7 @@ void Level::Update(f32 dt) {
     gemSys.Update(em , this, dt);
     transformSys.Update(em);
 
-    TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
+    TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     camera->SetTarget(heroTransform->pos);
 
     particleSys.Update(em, camera->pos, gameTime, dt);
@@ -492,6 +493,9 @@ void Level::Update(f32 dt) {
 
 void Level::Render() {
     map.Render();
+
+    // TODO: Remove this pointer to EntityManager
+    EntityManager em = *EntityManager::Get();
     graphicsSys.Update(em);
     particleSys.Render(em);
 }
@@ -503,7 +507,7 @@ void Level::Serialize(Serializer *s) {
     Write(s, "num_entities", (i32)entities.size);
     BeginArray(s, "entities");
     for(i32 i = 0; i <  entities.size; ++i) {
-        Entity_ *entity = em.GetEntity(entities[i]);
+        Entity_ *entity = EntityManager::Get()->GetEntity(entities[i]);
         entity->Serialize(s);
     }
     EndArray(s);

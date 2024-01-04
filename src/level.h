@@ -57,7 +57,6 @@ struct Level : Serializable {
     void SetCamera(Camera *camera) { this->camera = camera; }
 
     MemoryFrame memory; 
-    EntityManager em;
 
     GraphicsSys<EntityManager> graphicsSys;
     TransformSys<EntityManager> transformSys;
