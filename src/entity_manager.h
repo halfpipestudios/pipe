@@ -13,6 +13,20 @@ struct EntityManager {
         componentsStorage.Initialize();
     }
 
+    void Terminate() {
+        // destroy all entities and component stored on the entity manager
+        for(i32 i = 0; i < entities.data.size; ++i) {
+            Entity_ *entity = &entities.data[i];
+            for(i32 i = 0; i < entity->componentsIds.size; ++i) {
+                u32 cmpID = entity->componentsIds[i]; 
+                ComponentSlotmapBase* slotmap = componentsStorage.GetComponentsSlotmapById(cmpID);
+                SlotmapKey componentKey = entity->componentsKeys.Get(cmpID);
+                slotmap->DestroyComponent(componentKey);
+            }            
+        }
+    
+    }
+
     template <typename ComponentType>
     void AddComponentType() {
         componentsStorage.AddComponentType<ComponentType>();

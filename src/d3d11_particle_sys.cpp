@@ -127,7 +127,7 @@ void D3D11ParticleSystem::Terminate() {
 }
 
 void D3D11ParticleSystem::Reset() {
-    firstRun = true;
+   firstRun = true;
     age = 0.0f;
 }
 

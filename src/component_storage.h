@@ -15,6 +15,7 @@ template <typename ComponentType>
 struct ComponentSlotmap : ComponentSlotmapBase {
     Slotmap<ComponentType> components;
     void DestroyComponent(SlotmapKey key) override {
+        components.Get(key).Terminate();
         components.Remove(key);
     }
 };
@@ -41,12 +42,6 @@ struct ComponentStorage {
         ComponentSlotmapBase*slotmap = slotmaps.Get(id);
         return slotmap;
     }
-    /*
-    ComponentSlotmapBase *GetComponentsByID(i32 id) {
-        ComponentSlotmapBase *componentArray = componentsArraysMap.Get(id);
-        return componentArray;
-    }
-    */
 
     template <typename ComponentType>
     void AddComponentType() {

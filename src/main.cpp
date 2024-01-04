@@ -53,11 +53,9 @@ int main() {
         GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
         GraphicsManager::Get()->SetViewport(0, 0, w, h);
         GraphicsManager::Get()->BindFrameBuffer(nullptr);
-        //GraphicsManager::Get()->ClearColorBuffer(nullptr, 0.5f, 0.0f, 1.0f);
-        GraphicsManager::Get()->ClearColorBuffer(nullptr, 0.1f, 0.05f, 0.4f);
+        GraphicsManager::Get()->ClearColorBuffer(nullptr, 0.1f, 1.0f, 0.4f);
         GraphicsManager::Get()->ClearDepthStencilBuffer(nullptr);
         
-        // TODO: game.FixUpdate() game.PostUpdate();
         
         game.BeginFrame(deltaTime);
         if(editorIsActive) {
