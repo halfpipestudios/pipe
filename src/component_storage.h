@@ -9,14 +9,21 @@
 
 struct ComponentSlotmapBase {
     virtual void DestroyComponent(SlotmapKey key) = 0;
+    virtual CMPBase *GetBaseComponent(SlotmapKey key) = 0;
 };
 
 template <typename ComponentType>
 struct ComponentSlotmap : ComponentSlotmapBase {
     Slotmap<ComponentType> components;
+    
     void DestroyComponent(SlotmapKey key) override {
         components.Get(key).Terminate();
         components.Remove(key);
+    }
+
+
+    CMPBase *GetBaseComponent(SlotmapKey key) override {
+        return (CMPBase *)&components.Get(key);
     }
 };
 

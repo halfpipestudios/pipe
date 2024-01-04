@@ -8,7 +8,7 @@ struct CMPBase : Serializable {
     i32 id               { -1 };
     SlotmapKey entityKey { };
 
-    void Serialize(Serializer *s) override { (void)s; };
+    void Serialize(Serializer *s) override { Write(s, "type", "unknow"); };
 
 protected:
     inline static i32 counter { 0 };

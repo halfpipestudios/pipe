@@ -14,7 +14,6 @@ struct ParticleCMP : CMP<ParticleCMP> {
         particleSys = GraphicsManager::Get()->CreateParticleSystem(maxParticles,
                 soShader, soGeoShader, dwShader, dwGeoShader, texture);
 
-
     }
 
     void Terminate() override {

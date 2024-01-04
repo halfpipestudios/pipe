@@ -101,6 +101,12 @@ struct EntityManager {
         entities.Remove(entityKey);
     }
 
+    CMPBase *GetComponentBasePtrByCmpID(Entity_ *entity, u32 cmpID) {
+        ComponentSlotmapBase* slotmap = componentsStorage.GetComponentsSlotmapById(cmpID);
+        SlotmapKey componentKey = entity->componentsKeys.Get(cmpID);
+        return slotmap->GetBaseComponent(componentKey); 
+    }
+
 
     template <typename ComponentType>
     ComponentType *AddComponent(SlotmapKey entityKey) {
