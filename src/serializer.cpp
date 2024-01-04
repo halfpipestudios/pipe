@@ -16,10 +16,11 @@ void Serializer::Begin() {
     size = 0;
 }
 
-void Serializer::End() {
+void Serializer::End(char *path) {
 
-    WriteCharacter('\0');
-    printf("%s\n", data);
+    FILE *file = fopen(path, "w");
+    fwrite(data, size, 1, file);
+    fclose(file);
     
     // TODO: Must be at the end of this functions
     data = nullptr;

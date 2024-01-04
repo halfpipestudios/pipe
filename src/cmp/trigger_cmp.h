@@ -8,6 +8,12 @@ struct TriggerCMP : CMP<TriggerCMP> {
         this->collider = collider;
         whoTriggerThis = who;
     }
+
+    void Serialize(Serializer *s) override {
+        BeginObject(s, "trigger");
+        EndObject(s);
+    };
+
 };
 
 #endif

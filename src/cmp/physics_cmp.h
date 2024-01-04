@@ -25,6 +25,33 @@ struct PhysicsCMP : CMP<PhysicsCMP> {
     PhysicsState lastPhysics { };
     Vec3 velXZ               { };
     Vec3 viewDir             { };
+
+
+    void Serialize(Serializer *s) override {
+        BeginObject(s, "physics");
+        
+        BeginObject(s, "position");
+        Write(s, "x", physics.pos.x);
+        Write(s, "y", physics.pos.y);
+        Write(s, "z", physics.pos.z);
+        EndObject(s);
+
+        BeginObject(s, "velocity");
+        Write(s, "x", physics.vel.x);
+        Write(s, "y", physics.vel.y);
+        Write(s, "z", physics.vel.z);
+        EndObject(s);
+
+        BeginObject(s, "acceleration");
+        Write(s, "x", physics.acc.x);
+        Write(s, "y", physics.acc.y);
+        Write(s, "z", physics.acc.z);
+        EndObject(s);
+        
+        
+        EndObject(s);
+    };
+
 };
 
 #endif // _PHYSICS_CMP_H_

@@ -10,6 +10,15 @@ struct GemCMP : CMP<GemCMP> {
         this->value = value;
         this->timerOffset = (f32)value; //(value - 50.0f) / 49.0f;
     }
+
+    void Serialize(Serializer *s) override {
+        BeginObject(s, "gem");
+        Write(s, "value", value);
+        Write(s, "timer", timer);
+        Write(s, "timer_offset", timerOffset);
+        EndObject(s);
+    };
+
 };
 
 #endif // _GEM_CMP_H_

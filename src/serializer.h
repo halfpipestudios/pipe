@@ -10,7 +10,7 @@ struct Level;
 struct Serializer {
     
     void Begin();
-    void End();
+    void End(char *path);
 
     void WriteBytes(u8 *buffer, u32 size);
 

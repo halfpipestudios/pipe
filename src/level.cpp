@@ -107,8 +107,7 @@ void Map::Render() {
 }
 
 
-static SlotmapKey CreateHero(Model& model, Shader shader,
-                             AnimationClipSet *animationClipSet, Camera *camera) {
+static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, Camera *camera) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -123,7 +122,7 @@ static SlotmapKey CreateHero(Model& model, Shader shader,
     physicsCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3());
 
     GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(heroKey);
-    graphicsCmp->Initialize(model, shader);
+    graphicsCmp->Initialize("hero.twm", shader);
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(heroKey);
     animationCmp->Initialize(animationClipSet);
@@ -145,7 +144,7 @@ static SlotmapKey CreateHero(Model& model, Shader shader,
 
 static SlotmapKey CreateOrc(char *name,
                             Vec3 pos,
-                            Model& model, Shader shader,
+                            Shader shader,
                             AnimationClipSet *animationClipSet,
                             
                             u32 maxParticles,
@@ -168,7 +167,7 @@ static SlotmapKey CreateOrc(char *name,
     physicsCmp->Initialize(pos, Vec3(), Vec3());
 
     GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(orc);
-    graphicsCmp->Initialize(model, shader);
+    graphicsCmp->Initialize("orc.twm", shader);
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(orc);
     animationCmp->Initialize(animationClipSet);
@@ -243,9 +242,8 @@ static SlotmapKey CreateMovingPlatform(char *name, Vec3 scale, Vec3 a, Vec3 b, S
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(platform);
     transformCmp->Initialize(a, Vec3(), scale);
 
-    Model *model = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("cube.twm"));
     GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(platform);
-    graphicsCmp->Initialize(*model, shader);
+    graphicsCmp->Initialize("cube.twm", shader);
 
     // Collider
     ConvexHull convexHull {};
@@ -265,7 +263,7 @@ static SlotmapKey CreateMovingPlatform(char *name, Vec3 scale, Vec3 a, Vec3 b, S
     return platform;
 }
 
-static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Model& model, Vec3 position, Shader shader) {
+static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Vec3 position, Shader shader) {
 
     SlotmapKey gem = EntityManager::Get()->AddEntity();
     Entity_ *gemPtr = EntityManager::Get()->GetEntity(gem);
@@ -275,7 +273,7 @@ static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Model& model, Vec3 positi
     transformCmp->Initialize(position, Vec3(), Vec3(0.2f, 0.2f, 0.2f));
 
     GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(gem);
-    graphicsCmp->Initialize(model, shader);
+    graphicsCmp->Initialize("gem.twm", shader);
 
     Cylinder cylinder = {};
     cylinder.c = position;
@@ -369,10 +367,6 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     
     AnimationClipSet *heroAnim = AnimationManager::Get()->Dereference(AnimationManager::Get()->GetAsset("hero.twa"));
 
-    Model *heroModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("hero.twm"));
-    Model *orcModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("orc.twm"));
-    Model *gemModel = ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset("gem.twm"));
-
     // Shaders for FIRE particle system
     soFireShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/soFireVert.hlsl", "./data/shaders/soFireFrag.hlsl");
     soFireGeoShader = GraphicsManager::Get()->CreateGeometryShaderWithStreamOutput("./data/shaders/soFireGeo.hlsl");
@@ -391,13 +385,13 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwLavaShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwLavaVert.hlsl", "./data/shaders/dwLavaFrag.hlsl");
     dwLavaGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwLavaGeo.hlsl");
 
-    entities.Push(CreateHero(*heroModel, animShader, heroAnim, camera));
+    entities.Push(CreateHero(animShader, heroAnim, camera));
 
-    entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim, 
+    entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png")));
-    entities.Push(CreateOrc("orc_2",  Vec3(0, 4, 15), *orcModel, animShader, heroAnim, 
+    entities.Push(CreateOrc("orc_2",  Vec3(0, 4, 15), animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("raindrop1.png")));
-    entities.Push(CreateOrc("orc_3", Vec3(0, 4, 8),  *orcModel, animShader, heroAnim,
+    entities.Push(CreateOrc("orc_3", Vec3(0, 4, 8),  animShader, heroAnim,
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png"), &bhTree));
 
     entities.Push(CreateRain("rain", Vec3(), soRainShader, soRainGeoShader, dwRainShader, dwRainGeoShader)); 
@@ -411,7 +405,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     //entities.Push(CreateGem(em, entities[0], *gemModel, Vec3(8, 2.2f, 8), statShader));
     for(i32 y = 0; y < 10; y++) {
         for(i32 x = 0; x < 10; x++) {
-            entities.Push(CreateGem(entities[0], *gemModel, Vec3(-4 + (f32)x, 2.2f, 8 + (f32)y), statShader));
+            entities.Push(CreateGem(entities[0], Vec3(-4 + (f32)x, 2.2f, 8 + (f32)y), statShader));
         }
     }
 
@@ -427,7 +421,7 @@ void Level::Terminate() {
     Serializer s;
     s.Begin();
     Serialize(&s);
-    s.End();
+    s.End("level.dat");
     // -------------------------------
 
     map.Terminate();

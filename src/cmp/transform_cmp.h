@@ -23,9 +23,24 @@ struct TransformCMP : CMP<TransformCMP> {
     void Serialize(Serializer *s) override {
         BeginObject(s, "transform");
         
-        Write(s, "position", 1);
-        Write(s, "rotation", 2);
-        Write(s, "scale", 3);
+        BeginObject(s, "position");
+        Write(s, "x", pos.x);
+        Write(s, "y", pos.y);
+        Write(s, "z", pos.z);
+        EndObject(s);
+
+        BeginObject(s, "rotation");
+        Write(s, "x", rot.x);
+        Write(s, "y", rot.y);
+        Write(s, "z", rot.z);
+        EndObject(s);
+
+        BeginObject(s, "scale");
+        Write(s, "x", scale.x);
+        Write(s, "y", scale.y);
+        Write(s, "z", scale.z);
+        EndObject(s);
+        
         
         EndObject(s);
     };

@@ -30,6 +30,21 @@ struct CollisionCMP : CMP<CollisionCMP> {
     CollisionCMP() {}
     void Initialize(Cylinder cylinder);
     void Initialize(ConvexHull convexHull, MapImporter::Entity entity);
+    
+    char *TypeToStr() {
+        switch(type) {
+            case COLLIDER_CYLINDER_: return "cylinder";
+            case COLLIDER_CONVEXHULL_: return "convex_hull";
+        }
+        ASSERT(!"invalid code path");
+        return nullptr;
+    }
+
+    void Serialize(Serializer *s) override {
+        BeginObject(s, "collision");
+        Write(s, "type", TypeToStr());
+        EndObject(s);
+    };
 
 };
 

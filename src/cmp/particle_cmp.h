@@ -21,6 +21,11 @@ struct ParticleCMP : CMP<ParticleCMP> {
         printf("ParticleCMP terminate\n"); 
     } 
 
+    void Serialize(Serializer *s) override {
+        BeginObject(s, "particle");
+        EndObject(s);
+    };
+
 };
 
 #endif // _PARTICLE_CMP_H_
