@@ -213,6 +213,26 @@ static SlotmapKey CreateRain(EntityManager& em, char *name, Vec3 pos,
     return rain;
 }
 
+static SlotmapKey CreateLava(EntityManager& em, char *name, Vec3 pos,
+        Shader soRainShader, GeometryShader soRainGeoShader, Shader dwRainShader, GeometryShader dwRainGeoShader) {
+
+    SlotmapKey rain = em.AddEntity();
+
+    Entity_ *rainPtr = em.GetEntity(rain);
+    rainPtr->name = name;
+    
+    TransformCMP *transformCmp = em.AddComponent<TransformCMP>(rain);
+    transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
+
+    ParticleCMP *parCmp = em.AddComponent<ParticleCMP>(rain);
+    parCmp->Initialize(2000, 
+            soRainShader, soRainGeoShader,
+            dwRainShader, dwRainGeoShader,
+            TextureManager::Get()->GetAsset("flare.png"));
+
+    return rain;
+}
+
 
 static SlotmapKey CreateMovingPlatform(EntityManager& em, char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
     SlotmapKey platform = em.AddEntity();
@@ -364,6 +384,12 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwRainShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwRainVert.hlsl", "./data/shaders/dwRainFrag.hlsl");
     dwRainGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwRainGeo.hlsl");
 
+    // Shaders for LAVA particle system
+    soLavaShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/soLavaVert.hlsl", "./data/shaders/soLavaFrag.hlsl");
+    soLavaGeoShader = GraphicsManager::Get()->CreateGeometryShaderWithStreamOutput("./data/shaders/soLavaGeo.hlsl");
+    dwLavaShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwLavaVert.hlsl", "./data/shaders/dwLavaFrag.hlsl");
+    dwLavaGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwLavaGeo.hlsl");
+
     entities.Push(CreateHero(em, *heroModel, animShader, heroAnim, camera));
 
     entities.Push(CreateOrc(em, "orc_1",  Vec3(0, 4, 20), *orcModel, animShader, heroAnim, 
@@ -374,6 +400,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png"), &bhTree));
 
     entities.Push(CreateRain(em, "rain", Vec3(), soRainShader, soRainGeoShader, dwRainShader, dwRainGeoShader)); 
+    entities.Push(CreateLava(em, "lava", Vec3(0, -13.5f, 73.5f), soLavaShader, soLavaGeoShader, dwLavaShader, dwLavaGeoShader)); 
 
     entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(  1, -0.5f, 67),    Vec3(22,  -0.5f, 67), statShader));
     entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(4, 0.5f, 2), Vec3(  0, -0.5f, 78),    Vec3(26,  -0.5f, 78), statShader));
@@ -418,6 +445,11 @@ void Level::Terminate() {
     GraphicsManager::Get()->DestroyGeometryShader(soRainGeoShader);
     GraphicsManager::Get()->DestroyShader(dwRainShader);
     GraphicsManager::Get()->DestroyGeometryShader(dwRainGeoShader);
+
+    GraphicsManager::Get()->DestroyShader(soLavaShader);
+    GraphicsManager::Get()->DestroyGeometryShader(soLavaGeoShader);
+    GraphicsManager::Get()->DestroyShader(dwLavaShader);
+    GraphicsManager::Get()->DestroyGeometryShader(dwLavaGeoShader);
 
     em.Terminate();
 

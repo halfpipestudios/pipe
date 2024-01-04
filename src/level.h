@@ -95,6 +95,12 @@ struct Level : Serializable {
     Shader dwRainShader;
     GeometryShader dwRainGeoShader;
 
+    // Lava particle system shaders
+    Shader soLavaShader;
+    GeometryShader soLavaGeoShader;
+    Shader dwLavaShader;
+    GeometryShader dwLavaGeoShader;
+
     f32 gameTime { 0 };
 
 private:

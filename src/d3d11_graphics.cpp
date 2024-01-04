@@ -434,7 +434,7 @@ static Shader CreateShader(ID3D11Device *device, ObjectAllocator<D3D11Shader>* s
                         &errorFragmentShader);
     if(errorFragmentShader) {
         char *errorString = (char *)errorFragmentShader->GetBufferPointer();
-        printf("error compiling fragment shader (%s): %s", fragpath, errorString);
+        printf("error compiling fragment shader (%s): %s", fragpath, errorString); 
         errorFragmentShader->Release();
         ASSERT(!"INVALID_CODE_PATH")
     }
