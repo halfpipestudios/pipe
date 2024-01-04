@@ -26,7 +26,7 @@ void ComponentsWindow::Update(Editor *editor, f32 dt) {
         return;
     }
 
-    Entity_ *selectedEntity = editor->level->em.GetEntity(*editor->selectedEntity);
+    Entity_ *selectedEntity = EntityManager::Get()->GetEntity(*editor->selectedEntity);
 
     if(selectedEntity) {
 
@@ -71,7 +71,7 @@ void ComponentsWindow::Render(Editor *editor) {
 
 void ComponentsWindow::UpdateTransformComponent(Editor *editor, SlotmapKey entityKey) {
 
-    TransformCMP *transform = editor->level->em.GetComponent<TransformCMP>(entityKey);
+    TransformCMP *transform = EntityManager::Get()->GetComponent<TransformCMP>(entityKey);
     ASSERT(transform);
     
     u32 w = 72;
@@ -107,7 +107,7 @@ void ComponentsWindow::UpdateTransformComponent(Editor *editor, SlotmapKey entit
 }
 
 void ComponentsWindow::UpdatePhysicsComponent(Editor *editor, SlotmapKey entityKey) {
-    PhysicsCMP *physicComp = editor->level->em.GetComponent<PhysicsCMP>(entityKey);
+    PhysicsCMP *physicComp = EntityManager::Get()->GetComponent<PhysicsCMP>(entityKey);
     ASSERT(physicComp);
 
     PhysicsState *p = &physicComp->physics;
@@ -145,7 +145,7 @@ void ComponentsWindow::UpdatePhysicsComponent(Editor *editor, SlotmapKey entityK
 }
 
 void ComponentsWindow::UpdateCollisionComponent(Editor *editor, SlotmapKey entityKey) {
-    CollisionCMP *col = editor->level->em.GetComponent<CollisionCMP>(entityKey);
+    CollisionCMP *col = EntityManager::Get()->GetComponent<CollisionCMP>(entityKey);
     ASSERT(col);
     u32 w = 72;
     u32 h = 28;
@@ -193,7 +193,7 @@ void ComponentsWindow::UpdatePlayerAnimationComponent(Editor *editor, SlotmapKey
 }
 
 void ComponentsWindow::UpdateMovingPlatformComponent(Editor *editor, SlotmapKey entityKey) {
-    MovingPlatformCMP *movingComp = editor->level->em.GetComponent<MovingPlatformCMP>(entityKey);
+    MovingPlatformCMP *movingComp = EntityManager::Get()->GetComponent<MovingPlatformCMP>(entityKey);
     ASSERT(movingComp);
     u32 w = 72;
     u32 h = 28;

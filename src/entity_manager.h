@@ -7,7 +7,7 @@
 #define ENTITY_ARRAY_MAX_SIZE 120
 
 struct EntityManager {
-
+    
     void Initialize() {
         entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
         componentsStorage.Initialize();
@@ -105,11 +105,16 @@ struct EntityManager {
         // return a pointer to the component 
         return component;
     }
+    
+    inline static EntityManager *Get() { return &entityManager; }
 
 private:
 
     Slotmap<Entity_> entities;
     ComponentStorage componentsStorage;
+
+    static EntityManager entityManager;
+
 };
 
 #endif // _ENTITY_MANAGER_H_

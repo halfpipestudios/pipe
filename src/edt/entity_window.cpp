@@ -12,7 +12,7 @@ void EntityWindow::Update(Editor *editor, f32 dt) {
 
     for(i32 i = 0; i < entities.size; ++i) {
         SlotmapKey *entityKey = &entities[i];
-        Entity_ *entity = level->em.GetEntity(*entityKey);
+        Entity_ *entity = EntityManager::Get()->GetEntity(*entityKey);
         _tgui_tree_view_node(entity->name, (void *)entityKey);
     }
 

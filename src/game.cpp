@@ -83,7 +83,7 @@ void Game::Update(f32 dt) {
     camera.ProcessMovement(&level.map, dt);
      
     if(dt > 0.0f) {
-        TransformCMP *heroTransform = level.em.GetComponent<TransformCMP>(level.heroKey);
+        TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(level.heroKey);
         GraphicsManager::Get()->UpdateParticleSystem(firePS, Vec3(0, 3, 0), camera.pos, gameTime, dt);
         //GraphicsManager::Get()->UpdateParticleSystem(rainPS, Vec3(1.85f, -5.25f, 152.63f), camera.pos, gameTime, dt);
         GraphicsManager::Get()->UpdateParticleSystem(rainPS, heroTransform->pos, camera.pos, gameTime, dt);
