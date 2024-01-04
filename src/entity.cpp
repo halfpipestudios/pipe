@@ -10,7 +10,7 @@ void Entity_::Serialize(Serializer *s) {
     for(u32 i = 0; i < componentsIds.size; ++i) {
         
         // CMPBase *cmp = EntityManager::Get()->GetComponent(id);
-
+        
         BeginObject(s, "component");
         Write(s, "id", (i32)componentsIds[i]);
         EndObject(s);
