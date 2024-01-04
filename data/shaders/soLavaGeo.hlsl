@@ -43,7 +43,7 @@ float3 RandomVec3(float offset) {
 #define PT_EMITTER 0
 #define PT_FLARE 1
 
-[maxvertexcount(10)]
+[maxvertexcount(6)]
 void GS(point Particle gin[1],
         inout PointStream<Particle> ptStream) {
 
@@ -52,15 +52,15 @@ void GS(point Particle gin[1],
         // time to emit a new particle?
         if(gin[0].age > 0.002f) {
 
-            for(int i = 0; i < 9; ++i) {
+            for(int i = 0; i < 5; ++i) {
 
-                float3 vRandom = 35.0f*RandomVec3((float)i/9.0f);
+                float3 vRandom = 35.0f*RandomVec3((float)i/5.0f);
                 vRandom.y = 0.0f;
 
                 Particle p;
                 p.pos = emitPosW + vRandom;
                 p.vel = RandomUnitVec3(0.0f);
-                p.sizeW = float2(6.0f, 6.0f);
+                p.sizeW = float2(12.0f, 24.0f);
                 p.age = 0.0f;
                 p.type = PT_FLARE;
 

@@ -400,7 +400,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png"), &bhTree));
 
     entities.Push(CreateRain(em, "rain", Vec3(), soRainShader, soRainGeoShader, dwRainShader, dwRainGeoShader)); 
-    entities.Push(CreateLava(em, "lava", Vec3(0, -13.5f, 73.5f), soLavaShader, soLavaGeoShader, dwLavaShader, dwLavaGeoShader)); 
+    entities.Push(CreateLava(em, "lava", Vec3(0, -11.11f, 73.5f), soLavaShader, soLavaGeoShader, dwLavaShader, dwLavaGeoShader)); 
 
     entities.Push(CreateMovingPlatform(em, "mov_plat_1", Vec3(2, 0.5f, 2), Vec3(  1, -0.5f, 67),    Vec3(22,  -0.5f, 67), statShader));
     entities.Push(CreateMovingPlatform(em, "mov_plat_2", Vec3(4, 0.5f, 2), Vec3(  0, -0.5f, 78),    Vec3(26,  -0.5f, 78), statShader));
@@ -483,10 +483,11 @@ void Level::Update(f32 dt) {
     animationSys.Update(em, dt);
     gemSys.Update(em , this, dt);
     transformSys.Update(em);
-    particleSys.Update(em, camera->pos, gameTime, dt);
 
     TransformCMP *heroTransform = em.GetComponent<TransformCMP>(heroKey);
     camera->SetTarget(heroTransform->pos);
+
+    particleSys.Update(em, camera->pos, gameTime, dt);
 }
 
 void Level::Render() {
