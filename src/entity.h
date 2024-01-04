@@ -5,6 +5,7 @@
 #include "cmp/base_cmp.h"
 
 #include "data_structures.inl"
+#include "serializer.h"
 
 struct Input;
 
@@ -16,7 +17,7 @@ enum EntityFlags {
     ENTITY_COLLIDING = 1 << 3,
 };
 
-struct Entity_ {
+struct Entity_ : Serializable {
 
     char *name;
     u32 flags;
@@ -25,6 +26,8 @@ struct Entity_ {
     inline void RemoveFlag(EntityFlags flag) { flags &= ~flag; }
     inline void ClearFlags() { flags = 0; };
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
+
+    void Serialize(Serializer *s) override;
 
     HashMap<SlotmapKey> componentsKeys;
     Array<u32> componentsIds;

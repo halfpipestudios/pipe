@@ -7,6 +7,7 @@
 #include "model_importer.h"
 #include "camera.h"
 #include "entity.h"
+#include "serializer.h"
 
 #include "behavior_tree.h"
 
@@ -38,7 +39,7 @@ struct Map {
     void Render();
 };
 
-struct Level {
+struct Level : Serializable {
 
     void Initialize(char *mapFilePath, Camera *camera,
             Shader mapShader, Shader statShader, Shader animShader);
@@ -78,6 +79,9 @@ struct Level {
     FrameArray<SlotmapKey> entitiesToRemove;
  
     BehaviorTree bhTree;
+    
+    // NOTE: Function used to serialize all the level
+    void Serialize(Serializer *s) override;
 
     // Fire particle system shaders
     Shader soFireShader;

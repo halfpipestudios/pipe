@@ -27,7 +27,7 @@ int main() {
     
     Editor editor;
     editor.Initialize(&game.level);
-
+    
     bool editorIsActive = false;
 
     f64 lastTimer = PlatformManager::Get()->GetTimeInSeconds();

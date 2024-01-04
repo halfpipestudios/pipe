@@ -396,6 +396,13 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
 
 void Level::Terminate() {
     
+    // NOTE: Level serialization test
+    Serializer s;
+    s.Begin();
+    Serialize(&s);
+    s.End();
+    // -------------------------------
+
     map.Terminate();
     
     AnimationManager::Get()->ClearAssets();
@@ -456,3 +463,17 @@ void Level::Render() {
     particleSys.Render(em);
 }
 
+
+void Level::Serialize(Serializer *s) {
+    BeginObject(s, "level");
+    
+    Write(s, "num_entities", (i32)entities.size);
+    BeginArray(s, "entities");
+    for(i32 i = 0; i <  entities.size; ++i) {
+        Entity_ *entity = em.GetEntity(entities[i]);
+        entity->Serialize(s);
+    }
+    EndArray(s);
+
+    EndObject(s);
+}
