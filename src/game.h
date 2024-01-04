@@ -21,25 +21,9 @@ struct Game {
     Shader animShader;
     Shader statShader;
 
-    // Fire particle system shaders
-    Shader soFireShader;
-    GeometryShader soFireGeoShader;
-    Shader dwFireShader;
-    GeometryShader dwFireGeoShader;
- 
-    // Rain particle system shaders
-    Shader soRainShader;
-    GeometryShader soRainGeoShader;
-    Shader dwRainShader;
-    GeometryShader dwRainGeoShader;
-
     Level level;
     Camera camera;
 
-    ParticleSystem firePS;
-    ParticleSystem rainPS;
-
-    f32 gameTime { 0.0f };
 };
 
 #endif // _GAME_H_

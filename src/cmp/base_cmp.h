@@ -19,6 +19,8 @@ struct CMP : CMPBase {
         static i32 id { ++counter };
         return id;
     }
+
+    virtual void Terminate() { }
 };
 
 #endif // _COMPONENT_NEW_H_

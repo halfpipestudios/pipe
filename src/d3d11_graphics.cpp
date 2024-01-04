@@ -34,7 +34,7 @@ void D3D11Graphics::Initialize() {
     swapChainDesc.SampleDesc.Count = gMsaa;
     swapChainDesc.SampleDesc.Quality = msaaQuality4x - 1;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.BufferCount = 1;
+    swapChainDesc.BufferCount = 2;
     swapChainDesc.OutputWindow = *((HWND *)PlatformManager::Get()->GetWindow()->GetOsWindow());
     swapChainDesc.Windowed = true;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -146,8 +146,8 @@ void D3D11Graphics::Initialize() {
     blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
     blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
     blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-    blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
     blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
     blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     device->CreateBlendState(&blendStateDesc, &additiveBlending);

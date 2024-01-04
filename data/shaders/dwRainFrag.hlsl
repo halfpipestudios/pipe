@@ -8,5 +8,4 @@ struct PS_Input {
 
 float4 fs_main(PS_Input i) : SV_TARGET {
     return srv.Sample(samplerState, float3(i.Tex, 0));
-    //return float4(0, 0, 1, 1);
 }
