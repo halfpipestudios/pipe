@@ -100,6 +100,12 @@ struct Level : Serializable {
     Shader dwLavaShader;
     GeometryShader dwLavaGeoShader;
 
+    // Spell particle system shaders
+    Shader soSpellShader;
+    GeometryShader soSpellGeoShader;
+    Shader dwSpellShader;
+    GeometryShader dwSpellGeoShader;
+
     f32 gameTime { 0 };
 
 private:

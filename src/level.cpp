@@ -107,7 +107,9 @@ void Map::Render() {
 }
 
 
-static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, Camera *camera) {
+static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, Camera *camera,
+                             Shader soShader, GeometryShader soGeoShader,
+                             Shader dwShader, GeometryShader dwGeoShader) {
 
     Input *input = PlatformManager::Get()->GetInput();
 
@@ -137,6 +139,12 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
     cylinder.n = 0.75f;
     CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(heroKey);
     collisionCmp->Initialize(cylinder);
+
+    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(heroKey);
+    parCmp->Initialize(1000, 
+            soShader, soGeoShader,
+            dwShader, dwGeoShader,
+            TextureManager::Get()->GetAsset("spell.png"));
 
     return heroKey;
     
@@ -385,7 +393,13 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwLavaShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwLavaVert.hlsl", "./data/shaders/dwLavaFrag.hlsl");
     dwLavaGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwLavaGeo.hlsl");
 
-    entities.Push(CreateHero(animShader, heroAnim, camera));
+    // Shaders for SPELL particle system
+    soSpellShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/soSpellVert.hlsl", "./data/shaders/soSpellFrag.hlsl");
+    soSpellGeoShader = GraphicsManager::Get()->CreateGeometryShaderWithStreamOutput("./data/shaders/soSpellGeo.hlsl");
+    dwSpellShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwSpellVert.hlsl", "./data/shaders/dwSpellFrag.hlsl");
+    dwSpellGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwSpellGeo.hlsl");
+
+    entities.Push(CreateHero(animShader, heroAnim, camera, soSpellShader, soSpellGeoShader, dwSpellShader, dwSpellGeoShader));
 
     entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png")));
@@ -444,6 +458,11 @@ void Level::Terminate() {
     GraphicsManager::Get()->DestroyGeometryShader(soLavaGeoShader);
     GraphicsManager::Get()->DestroyShader(dwLavaShader);
     GraphicsManager::Get()->DestroyGeometryShader(dwLavaGeoShader);
+
+    GraphicsManager::Get()->DestroyShader(soSpellShader);
+    GraphicsManager::Get()->DestroyGeometryShader(soSpellGeoShader);
+    GraphicsManager::Get()->DestroyShader(dwSpellShader);
+    GraphicsManager::Get()->DestroyGeometryShader(dwSpellGeoShader);
 
     EntityManager::Get()->Terminate();
 
