@@ -3,10 +3,6 @@
 
 #include "common.h"
 
-struct Level;
-
-#define MAX_DIGITS_FOR_INTEGER 20
-
 struct Serializer {
     
     void Begin();
@@ -27,8 +23,14 @@ struct Serializer {
 
 };
 
+// TODO: Move tokenizer to this file
+struct Tokenizer;
+
 struct Serializable {
+    virtual void Deserialize(Tokenizer *t) = 0;
     virtual void Serialize(Serializer *s) = 0;
+    
+    // NOTE: Serializer functions
 
     void Write(Serializer *s, char *name, f32 num);
     void Write(Serializer *s, char *name, i32 num);
@@ -41,6 +43,9 @@ struct Serializable {
 
     void BeginArray(Serializer *s, char *name);
     void EndArray(Serializer *s);
+
+    // NOTE: Deserializer functions
+
 
 private:
     void AdvanceTabs(Serializer *s);

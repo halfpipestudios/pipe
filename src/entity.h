@@ -6,6 +6,7 @@
 
 #include "data_structures.inl"
 #include "serializer.h"
+#include "tokenizer.h"
 
 struct Input;
 
@@ -28,6 +29,7 @@ struct Entity_ : Serializable {
     inline bool HaveFlag(EntityFlags flag) { return (flags & flag) != 0; }
 
     void Serialize(Serializer *s) override;
+    void Deserialize(Tokenizer *t) override { ASSERT(!"Deserialize not implemented"); }
 
     HashMap<SlotmapKey> componentsKeys;
     Array<u32> componentsIds;

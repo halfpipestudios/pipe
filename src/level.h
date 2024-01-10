@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "entity.h"
 #include "serializer.h"
+#include "tokenizer.h"
 
 #include "behavior_tree.h"
 
@@ -55,6 +56,9 @@ struct Level : Serializable {
     void DeleteEntitiesToRemove();
 
     void SetCamera(Camera *camera) { this->camera = camera; }
+    
+    void Deserialize(Tokenizer *t) override { ASSERT(!"Deserialize not implemented"); }
+    void Serialize(Serializer *s) override;
 
     MemoryFrame memory; 
 
@@ -79,9 +83,6 @@ struct Level : Serializable {
  
     BehaviorTree bhTree;
     
-    // NOTE: Function used to serialize all the level
-    void Serialize(Serializer *s) override;
-
     // Fire particle system shaders
     Shader soFireShader;
     GeometryShader soFireGeoShader;
