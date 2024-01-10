@@ -4,6 +4,28 @@
 
 #include <stdlib.h>
 
+char *Token::TypeToString() {
+    switch(type) {
+    case Type::UNKNOW:     return "UNKNOW";
+    case Type::INTEGER:    return "INTEGER";
+    case Type::REAL:       return "REAL";
+    case Type::STRING:     return "STRING";
+    case Type::IDENTIFIER: return "IDENTIFIER";
+
+    case Type::L_BRACE: return "L_BRACE";
+    case Type::R_BRACE: return "R_BRACE";
+
+    case Type::L_SQUARE_BRACKET: return "L_SQUARE_BRACKET"; 
+    case Type::R_SQUARE_BRACKET: return "R_SQUARE_BRACKET";
+
+    case Type::DOUBLE_DOT: return "DOUBLE_DOT";
+    case Type::COMMA: return "COMMA";
+    }
+
+    ASSERT(!"Invalid code path");
+    return nullptr;
+}
+
 void Tokenizer::Begin(char *filepath) {
     MemoryManager::Get()->BeginTemporalMemory();
     
@@ -12,6 +34,9 @@ void Tokenizer::Begin(char *filepath) {
     start = (char *)file.data;
     end = start + file.size;
     current = start;
+
+    currentCol = TOKENIZER_START_COL_AND_LINE;
+    currentLin = TOKENIZER_START_COL_AND_LINE;
 }
 
 void Tokenizer::End() {
@@ -29,6 +54,8 @@ bool Tokenizer::NextToken(Token *token) {
 
     if(IsEnd()) return false;
     
+    SetTokenColAndLine(token);
+
     switch(*current) {
 
     case '1': case '2': case '3': case '4': case '5':
@@ -88,7 +115,7 @@ void Tokenizer::SkipSpaceAndNewLine() {
     while(IsSpace() && !IsEnd()) {
         if(*current == '\n') {
             ++currentLin;
-            currentCol = 0;
+            currentCol = TOKENIZER_START_COL_AND_LINE;
         }
         AdvanceCurrent();
     }
@@ -108,7 +135,7 @@ void Tokenizer::TokenizeReal(Token *token) {
     while(!IsEnd() && IsDigit()) {
         AdvanceCurrent();
     }
-    ASSERT(*current == '.');
+    ASSERT(*current == '.'); AdvanceCurrent();
     while(!IsEnd() && IsDigit()) {
         AdvanceCurrent();
     }
@@ -186,4 +213,9 @@ char *Tokenizer::TemporalNullTerminatedTokenContent(Token *token) {
     memcpy(buffer, token->start, bufferSize);
     buffer[bufferSize] = '\0';
     return buffer;
+}
+
+void Tokenizer::SetTokenColAndLine(Token *token) {
+    token->col = currentCol;
+    token->line = currentLin;
 }

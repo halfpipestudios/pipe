@@ -28,6 +28,8 @@ struct Token {
     Type type;
     char *start;
     char *end;
+    u32 col;
+    u32 line;
 
     union {
         i32 iValue;
@@ -35,8 +37,10 @@ struct Token {
         f32 fValue;
     };
 
-
+    char *TypeToString();
 };
+
+#define TOKENIZER_START_COL_AND_LINE 1
 
 struct Tokenizer {
     
@@ -46,8 +50,6 @@ struct Tokenizer {
 
     u32 currentLin;
     u32 currentCol;
-
-    bool error;
 
     void Begin(char *filepath);
     void End();
@@ -61,9 +63,11 @@ private:
     inline bool IsAlpha() { char c = *current; return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')); }
     inline bool IsEnd() { return current == end; }
     inline void AdvanceCurrent() { ++current; ++currentCol; }
+
     
     bool IsCurrentTokenNumberReal();
     char *TemporalNullTerminatedTokenContent(Token *token);
+    void SetTokenColAndLine(Token *token);
 
     void SkipSpaceAndNewLine();
     

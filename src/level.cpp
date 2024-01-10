@@ -429,6 +429,8 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     gBlackBoard.target = &heroTransform->pos;
 }
 
+#include "tokenizer.h"
+
 void Level::Terminate() {
     
     // NOTE: Level serialization test
@@ -436,6 +438,20 @@ void Level::Terminate() {
     s.Begin();
     Serialize(&s);
     s.End("level.dat");
+    // -------------------------------
+    
+    // NOTE: Tokenizer test
+    Tokenizer tokenizer;        
+    tokenizer.Begin("level.dat");
+    Token token;
+    while(tokenizer.NextToken(&token)) {
+        printf("Toke: %.*s\n", (i32)(token.end - token.start), token.start);
+        printf("type: %s\n", token.TypeToString());
+        printf("----------------------------\n");
+    }
+
+    tokenizer.End();
+
     // -------------------------------
 
     map.Terminate();
