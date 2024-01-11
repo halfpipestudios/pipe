@@ -10,8 +10,8 @@ struct TriggerCMP : CMP<TriggerCMP> {
     }
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "trigger");
-        EndObject(s);
+        WriteBeginObject(s, "trigger");
+        WriteEndObject(s);
     };
 
 };

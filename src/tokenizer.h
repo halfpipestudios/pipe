@@ -38,6 +38,7 @@ struct Token {
     };
 
     char *TypeToString();
+    bool Contains(char *str);
 };
 
 #define TOKENIZER_START_COL_AND_LINE 1

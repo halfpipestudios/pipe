@@ -3,19 +3,19 @@
 #include "entity_manager.h"
 
 void Entity_::Serialize(Serializer *s) {
-    BeginObject(s, "entity");
+    WriteBeginObject(s, "entity");
     
     Write(s, "name", name);
     Write(s, "num_components", (i32)componentsIds.size);
     
-    BeginArray(s, "components");
+    WriteBeginArray(s, "components");
     for(u32 i = 0; i < componentsIds.size; ++i) {
         
         CMPBase *cmp = EntityManager::Get()->GetComponentBasePtrByCmpID(this, componentsIds[i]);
         cmp->Serialize(s);
     }
-    EndArray(s);
+    WriteEndArray(s);
 
-    EndObject(s);
+    WriteEndObject(s);
 }
 

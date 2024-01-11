@@ -26,6 +26,15 @@ char *Token::TypeToString() {
     return nullptr;
 }
 
+bool Token::Contains(char *str) {
+    u32 len = end - start;
+    if(len != strlen(str)) return false;
+    for(u32 i = 0; i < len; ++i) {
+        if(start[i] != str[i]) return false;
+    }
+    return true;
+}
+
 void Tokenizer::Begin(char *filepath) {
     MemoryManager::Get()->BeginTemporalMemory();
     

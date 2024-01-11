@@ -12,11 +12,11 @@ struct GemCMP : CMP<GemCMP> {
     }
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "gem");
+        WriteBeginObject(s, "gem");
         Write(s, "value", value);
         Write(s, "timer", timer);
         Write(s, "timer_offset", timerOffset);
-        EndObject(s);
+        WriteEndObject(s);
     };
 
 };

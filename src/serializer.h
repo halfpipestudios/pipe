@@ -2,6 +2,8 @@
 #define _SERIALIZER_H_
 
 #include "common.h"
+#include "tokenizer.h"
+// TODO: Move tokenizer to this file
 
 struct Serializer {
     
@@ -23,9 +25,6 @@ struct Serializer {
 
 };
 
-// TODO: Move tokenizer to this file
-struct Tokenizer;
-
 struct Serializable {
     virtual void Deserialize(Tokenizer *t) = 0;
     virtual void Serialize(Serializer *s) = 0;
@@ -34,21 +33,32 @@ struct Serializable {
 
     void Write(Serializer *s, char *name, f32 num);
     void Write(Serializer *s, char *name, i32 num);
-    void Write(Serializer *s, char *name, u32 num);
     void Write(Serializer *s, char *name, char *str);
-    void Write(Serializer *s, char *name, char c);
 
-    void BeginObject(Serializer *s, char *name);
-    void EndObject(Serializer *s);
+    void WriteBeginObject(Serializer *s, char *name);
+    void WriteEndObject(Serializer *s);
 
-    void BeginArray(Serializer *s, char *name);
-    void EndArray(Serializer *s);
+    void WriteBeginArray(Serializer *s, char *name);
+    void WriteEndArray(Serializer *s);
 
     // NOTE: Deserializer functions
+    
+    void Read(Tokenizer *t, char *name, f32 *num);
+    void Read(Tokenizer *t, char *name, i32 *num);
+    void Read(Tokenizer *t, char *name, char *str, u32 maxSize);
 
+    void ReadBeginObject(Tokenizer *t, char *name);
+    void ReadEndObject(Tokenizer *t);
+
+    void ReadBeginArray(Tokenizer *t, char *name);
+    void ReadEndArray(Tokenizer *t);
 
 private:
+    
     void AdvanceTabs(Serializer *s);
+    void Expect(Tokenizer *t, Token *token , Token::Type type);
+    void Error(Token *token, char *str...);
+
 };
 
 #endif // _SERIALIZER_H_

@@ -28,28 +28,28 @@ struct PhysicsCMP : CMP<PhysicsCMP> {
 
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "physics");
+        WriteBeginObject(s, "physics");
         
-        BeginObject(s, "position");
+        WriteBeginObject(s, "position");
         Write(s, "x", physics.pos.x);
         Write(s, "y", physics.pos.y);
         Write(s, "z", physics.pos.z);
-        EndObject(s);
+        WriteEndObject(s);
 
-        BeginObject(s, "velocity");
+        WriteBeginObject(s, "velocity");
         Write(s, "x", physics.vel.x);
         Write(s, "y", physics.vel.y);
         Write(s, "z", physics.vel.z);
-        EndObject(s);
+        WriteEndObject(s);
 
-        BeginObject(s, "acceleration");
+        WriteBeginObject(s, "acceleration");
         Write(s, "x", physics.acc.x);
         Write(s, "y", physics.acc.y);
         Write(s, "z", physics.acc.z);
-        EndObject(s);
+        WriteEndObject(s);
         
         
-        EndObject(s);
+        WriteEndObject(s);
     };
 
 };

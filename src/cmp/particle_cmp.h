@@ -22,8 +22,8 @@ struct ParticleCMP : CMP<ParticleCMP> {
     } 
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "particle");
-        EndObject(s);
+        WriteBeginObject(s, "particle");
+        WriteEndObject(s);
     };
 
 };
