@@ -649,6 +649,15 @@ Mat4 Mat4::Rotate(Vec3 rotate) {
     return RotateX(rotate.x) * RotateY(rotate.y) * RotateZ(rotate.z) ;
 }
 
+
+Mat4 Mat4::TransformFromBasis(Vec3 o, Vec3 r, Vec3 u, Vec3 f) {
+    return Mat4(
+            r.x, u.x, f.x, o.x,
+            r.y, u.y, f.y, o.y,
+            r.z, u.z, f.z, o.z,
+            0, 0, 0, 1);
+}
+
 Mat4 Mat4::Transposed(const Mat4 &m) {
 	return {
 		m.m11, m.m21, m.m31, m.m41,
@@ -799,6 +808,60 @@ Quat Quat::operator+(Quat &q) {
     result.y = this->y + q.y;
     result.z = this->z + q.z;
     return result;
+}
+
+Quat Quat::operator*(Quat &q) {
+	return Quat(
+		-q.x * x - q.y * y - q.z * z + q.w * w,
+         q.x * w + q.y * z - q.z * y + q.w * x,
+		-q.x * z + q.y * w + q.z * x + q.w * y,
+	     q.x * y - q.y * x + q.z * w + q.w * z
+	);
+}
+
+Vec3 Quat::operator*(Vec3 &v) {
+    return vector * 2.0f * vector.Dot(v) +
+        v * (scalar * scalar - vector.Dot(vector)) +
+        vector.Cross(v) * 2.0f * scalar;
+}
+
+void Quat::Normalize() {
+    f32 lenSqr = w*w + x*x + y*y + z*z;
+    if(lenSqr == 0.0f) {
+        return;
+    }
+
+    f32 len = sqrtf(lenSqr);
+    w /= len;
+    x /= len;
+    y /= len;
+    z /= len;
+}
+
+Quat Quat::Normalized() {
+    f32 lenSqr = w*w + x*x + y*y + z*z;
+    if(lenSqr == 0.0f) {
+        return {};
+    }
+    else
+    {
+        f32 len = sqrtf(lenSqr);
+        Quat result;
+        result.w = w / len;
+        result.x = x / len;
+        result.y = y / len;
+        result.z = z / len;
+        return result;
+    }
+}
+
+Quat Quat::AngleAxis(f32 angle, Vec3 &axis) {
+    Vec3 norm = axis.Normalized();
+    f32 s = sinf(angle * 0.5f);
+    return  Quat(cosf(angle * 0.5f),
+                 norm.x * s,
+                 norm.y * s,
+                 norm.z * s);
 }
 
 // -----------------------------------------

@@ -18,6 +18,9 @@
 #include "cmp/trigger_cmp.h"
 #include "cmp/gem_cmp.h"
 #include "cmp/particle_cmp.h"
+#include "cmp/fire_spell_cmp.h"
+#include "cmp/player_cmp.h"
+#include "cmp/enemy_cmp.h"
 
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
@@ -116,6 +119,7 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
     SlotmapKey heroKey = EntityManager::Get()->AddEntity();
     Entity_ *hero = EntityManager::Get()->GetEntity(heroKey);
     strcpy(hero->name, "Hero");
+    EntityManager::Get()->AddComponent<PlayerCMP>(heroKey);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(heroKey);
     transformCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
@@ -140,11 +144,10 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
     CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(heroKey);
     collisionCmp->Initialize(cylinder);
 
-    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(heroKey);
-    parCmp->Initialize(1000, 
-            soShader, soGeoShader,
-            dwShader, dwGeoShader,
-            TextureManager::Get()->GetAsset("spell.png"));
+    FireSpellCMP *fireCmp = EntityManager::Get()->AddComponent<FireSpellCMP>(heroKey);
+    fireCmp->Initialize(soShader, soGeoShader,
+                        dwShader, dwGeoShader,
+                        TextureManager::Get()->GetAsset("fire_test.png"));
 
     return heroKey;
     
@@ -167,6 +170,8 @@ static SlotmapKey CreateOrc(char *name,
     SlotmapKey orc = EntityManager::Get()->AddEntity();
     Entity_ *orcPtr = EntityManager::Get()->GetEntity(orc);
     strcpy(orcPtr->name, name);
+
+    EntityManager::Get()->AddComponent<EnemyCMP>(orc);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(orc);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -190,10 +195,6 @@ static SlotmapKey CreateOrc(char *name,
 
     AiCMP *aiCmp = EntityManager::Get()->AddComponent<AiCMP>(orc);
     aiCmp->Initialize(STEERING_BEHAVIOR_FACE, 0.75f, 2.0f, true, bhTree);
-
-    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(orc);
-    parCmp->Initialize(maxParticles, soShader, soGeoShader, dwShader, dwGeoShader, texture);
-
 
     return orc;
     
@@ -358,6 +359,9 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     EntityManager::Get()->AddComponentType<TriggerCMP>();
     EntityManager::Get()->AddComponentType<GemCMP>();
     EntityManager::Get()->AddComponentType<ParticleCMP>();
+    EntityManager::Get()->AddComponentType<FireSpellCMP>();
+    EntityManager::Get()->AddComponentType<PlayerCMP>();
+    EntityManager::Get()->AddComponentType<EnemyCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath, mapShader);
@@ -399,7 +403,13 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwSpellShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwSpellVert.hlsl", "./data/shaders/dwSpellFrag.hlsl");
     dwSpellGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwSpellGeo.hlsl");
 
-    entities.Push(CreateHero(animShader, heroAnim, camera, soSpellShader, soSpellGeoShader, dwSpellShader, dwSpellGeoShader));
+    // Shaders for SHOOT SPELL particle system
+    soShootShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/soShootVert.hlsl", "./data/shaders/soShootFrag.hlsl");
+    soShootGeoShader = GraphicsManager::Get()->CreateGeometryShaderWithStreamOutput("./data/shaders/soShootGeo.hlsl");
+    dwShootShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwShootVert.hlsl", "./data/shaders/dwShootFrag.hlsl");
+    dwShootGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwShootGeo.hlsl");
+
+    entities.Push(CreateHero(animShader, heroAnim, camera, soShootShader, soShootGeoShader, dwShootShader, dwShootGeoShader));
 
     entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png")));
@@ -459,6 +469,11 @@ void Level::Terminate() {
     GraphicsManager::Get()->DestroyShader(dwSpellShader);
     GraphicsManager::Get()->DestroyGeometryShader(dwSpellGeoShader);
 
+    GraphicsManager::Get()->DestroyShader(soShootShader);
+    GraphicsManager::Get()->DestroyGeometryShader(soShootGeoShader);
+    GraphicsManager::Get()->DestroyShader(dwShootShader);
+    GraphicsManager::Get()->DestroyGeometryShader(dwShootGeoShader);
+
     EntityManager::Get()->Terminate();
 
     memory.EndFrame();
@@ -497,6 +512,7 @@ void Level::Update(f32 dt) {
     camera->SetTarget(heroTransform->pos);
 
     particleSys.Update(em, camera->pos, gameTime, dt);
+    fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
 }
 
 void Level::Render() {
@@ -506,6 +522,7 @@ void Level::Render() {
     EntityManager em = *EntityManager::Get();
     graphicsSys.Update(em);
     particleSys.Render(em);
+    fireSpellSys.Render(em);
 }
 
 void Level::Serialize(Serializer *s) {

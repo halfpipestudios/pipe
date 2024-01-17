@@ -223,6 +223,8 @@ struct Mat4 {
     static Mat4 RotateZ(f32 angle);
     static Mat4 Rotate(Vec3 rotate);
 
+    static Mat4 TransformFromBasis(Vec3 o, Vec3 r, Vec3 u, Vec3 f);
+
     static Mat4 Mat4::Transposed(const Mat4 &m);
     static f32 Mat4::Determinant(const Mat4 &m);
     static Mat4 Mat4::Adjugate(const Mat4 &m);
@@ -235,11 +237,16 @@ struct Quat {
         struct {
             f32 w, x, y, z;
         };
+        struct {
+            f32 scalar;
+            Vec3 vector;
+        };
         f32 v[4];
     };
 
     Quat() : w(1), x(0), y(0), z(0) {}
     Quat(f32 w, f32 x, f32 y, f32 z) : w(w), x(x), y(y), z(z) {}
+    Quat(Vec3 v) : w(1), x(v.x), y(v.y), z(v.z) {}
     
     f32 operator[](i32 index);
     Mat4 ToMat4();
@@ -249,6 +256,14 @@ struct Quat {
     Quat operator*(float f);
     Quat operator/(float f);
     Quat operator+(Quat &q);
+    Quat operator*(Quat &q);
+    Vec3 operator*(Vec3 &v);
+
+    void Normalize();
+    Quat Normalized();
+
+
+    static Quat AngleAxis(f32 angle, Vec3 &axis);
 
 };
 

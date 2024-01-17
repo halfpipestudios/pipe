@@ -16,7 +16,28 @@ struct TransformCMP : CMP<TransformCMP> {
     Vec3 scale { 1, 1, 1 };
     Vec3 renderOffset { };
     inline Mat4 GetWorldMatrix() { 
-        return Mat4::Translate(pos) * Mat4::Rotate(rot) * Mat4::Scale(scale); 
+
+        Quat rotX = Quat::AngleAxis( rot.x, Vec3(1, 0, 0));
+        Quat rotY = Quat::AngleAxis(-rot.y, Vec3(0, 1, 0));
+        Quat rotZ = Quat::AngleAxis( rot.z, Vec3(0, 0, 1));
+
+        Quat rotQuat = rotX * rotY * rotZ;
+
+        Vec3 x = rotQuat * Vec3(1, 0, 0);
+        Vec3 y = rotQuat * Vec3(0, 1, 0);
+        Vec3 z = rotQuat * Vec3(0, 0, 1);
+        
+        x = x * scale.x;
+        y = y * scale.y;
+        z = z * scale.z;
+
+        Vec3 p = pos;
+
+        return Mat4(
+                x.x, y.x, z.x, p.x,
+                x.y, y.y, z.y, p.y,
+                x.z, y.z, z.z, p.z,
+                0, 0, 0, 1);
     };
 
 
