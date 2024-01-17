@@ -203,12 +203,12 @@ void GameWindow::Render(Editor *editor) {
         
         ASSERT(editor->selectedEntity);
         TransformCMP transform = *EntityManager::Get()->GetComponent<TransformCMP>(*editor->selectedEntity);
-        transform.rot   = Vec3(0, 0, 0);
+        transform.rot   = Vec3(0, (f32)TO_RAD(180), 0);
         transform.scale = Vec3(1.2f, 1.2f, 1.2f);
         
         X.SetTransform(&editor->camera, transform);
         X.Render();
-        
+         
         TransformCMP transform1 = transform;
         transform1.rot.z += (f32)TO_RAD(90);
         Y.SetTransform(&editor->camera, transform1);
@@ -218,7 +218,7 @@ void GameWindow::Render(Editor *editor) {
         transform2.rot.y += (f32)TO_RAD(90);
         Z.SetTransform(&editor->camera, transform2);
         Z.Render();
-
+        
         GraphicsManager::Get()->SetDepthStencilState(true);
     }
 
