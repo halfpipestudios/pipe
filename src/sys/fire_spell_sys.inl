@@ -3,10 +3,74 @@
 #include "graphics_manager.h"
 #include "platform_manager.h"
 
+
+
+static bool TestRayCircle(Vec3 p, Vec3 d, Vec3 cc, f32 cr, f32 &tOut) {
+    Vec3 m = p - cc;
+    f32 b = m.Dot(d);
+    f32 c = m.Dot(m) - cr * cr;
+
+    if(c > 0.0f && b > 0.0f) {
+        tOut = FLT_MAX;
+        return false;
+    }
+
+    f32 discr = b*b - c;
+
+    if(discr < 0.0f) {
+        tOut = FLT_MAX;
+        return false;
+    }
+    
+    f32 t = -b - sqrtf(discr);
+
+    if(t < 0.0f) t = 0.0f;
+
+    tOut = t;
+
+    return true;
+}
+
+static bool CollisionTimeCircleCirlce(Vec3 c0, f32 r0, Vec3 v0,
+                                      Vec3 c1, f32 r1, Vec3 v1) {            
+    f32 radius = r0 + r1;
+    Vec3 relV = v0 - v1;
+
+    f32 distanSq = (c1 - c0).LenSq();
+    f32 vlenSq = relV.LenSq();
+    if (vlenSq < FLT_EPSILON && distanSq > radius * radius)
+    {
+        return false;
+    }
+    else if (vlenSq < FLT_EPSILON  && distanSq <= radius * radius)
+    {
+        return true;
+    }
+    else 
+    {
+        float vlen = sqrtf(vlenSq);
+        relV = relV / vlen;
+        f32 t = FLT_MAX;
+        bool result = TestRayCircle(c0, relV, c1, radius, t);
+        if(result) {
+
+            t /= vlen;
+            if(t <= 0.0f) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
+
+
 template <typename EM>
-void FireSpellSys<EM>::Update(EM& em, Vec3 cameraPos, f32 gameTime, f32 dt) {
+void FireSpellSys<EM>::Update(EM& em, Level *level, Vec3 cameraPos, f32 gameTime, f32 dt) {
 
     auto& fireSpellComponents = em.GetComponents<FireSpellCMP>();
+
+    auto& enemyComponents = em.GetComponents<EnemyCMP>();
 
     for(i32 i = 0; i < fireSpellComponents.size; i++) {
         FireSpellCMP *fir = &fireSpellComponents[i];
@@ -63,6 +127,31 @@ void FireSpellSys<EM>::Update(EM& em, Vec3 cameraPos, f32 gameTime, f32 dt) {
 
                 GraphicsManager::Get()->UpdateParticleSystem(fireball->particleSys,
                             worldP, cameraPos, gameTime, dt);
+
+
+                for(i32 k = 0; k < enemyComponents.size; k++) {
+                    EnemyCMP *ene = &enemyComponents[k];
+                    PhysicsCMP *enemyPhy = em.GetComponent<PhysicsCMP>(ene->entityKey);
+
+                    Vec3 ap = fireball->pos;
+                    Vec3 av = fireball->vel;
+                    f32  ar = 0.3f; 
+
+                    Vec3 bp = enemyPhy->physics.pos;
+                    Vec3 bv = enemyPhy->physics.vel;
+                    f32  br = 0.3f; 
+
+                    bp.y += 0.375f;
+                    
+                    if(CollisionTimeCircleCirlce(ap, ar, av, bp, br, bv)) {
+                        printf("Hit\n");
+                        level->DeleteEntity(ene->entityKey);
+                        fireball->active = false;
+                        break;
+                    }
+
+                }
+
             }
         }
 

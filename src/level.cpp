@@ -19,6 +19,8 @@
 #include "cmp/gem_cmp.h"
 #include "cmp/particle_cmp.h"
 #include "cmp/fire_spell_cmp.h"
+#include "cmp/player_cmp.h"
+#include "cmp/enemy_cmp.h"
 
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
@@ -117,6 +119,8 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
     SlotmapKey heroKey = EntityManager::Get()->AddEntity();
     Entity_ *hero = EntityManager::Get()->GetEntity(heroKey);
     hero->name = "Hero";
+
+    EntityManager::Get()->AddComponent<PlayerCMP>(heroKey);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(heroKey);
     transformCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
@@ -167,6 +171,8 @@ static SlotmapKey CreateOrc(char *name,
     SlotmapKey orc = EntityManager::Get()->AddEntity();
     Entity_ *orcPtr = EntityManager::Get()->GetEntity(orc);
     orcPtr->name = name;
+
+    EntityManager::Get()->AddComponent<EnemyCMP>(orc);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(orc);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -190,11 +196,6 @@ static SlotmapKey CreateOrc(char *name,
 
     AiCMP *aiCmp = EntityManager::Get()->AddComponent<AiCMP>(orc);
     aiCmp->Initialize(STEERING_BEHAVIOR_FACE, 0.75f, 2.0f, true, bhTree);
-
-    /*
-    ParticleCMP *parCmp = EntityManager::Get()->AddComponent<ParticleCMP>(orc);
-    parCmp->Initialize(maxParticles, soShader, soGeoShader, dwShader, dwGeoShader, texture);
-    */
 
     return orc;
     
@@ -360,6 +361,8 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     EntityManager::Get()->AddComponentType<GemCMP>();
     EntityManager::Get()->AddComponentType<ParticleCMP>();
     EntityManager::Get()->AddComponentType<FireSpellCMP>();
+    EntityManager::Get()->AddComponentType<PlayerCMP>();
+    EntityManager::Get()->AddComponentType<EnemyCMP>();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath, mapShader);
@@ -517,7 +520,7 @@ void Level::Update(f32 dt) {
     camera->SetTarget(heroTransform->pos);
 
     particleSys.Update(em, camera->pos, gameTime, dt);
-    fireSpellSys.Update(em, camera->pos, gameTime, dt);
+    fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
 }
 
 void Level::Render() {

@@ -4,7 +4,7 @@
 template <typename EM>
 struct FireSpellSys {
     
-    void Update(EM& em, Vec3 cameraPos, f32 gameTime, f32 dt);
+    void Update(EM& em, Level *level, Vec3 cameraPos, f32 gameTime, f32 dt);
     void Render(EM& em);
 
 };
