@@ -1,5 +1,5 @@
 level: {
-  num_entities: 91,
+  num_entities: 26,
   entities: [
     entity: {
       name: "Hero",
@@ -7,13 +7,13 @@ level: {
       components: [
         transform: {
           position: {
-            x: 5.685577,
-            y: 2.751000,
-            z: 12.819580,
+            x: 5.386621,
+            y: 2.751005,
+            z: 23.522898,
           }
           rotation: {
             x: 0.000000,
-            y: -4.103478,
+            y: -3.266238,
             z: 0.000000,
           }
           scale: {
@@ -24,14 +24,14 @@ level: {
         }
         physics: {
           position: {
-            x: 5.685577,
-            y: 2.751000,
-            z: 12.819580,
+            x: 5.386621,
+            y: 2.751005,
+            z: 23.522898,
           }
           velocity: {
-            x: -0.000022,
+            x: -0.000000,
             y: 0.000000,
-            z: -0.000015,
+            z: -0.000000,
           }
           acceleration: {
             x: 0.000000,
@@ -49,23 +49,22 @@ level: {
         collision: {
           type: "cylinder",
         }
-        particle: {
-        }
+        type: "unknow",
       ]
     }
     entity: {
       name: "orc_1",
-      num_components: 7,
+      num_components: 6,
       components: [
         transform: {
           position: {
-            x: -0.000062,
+            x: 0.000045,
             y: 2.751000,
-            z: 19.999912,
+            z: 20.000042,
           }
           rotation: {
             x: 0.000000,
-            y: -2.461475,
+            y: -0.988099,
             z: 0.000000,
           }
           scale: {
@@ -76,14 +75,14 @@ level: {
         }
         physics: {
           position: {
-            x: -0.000062,
+            x: 0.000045,
             y: 2.751000,
-            z: 19.999912,
+            z: 20.000042,
           }
           velocity: {
-            x: -0.000000,
+            x: 0.000000,
             y: 0.000000,
-            z: -0.000000,
+            z: 0.000000,
           }
           acceleration: {
             x: 0.000000,
@@ -104,24 +103,22 @@ level: {
           time_to_target: 0.750000,
           arraival_radii: 2.000000,
           active: 1,
-        }
-        particle: {
         }
       ]
     }
     entity: {
       name: "orc_2",
-      num_components: 7,
+      num_components: 6,
       components: [
         transform: {
           position: {
-            x: 0.000064,
+            x: 0.000082,
             y: 2.751000,
-            z: 15.000138,
+            z: 15.000165,
           }
           rotation: {
             x: 0.000000,
-            y: -1.927355,
+            y: -0.562157,
             z: 0.000000,
           }
           scale: {
@@ -132,9 +129,9 @@ level: {
         }
         physics: {
           position: {
-            x: 0.000064,
+            x: 0.000082,
             y: 2.751000,
-            z: 15.000138,
+            z: 15.000165,
           }
           velocity: {
             x: 0.000000,
@@ -160,24 +157,22 @@ level: {
           time_to_target: 0.750000,
           arraival_radii: 2.000000,
           active: 1,
-        }
-        particle: {
         }
       ]
     }
     entity: {
       name: "orc_3",
-      num_components: 7,
+      num_components: 6,
       components: [
         transform: {
           position: {
             x: 7.699011,
-            y: 2.755670,
-            z: -4.176394,
+            y: 2.755616,
+            z: -4.107147,
           }
           rotation: {
             x: 0.000000,
-            y: -0.271018,
+            y: 81.417580,
             z: 0.000000,
           }
           scale: {
@@ -189,18 +184,18 @@ level: {
         physics: {
           position: {
             x: 7.699011,
-            y: 2.755670,
-            z: -4.176394,
+            y: 2.755616,
+            z: -4.107147,
           }
           velocity: {
-            x: -0.002153,
-            y: 0.000438,
-            z: 3.052861,
+            x: 0.000000,
+            y: 0.000167,
+            z: 3.083244,
           }
           acceleration: {
-            x: 6.814594,
+            x: 6.707511,
             y: 0.000000,
-            z: 24.000217,
+            z: 24.195341,
           }
         }
         graphics: {
@@ -216,8 +211,6 @@ level: {
           time_to_target: 0.750000,
           arraival_radii: 2.000000,
           active: 1,
-        }
-        particle: {
         }
       ]
     }
@@ -277,7 +270,7 @@ level: {
       components: [
         transform: {
           position: {
-            x: 1.004946,
+            x: 21.998007,
             y: -0.500000,
             z: 67.000000,
           }
@@ -307,7 +300,7 @@ level: {
       components: [
         transform: {
           position: {
-            x: 19.447544,
+            x: 6.100276,
             y: -0.500000,
             z: 78.000000,
           }
@@ -337,7 +330,7 @@ level: {
       components: [
         transform: {
           position: {
-            x: 20.804762,
+            x: 2.072914,
             y: -0.500000,
             z: 86.000000,
           }
@@ -367,7 +360,7 @@ level: {
       components: [
         transform: {
           position: {
-            x: -20.804762,
+            x: -2.072914,
             y: 0.000000,
             z: 88.199997,
           }
@@ -399,2354 +392,11 @@ level: {
           position: {
             x: -4.000000,
             y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 60,
-          timer: 15.453558,
-          timer_offset: 60.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 74,
-          timer: 15.453558,
-          timer_offset: 74.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 96,
-          timer: 15.453558,
-          timer_offset: 96.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 68,
-          timer: 15.453558,
-          timer_offset: 68.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 52,
-          timer: 15.453558,
-          timer_offset: 52.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 78,
-          timer: 15.453558,
-          timer_offset: 78.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 93,
-          timer: 15.453558,
-          timer_offset: 93.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 96,
-          timer: 15.453558,
-          timer_offset: 96.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 86,
-          timer: 15.453558,
-          timer_offset: 86.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 8.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 94,
-          timer: 15.453558,
-          timer_offset: 94.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 93,
-          timer: 15.453558,
-          timer_offset: 93.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 82,
-          timer: 15.453558,
-          timer_offset: 82.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 84,
-          timer: 15.453558,
-          timer_offset: 84.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 66,
-          timer: 15.453558,
-          timer_offset: 66.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 56,
-          timer: 15.453558,
-          timer_offset: 56.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 2.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 61,
-          timer: 15.453558,
-          timer_offset: 61.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 58,
-          timer: 15.453558,
-          timer_offset: 58.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 100,
-          timer: 15.453558,
-          timer_offset: 100.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 9.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 82,
-          timer: 15.453558,
-          timer_offset: 82.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 66,
-          timer: 15.453558,
-          timer_offset: 66.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 64,
-          timer: 15.453558,
-          timer_offset: 64.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 77,
-          timer: 15.453558,
-          timer_offset: 77.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 72,
-          timer: 15.453558,
-          timer_offset: 72.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 79,
-          timer: 15.453558,
-          timer_offset: 79.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 81,
-          timer: 15.453558,
-          timer_offset: 81.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 82,
-          timer: 15.453558,
-          timer_offset: 82.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 63,
-          timer: 15.453558,
-          timer_offset: 63.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 17.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 51,
-          timer: 15.453558,
-          timer_offset: 51.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 10.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 80,
-          timer: 15.453558,
-          timer_offset: 80.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 88,
-          timer: 15.453558,
-          timer_offset: 88.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 59,
-          timer: 15.453558,
-          timer_offset: 59.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 69,
-          timer: 15.453558,
-          timer_offset: 69.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 53,
-          timer: 15.453558,
-          timer_offset: 53.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 11.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 77,
-          timer: 15.453558,
-          timer_offset: 77.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 85,
-          timer: 15.453558,
-          timer_offset: 85.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 75,
-          timer: 15.453558,
-          timer_offset: 75.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 99,
-          timer: 15.453558,
-          timer_offset: 99.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 89,
-          timer: 15.453558,
-          timer_offset: 89.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 60,
-          timer: 15.453558,
-          timer_offset: 60.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 92,
-          timer: 15.453558,
-          timer_offset: 92.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 64,
-          timer: 15.453558,
-          timer_offset: 64.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 69,
-          timer: 15.453558,
-          timer_offset: 69.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 97,
-          timer: 15.453558,
-          timer_offset: 97.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 2.000000,
-            y: 2.200000,
-            z: 12.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 59,
-          timer: 15.453558,
-          timer_offset: 59.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 77,
-          timer: 15.453558,
-          timer_offset: 77.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 2.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 53,
-          timer: 15.453558,
-          timer_offset: 53.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 90,
-          timer: 15.453558,
-          timer_offset: 90.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 93,
-          timer: 15.453558,
-          timer_offset: 93.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 62,
-          timer: 15.453558,
-          timer_offset: 62.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 53,
-          timer: 15.453558,
-          timer_offset: 53.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 66,
-          timer: 15.453558,
-          timer_offset: 66.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 84,
-          timer: 15.453558,
-          timer_offset: 84.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 2.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 66,
-          timer: 15.453558,
-          timer_offset: 66.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 56,
-          timer: 15.453558,
-          timer_offset: 56.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 13.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 89,
-          timer: 15.453558,
-          timer_offset: 89.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 90,
-          timer: 15.453558,
-          timer_offset: 90.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 79,
-          timer: 15.453558,
-          timer_offset: 79.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 62,
-          timer: 15.453558,
-          timer_offset: 62.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -2.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 86,
-          timer: 15.453558,
-          timer_offset: 86.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 74,
-          timer: 15.453558,
-          timer_offset: 74.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 84,
-          timer: 15.453558,
-          timer_offset: 84.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 1.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 2.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 80,
-          timer: 15.453558,
-          timer_offset: 80.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 82,
-          timer: 15.453558,
-          timer_offset: 82.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 14.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 68,
-          timer: 15.453558,
-          timer_offset: 68.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 16.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 50,
-          timer: 15.453558,
-          timer_offset: 50.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -4.000000,
-            y: 2.200000,
             z: 15.000000,
           }
           rotation: {
             x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 72,
-          timer: 15.453558,
-          timer_offset: 72.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -3.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
+            y: 213.361588,
             z: 0.000000,
           }
           scale: {
@@ -2762,7 +412,7 @@ level: {
         }
         gem: {
           value: 54,
-          timer: 15.453558,
+          timer: 213.361588,
           timer_offset: 54.000000,
         }
       ]
@@ -2773,79 +423,13 @@ level: {
       components: [
         transform: {
           position: {
-            x: -2.000000,
+            x: -3.000000,
             y: 2.200000,
-            z: 15.000000,
+            z: 16.000000,
           }
           rotation: {
             x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 70,
-          timer: 15.453558,
-          timer_offset: 70.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: -1.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 75,
-          timer: 15.453558,
-          timer_offset: 75.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 0.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
+            y: 213.361588,
             z: 0.000000,
           }
           scale: {
@@ -2861,7 +445,7 @@ level: {
         }
         gem: {
           value: 55,
-          timer: 15.453558,
+          timer: 213.361588,
           timer_offset: 55.000000,
         }
       ]
@@ -2872,13 +456,13 @@ level: {
       components: [
         transform: {
           position: {
-            x: 1.000000,
+            x: -3.000000,
             y: 2.200000,
             z: 15.000000,
           }
           rotation: {
             x: 0.000000,
-            y: 15.453558,
+            y: 213.361588,
             z: 0.000000,
           }
           scale: {
@@ -2893,9 +477,9 @@ level: {
         trigger: {
         }
         gem: {
-          value: 63,
-          timer: 15.453558,
-          timer_offset: 63.000000,
+          value: 80,
+          timer: 213.361588,
+          timer_offset: 80.000000,
         }
       ]
     }
@@ -2905,13 +489,13 @@ level: {
       components: [
         transform: {
           position: {
-            x: 2.000000,
+            x: -1.000000,
             y: 2.200000,
-            z: 15.000000,
+            z: 14.000000,
           }
           rotation: {
             x: 0.000000,
-            y: 15.453558,
+            y: 213.361588,
             z: 0.000000,
           }
           scale: {
@@ -2926,108 +510,9 @@ level: {
         trigger: {
         }
         gem: {
-          value: 73,
-          timer: 15.453558,
-          timer_offset: 73.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 3.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 92,
-          timer: 15.453558,
-          timer_offset: 92.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 4.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 72,
-          timer: 15.453558,
-          timer_offset: 72.000000,
-        }
-      ]
-    }
-    entity: {
-      name: "gem",
-      num_components: 4,
-      components: [
-        transform: {
-          position: {
-            x: 5.000000,
-            y: 2.200000,
-            z: 15.000000,
-          }
-          rotation: {
-            x: 0.000000,
-            y: 15.453558,
-            z: 0.000000,
-          }
-          scale: {
-            x: 0.200000,
-            y: 0.200000,
-            z: 0.200000,
-          }
-        }
-        graphics: {
-          model: "gem.twm",
-        }
-        trigger: {
-        }
-        gem: {
-          value: 85,
-          timer: 15.453558,
-          timer_offset: 85.000000,
+          value: 99,
+          timer: 213.361588,
+          timer_offset: 99.000000,
         }
       ]
     }
@@ -3043,7 +528,7 @@ level: {
           }
           rotation: {
             x: 0.000000,
-            y: 15.453558,
+            y: 213.361588,
             z: 0.000000,
           }
           scale: {
@@ -3058,9 +543,372 @@ level: {
         trigger: {
         }
         gem: {
-          value: 71,
-          timer: 15.453558,
-          timer_offset: 71.000000,
+          value: 62,
+          timer: 213.361588,
+          timer_offset: 62.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 73,
+          timer: 213.361588,
+          timer_offset: 73.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 88,
+          timer: 213.361588,
+          timer_offset: 88.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 81,
+          timer: 213.361588,
+          timer_offset: 81.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 80,
+          timer: 213.361588,
+          timer_offset: 80.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 87,
+          timer: 213.361588,
+          timer_offset: 87.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 67,
+          timer: 213.361588,
+          timer_offset: 67.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 79,
+          timer: 213.361588,
+          timer_offset: 79.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 89,
+          timer: 213.361588,
+          timer_offset: 89.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 74,
+          timer: 213.361588,
+          timer_offset: 74.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 86,
+          timer: 213.361588,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 213.361588,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+        }
+        trigger: {
+        }
+        gem: {
+          value: 92,
+          timer: 213.361588,
+          timer_offset: 92.000000,
         }
       ]
     }

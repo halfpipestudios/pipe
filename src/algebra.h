@@ -223,6 +223,8 @@ struct Mat4 {
     static Mat4 RotateZ(f32 angle);
     static Mat4 Rotate(Vec3 rotate);
 
+    static Mat4 TransformFromBasis(Vec3 o, Vec3 r, Vec3 u, Vec3 f);
+
     static Mat4 Mat4::Transposed(const Mat4 &m);
     static f32 Mat4::Determinant(const Mat4 &m);
     static Mat4 Mat4::Adjugate(const Mat4 &m);

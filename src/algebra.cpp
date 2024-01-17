@@ -649,6 +649,15 @@ Mat4 Mat4::Rotate(Vec3 rotate) {
     return RotateX(rotate.x) * RotateY(rotate.y) * RotateZ(rotate.z) ;
 }
 
+
+Mat4 Mat4::TransformFromBasis(Vec3 o, Vec3 r, Vec3 u, Vec3 f) {
+    return Mat4(
+            r.x, u.x, f.x, o.x,
+            r.y, u.y, f.y, o.y,
+            r.z, u.z, f.z, o.z,
+            0, 0, 0, 1);
+}
+
 Mat4 Mat4::Transposed(const Mat4 &m) {
 	return {
 		m.m11, m.m21, m.m31, m.m41,

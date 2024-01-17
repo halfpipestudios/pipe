@@ -23,6 +23,7 @@
 #include "sys/trigger_sys.inl"
 #include "sys/gem_sys.inl"
 #include "sys/particle_sys.inl"
+#include "sys/fire_spell_sys.inl"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -69,6 +70,7 @@ struct Level : Serializable {
     TriggerSys<EntityManager> triggerSys;
     GemSys<EntityManager> gemSys;
     ParticleSys<EntityManager> particleSys;
+    FireSpellSys<EntityManager> fireSpellSys;
 
     Camera *camera;
     Map map;
@@ -105,6 +107,12 @@ struct Level : Serializable {
     GeometryShader soSpellGeoShader;
     Shader dwSpellShader;
     GeometryShader dwSpellGeoShader;
+
+    // Shoot Spell particle system shaders
+    Shader soShootShader;
+    GeometryShader soShootGeoShader;
+    Shader dwShootShader;
+    GeometryShader dwShootGeoShader;
 
     f32 gameTime { 0 };
 
