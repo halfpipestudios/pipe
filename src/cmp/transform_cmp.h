@@ -43,6 +43,34 @@ struct TransformCMP : CMP<TransformCMP> {
         
         WriteEndObject(s);
     };
+
+    void Deserialize(Tokenizer *t) override {
+        Vec3 pos, rot, scale;
+
+        ReadBeginObject(t, "transform");
+        
+        ReadBeginObject(t, "position");
+        Read(t, "x", &pos.x);
+        Read(t, "y", &pos.y);
+        Read(t, "z", &pos.z);
+        ReadEndObject(t);
+
+        ReadBeginObject(t, "rotation");
+        Read(t, "x", &rot.x);
+        Read(t, "y", &rot.y);
+        Read(t, "z", &rot.z);
+        ReadEndObject(t);
+
+        ReadBeginObject(t, "scale");
+        Read(t, "x", &scale.x);
+        Read(t, "y", &scale.y);
+        Read(t, "z", &scale.z);
+        ReadEndObject(t);
+        
+        ReadEndObject(t);
+
+        Initialize(pos, rot, scale);
+    };
 };
 
 #endif // _TRANSFORM_CMP_H_

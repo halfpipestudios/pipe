@@ -115,7 +115,7 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
 
     SlotmapKey heroKey = EntityManager::Get()->AddEntity();
     Entity_ *hero = EntityManager::Get()->GetEntity(heroKey);
-    hero->name = "Hero";
+    strcpy(hero->name, "Hero");
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(heroKey);
     transformCmp->Initialize(Vec3(0, 8, 0), Vec3(), Vec3(0.8f, 0.8f, 0.8f));
@@ -166,7 +166,7 @@ static SlotmapKey CreateOrc(char *name,
 
     SlotmapKey orc = EntityManager::Get()->AddEntity();
     Entity_ *orcPtr = EntityManager::Get()->GetEntity(orc);
-    orcPtr->name = name;
+    strcpy(orcPtr->name, name);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(orc);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -206,7 +206,7 @@ static SlotmapKey CreateRain(char *name, Vec3 pos,
     SlotmapKey rain = EntityManager::Get()->AddEntity();
 
     Entity_ *rainPtr = EntityManager::Get()->GetEntity(rain);
-    rainPtr->name = name;
+    strcpy(rainPtr->name, name);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(rain);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -227,7 +227,7 @@ static SlotmapKey CreateLava(char *name, Vec3 pos,
     SlotmapKey rain = EntityManager::Get()->AddEntity();
 
     Entity_ *rainPtr = EntityManager::Get()->GetEntity(rain);
-    rainPtr->name = name;
+    strcpy(rainPtr->name, name);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(rain);
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
@@ -245,7 +245,7 @@ static SlotmapKey CreateLava(char *name, Vec3 pos,
 static SlotmapKey CreateMovingPlatform(char *name, Vec3 scale, Vec3 a, Vec3 b, Shader shader) {
     SlotmapKey platform = EntityManager::Get()->AddEntity();
     Entity_ *platformPtr = EntityManager::Get()->GetEntity(platform);
-    platformPtr->name = name;
+    strcpy(platformPtr->name, name);
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(platform);
     transformCmp->Initialize(a, Vec3(), scale);
@@ -275,7 +275,7 @@ static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Vec3 position, Shader sha
 
     SlotmapKey gem = EntityManager::Get()->AddEntity();
     Entity_ *gemPtr = EntityManager::Get()->GetEntity(gem);
-    gemPtr->name = "gem";
+    strcpy(gemPtr->name, "gem");
     
     TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(gem);
     transformCmp->Initialize(position, Vec3(), Vec3(0.2f, 0.2f, 0.2f));
@@ -433,13 +433,6 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
 
 void Level::Terminate() {
     
-    // NOTE: Level serialization test
-    Serializer s;
-    s.Begin();
-    Serialize(&s);
-    s.End("level.dat");
-    // -------------------------------
-    
     map.Terminate();
     
     AnimationManager::Get()->ClearAssets();
@@ -515,7 +508,6 @@ void Level::Render() {
     particleSys.Render(em);
 }
 
-
 void Level::Serialize(Serializer *s) {
     WriteBeginObject(s, "level");
     
@@ -528,4 +520,20 @@ void Level::Serialize(Serializer *s) {
     WriteEndArray(s);
 
     WriteEndObject(s);
+}
+
+void Level::Deserialize(Tokenizer *t) {
+    ReadBeginObject(t, "level");
+    
+    i32 numEntities = 0;
+    Read(t, "num_entities", &numEntities);
+    ReadBeginArray(t, "entities");
+    for(i32 i = 0; i <  numEntities; ++i) {
+        SlotmapKey key = EntityManager::Get()->AddEntity();
+        Entity_ *entity = EntityManager::Get()->GetEntity(key);
+        entity->Deserialize(t);
+    }
+    ReadEndArray(t);
+
+    ReadEndObject(t);
 }

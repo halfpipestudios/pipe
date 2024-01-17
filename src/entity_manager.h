@@ -81,6 +81,7 @@ struct EntityManager {
     SlotmapKey AddEntity() {
         SlotmapKey entityKey = entities.Add({});
         Entity_ *entity = &entities.Get(entityKey);
+        entity->key = entityKey;
         entity->componentsKeys.Initialize(COMPONENTS_TYPE_MAX_SIZE);
         entity->componentsIds.Initialize(COMPONENTS_TYPE_MAX_SIZE);
         return entityKey;
@@ -107,10 +108,8 @@ struct EntityManager {
         return slotmap->GetBaseComponent(componentKey); 
     }
 
-
     template <typename ComponentType>
     ComponentType *AddComponent(SlotmapKey entityKey) {
-        // get a pointer to the entity
         Entity_ *entity = &entities.Get(entityKey);
         // Get the slotmap of the current component type
         Slotmap<ComponentType>& slotmap = componentsStorage.GetComponentsSlotmap<ComponentType>();

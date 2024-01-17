@@ -2,6 +2,9 @@
 #include "platform_manager.h" 
 #include "mgr/texture_manager.h"
 
+#include "serializer.h"
+#include "tokenizer.h"
+
 void Game::Initialize() {
 
     camera.Initialize(THIRD_PERSON_CAMERA);
@@ -21,9 +24,31 @@ void Game::Initialize() {
                                                             "./data/shaders/staticFrag.hlsl");
 
     level.Initialize("./data/maps/levelOP.map", &camera, mapShader, statShader, animShader);
+
+    // TODO: Remove this test
+
+    // NOTE: Serialize Test -----------------
+    
+    Serializer s;
+    s.Begin();
+    level.Serialize(&s);
+    s.End("level.dat");
+    
+    // NOTE: Deserialize Test -----------------
+    Level otherLevel;
+
+    Tokenizer t;
+    t.Begin("level.dat");
+    otherLevel.Deserialize(&t);
+    t.End();
+
+    // ----------------------------------------
+
+
 }
 
 void Game::Terminate() {
+
     level.Terminate();
     GraphicsManager::Get()->DestroyShader(mapShader);
     GraphicsManager::Get()->DestroyShader(statShader);

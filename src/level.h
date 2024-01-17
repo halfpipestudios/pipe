@@ -57,7 +57,7 @@ struct Level : Serializable {
 
     void SetCamera(Camera *camera) { this->camera = camera; }
     
-    void Deserialize(Tokenizer *t) override { ASSERT(!"Deserialize not implemented"); }
+    void Deserialize(Tokenizer *t) override;
     void Serialize(Serializer *s) override;
 
     MemoryFrame memory; 

@@ -40,6 +40,13 @@ struct CollisionCMP : CMP<CollisionCMP> {
         return nullptr;
     }
 
+    void Deserialize(Tokenizer *t) override {
+        char buffer[256];
+        ReadBeginObject(t, "collision");
+        Read(t, "type", buffer, 256);
+        ReadEndObject(t);
+    };
+
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "collision");
         Write(s, "type", TypeToStr());

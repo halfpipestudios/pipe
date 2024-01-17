@@ -19,6 +19,11 @@ set LNK_DIR=
 cl /c %CFLAGS% %INC_DIR% %SOURCES% %OUT_DIR% 
 lib /OUT:".\thirdparty\tgui\lib\tgui.lib"  %OBJS%
 
+echo ----------------------------------------
+echo Generating Component Factory ...
+echo ----------------------------------------
+echo gen_cmp_factory.py
+python gen_cmp_factory.py
 
 echo ----------------------------------------
 echo Build game ...
