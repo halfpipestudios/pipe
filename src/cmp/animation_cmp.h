@@ -143,8 +143,8 @@ struct AnimationCMP : CMP<AnimationCMP> {
     PlayerAnimationFallState_ fall;
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "player_animation");
-        EndObject(s);
+        WriteBeginObject(s, "player_animation");
+        WriteEndObject(s);
     };
 
 };

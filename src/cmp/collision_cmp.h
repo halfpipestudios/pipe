@@ -41,9 +41,9 @@ struct CollisionCMP : CMP<CollisionCMP> {
     }
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "collision");
+        WriteBeginObject(s, "collision");
         Write(s, "type", TypeToStr());
-        EndObject(s);
+        WriteEndObject(s);
     };
 
 };

@@ -1,14 +1,17 @@
 #ifndef _COMPONENT_NEW_H_
 #define _COMPONENT_NEW_H_
 
-#include <data_structures.h>
+#include "data_structures.h"
 #include "serializer.h"
+#include "tokenizer.h"
+
 
 struct CMPBase : Serializable {
     i32 id               { -1 };
     SlotmapKey entityKey { };
 
-    void Serialize(Serializer *s) override { Write(s, "type", "unknow"); };
+    void Serialize(Serializer *s) override { Write(s, "type", "unknow"); }
+    void Deserialize(Tokenizer *t) override { ASSERT(!"Deserialize not implemented"); }
 
 protected:
     inline static i32 counter { 0 };

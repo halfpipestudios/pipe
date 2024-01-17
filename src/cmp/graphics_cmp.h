@@ -19,9 +19,9 @@ struct GraphicsCMP : CMP<GraphicsCMP> {
     // TODO: char *shaderName;
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "graphics");
+        WriteBeginObject(s, "graphics");
         Write(s, "model", modelName);
-        EndObject(s);
+        WriteEndObject(s);
     };
 
 };

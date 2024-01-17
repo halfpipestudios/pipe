@@ -36,12 +36,12 @@ struct AiCMP : CMP<AiCMP> {
     }
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "ai");
+        WriteBeginObject(s, "ai");
         Write(s, "behavior", SteeringBehaviorToStr());
         Write(s, "time_to_target", timeToTarget);
         Write(s, "arraival_radii", arrivalRadii);
         Write(s, "active", active);
-        EndObject(s);
+        WriteEndObject(s);
     };
 
 

@@ -15,8 +15,8 @@ struct InputCMP : CMP<InputCMP> {
     Camera *camera;
 
     void Serialize(Serializer *s) override {
-        BeginObject(s, "input");
-        EndObject(s);
+        WriteBeginObject(s, "input");
+        WriteEndObject(s);
     };
 
 };

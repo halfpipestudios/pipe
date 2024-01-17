@@ -437,6 +437,8 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     gBlackBoard.target = &heroTransform->pos;
 }
 
+#include "tokenizer.h"
+
 void Level::Terminate() {
     
     // NOTE: Level serialization test
@@ -445,7 +447,7 @@ void Level::Terminate() {
     Serialize(&s);
     s.End("level.dat");
     // -------------------------------
-
+    
     map.Terminate();
     
     AnimationManager::Get()->ClearAssets();
@@ -530,15 +532,15 @@ void Level::Render() {
 
 
 void Level::Serialize(Serializer *s) {
-    BeginObject(s, "level");
+    WriteBeginObject(s, "level");
     
     Write(s, "num_entities", (i32)entities.size);
-    BeginArray(s, "entities");
+    WriteBeginArray(s, "entities");
     for(i32 i = 0; i <  entities.size; ++i) {
         Entity_ *entity = EntityManager::Get()->GetEntity(entities[i]);
         entity->Serialize(s);
     }
-    EndArray(s);
+    WriteEndArray(s);
 
-    EndObject(s);
+    WriteEndObject(s);
 }

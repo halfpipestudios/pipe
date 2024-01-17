@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+
 
 // -----------------------------------------------------------
 // Serializer Functions 
@@ -61,6 +63,14 @@ void Serializer::WriteReal(f32 number) {
 // Serializable functions 
 // -----------------------------------------------------------
 
+void Serializable::AdvanceTabs(Serializer *s) {
+    for(u32 i = 0; i < s->curTabOffset; ++i) {
+        s->WriteCharacter(' ');
+    }
+}
+
+// NOTE: Serializer functions
+
 void Serializable::Write(Serializer *s, char *name, f32 num) {
     AdvanceTabs(s);
     s->WriteString(name);
@@ -71,15 +81,6 @@ void Serializable::Write(Serializer *s, char *name, f32 num) {
 }
 
 void Serializable::Write(Serializer *s, char *name, i32 num) {
-    AdvanceTabs(s);
-    s->WriteString(name);
-    s->WriteString(": ");
-    s->WriteInt(num);
-    s->WriteCharacter(',');
-    s->WriteCharacter('\n');
-}
-
-void Serializable::Write(Serializer *s, char *name, u32 num) {
     AdvanceTabs(s);
     s->WriteString(name);
     s->WriteString(": ");
@@ -99,45 +100,105 @@ void Serializable::Write(Serializer *s, char *name, char *str) {
     s->WriteCharacter('\n');
 }
 
-void Serializable::Write(Serializer *s, char *name, char c) {
-    AdvanceTabs(s);
-    s->WriteString(name);
-    s->WriteString(": ");
-    s->WriteCharacter('\'');
-    s->WriteCharacter(c);
-    s->WriteCharacter('\'');
-    s->WriteCharacter(',');
-    s->WriteCharacter('\n');
-}
-
-void Serializable::BeginObject(Serializer *s, char *name) {
+void Serializable::WriteBeginObject(Serializer *s, char *name) {
     AdvanceTabs(s);
     s->WriteString(name);
     s->WriteString(": {\n");
     s->curTabOffset += s->tabOffset;
 }
 
-void Serializable::EndObject(Serializer *s) {
+void Serializable::WriteEndObject(Serializer *s) {
     s->curTabOffset -= s->tabOffset;
     AdvanceTabs(s);
     s->WriteString("}\n");
 }
 
-void Serializable::BeginArray(Serializer *s, char *name) {
+void Serializable::WriteBeginArray(Serializer *s, char *name) {
     AdvanceTabs(s);
     s->WriteString(name);
     s->WriteString(": [\n");
     s->curTabOffset += s->tabOffset;
 }
 
-void Serializable::EndArray(Serializer *s) {
+void Serializable::WriteEndArray(Serializer *s) {
     s->curTabOffset -= s->tabOffset;
     AdvanceTabs(s);
     s->WriteString("]\n");
 }
 
-void Serializable::AdvanceTabs(Serializer *s) {
-    for(u32 i = 0; i < s->curTabOffset; ++i) {
-        s->WriteCharacter(' ');
+// NOTE: Deserializer functions
+
+void Serializable::Expect(Tokenizer *t, Token *token, Token::Type type) {
+    t->NextToken(token);
+    if(token->type != type) {
+        Token tmpToken;
+        tmpToken.type = type;
+        Error(token, "Expecting %s but get %s instead", tmpToken.TypeToString(), token->TypeToString());
     }
+}
+
+void Serializable::Error(Token *token, char *str...) {
+    static char errorStr[256];
+    va_list args;
+    va_start(args, str);
+    snprintf(errorStr, 256, str, args);
+    va_end(args);
+    printf("line:%d:col:%d: error: %s\n", token->line, token->col, errorStr);
+    ASSERT(!"SERIALIZER ERROR");
+}
+
+void Serializable::Read(Tokenizer *t, char *name, f32 *num) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::REAL);
+    *num = token.fValue;
+    Expect(t, &token, Token::Type::COMMA);
+}
+
+void Serializable::Read(Tokenizer *t, char *name, i32 *num) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::INTEGER);
+    *num = token.iValue;
+    Expect(t, &token, Token::Type::COMMA);
+}
+
+void Serializable::Read(Tokenizer *t, char *name, char *str, u32 maxSize) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::STRING);
+    memcpy(str, token.start+1, MIN(token.end - token.start - 2, maxSize));
+    Expect(t, &token, Token::Type::COMMA);
+}
+
+void Serializable::ReadBeginObject(Tokenizer *t, char *name) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::L_BRACE);
+}
+
+void Serializable::ReadEndObject(Tokenizer *t) {
+    Token token = {};
+    Expect(t, &token, Token::Type::R_BRACE);
+}
+
+void Serializable::ReadBeginArray(Tokenizer *t, char *name) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::L_SQUARE_BRACKET);
+}
+
+void Serializable::ReadEndArray(Tokenizer *t) {
+    Token token = {};
+    Expect(t, &token, Token::Type::R_SQUARE_BRACKET);
 }
