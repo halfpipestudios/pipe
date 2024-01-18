@@ -97,7 +97,7 @@ void Map::Render() {
 }
 
 
-static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, Camera *camera,
+static SlotmapKey CreateHero(Shader shader, Camera *camera,
                              Shader soShader, GeometryShader soGeoShader,
                              Shader dwShader, GeometryShader dwGeoShader) {
 
@@ -118,7 +118,7 @@ static SlotmapKey CreateHero(Shader shader, AnimationClipSet *animationClipSet, 
     graphicsCmp->Initialize("hero.twm", shader);
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(heroKey);
-    animationCmp->Initialize(animationClipSet);
+    animationCmp->Initialize("hero.twa");
 
     InputCMP *inputCmp = EntityManager::Get()->AddComponent<InputCMP>(heroKey);
     inputCmp->Initialize(input, camera);
@@ -170,7 +170,7 @@ static SlotmapKey CreateOrc(char *name,
     graphicsCmp->Initialize("orc.twm", shader);
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(orc);
-    animationCmp->Initialize(animationClipSet);
+    animationCmp->Initialize("hero.twa");
 
     Cylinder cylinder = {};
     cylinder.c = pos;
@@ -383,7 +383,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     dwShootShader = GraphicsManager::Get()->CreateShaderParticle("./data/shaders/dwShootVert.hlsl", "./data/shaders/dwShootFrag.hlsl");
     dwShootGeoShader = GraphicsManager::Get()->CreateGeometryShader("./data/shaders/dwShootGeo.hlsl");
 
-    entities.Push(CreateHero(animShader, heroAnim, camera, soShootShader, soShootGeoShader, dwShootShader, dwShootGeoShader));
+    entities.Push(CreateHero(animShader, camera, soShootShader, soShootGeoShader, dwShootShader, dwShootGeoShader));
 
     entities.Push(CreateOrc("orc_1",  Vec3(0, 4, 20), animShader, heroAnim, 
                 1000, soFireShader, soFireGeoShader, dwFireShader, dwFireGeoShader, TextureManager::Get()->GetAsset("flare.png")));

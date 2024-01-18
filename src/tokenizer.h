@@ -32,8 +32,8 @@ struct Token {
     u32 line;
 
     union {
-        i32 iValue;
-        u32 uValue;
+        i64 iValue;
+        u64 uValue;
         f32 fValue;
     };
 

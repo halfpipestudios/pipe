@@ -52,6 +52,20 @@ void Serializer::WriteInt(i32 number) {
     WriteBytes((u8 *)buffer, len);
 }
 
+void Serializer::WriteUInt(u32 number) {
+    static char buffer[4096];
+    i32 len = snprintf(buffer, 4096, "%u", number);
+    ASSERT(len >= 0);
+    WriteBytes((u8 *)buffer, len);
+}
+
+void Serializer::WriteUInt64(u64 number) {
+    static char buffer[4096];
+    i32 len = snprintf(buffer, 4096, "%llu", number);
+    ASSERT(len >= 0);
+    WriteBytes((u8 *)buffer, len);
+}
+
 void Serializer::WriteReal(f32 number) {
     static char buffer[4096];
     i32 len = snprintf(buffer, 4096, "%f", number);
@@ -85,6 +99,24 @@ void Serializable::Write(Serializer *s, char *name, i32 num) {
     s->WriteString(name);
     s->WriteString(": ");
     s->WriteInt(num);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
+}
+
+void Serializable::Write(Serializer *s, char *name, u32 num) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteUInt(num);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
+}
+
+void Serializable::Write(Serializer *s, char *name, u64 num) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteUInt64(num);
     s->WriteCharacter(',');
     s->WriteCharacter('\n');
 }
@@ -180,7 +212,27 @@ void Serializable::Read(Tokenizer *t, char *name, i32 *num) {
     if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
     Expect(t, &token, Token::Type::DOUBLE_DOT);
     Expect(t, &token, Token::Type::INTEGER);
-    *num = token.iValue;
+    *num = (i32)token.iValue;
+    Expect(t, &token, Token::Type::COMMA);
+}
+
+void Serializable::Read(Tokenizer *t, char *name, u32 *num) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::INTEGER);
+    *num = (u32)token.uValue;
+    Expect(t, &token, Token::Type::COMMA);
+}
+
+void Serializable::Read(Tokenizer *t, char *name, u64 *num) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::INTEGER);
+    *num = token.uValue;
     Expect(t, &token, Token::Type::COMMA);
 }
 
@@ -201,7 +253,9 @@ void Serializable::Read(Tokenizer *t, char *name, char *str, u32 maxSize) {
     if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
     Expect(t, &token, Token::Type::DOUBLE_DOT);
     Expect(t, &token, Token::Type::STRING);
-    memcpy(str, token.start+1, MIN(token.end - token.start - 2, maxSize));
+    u32 size = MIN(token.end - token.start - 2, maxSize-1);
+    memcpy(str, token.start+1, size);
+    str[size] = '\0';
     Expect(t, &token, Token::Type::COMMA);
 }
 
