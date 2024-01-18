@@ -336,18 +336,8 @@ void Level::DeleteEntitiesToRemove() {
     }
 }
 
-void Level::Initialize(char *mapFilePath, Camera *camera,
-            Shader mapShader, Shader statShader, Shader animShader) {
-
-    srand(time(NULL));
-    
-    memory.BeginFrame();
-    
-    this->camera = camera;
-
-    entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
-    
-    EntityManager::Get()->Initialize();
+static void AddTypesToEM()
+{
     EntityManager::Get()->AddComponentType<TransformCMP>();
     EntityManager::Get()->AddComponentType<GraphicsCMP>();
     EntityManager::Get()->AddComponentType<PhysicsCMP>();
@@ -362,6 +352,21 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     EntityManager::Get()->AddComponentType<FireSpellCMP>();
     EntityManager::Get()->AddComponentType<PlayerCMP>();
     EntityManager::Get()->AddComponentType<EnemyCMP>();
+}
+
+void Level::Initialize(char *mapFilePath, Camera *camera,
+            Shader mapShader, Shader statShader, Shader animShader) {
+
+    srand(time(NULL));
+    
+    memory.BeginFrame();
+    
+    this->camera = camera;
+
+    entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
+    
+    EntityManager::Get()->Initialize();
+    AddTypesToEM();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath, mapShader);
