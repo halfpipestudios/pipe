@@ -19,6 +19,19 @@ struct GemCMP : CMP<GemCMP> {
         WriteEndObject(s);
     };
 
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "gem");
+        i32 value_;
+        f32 timerOffset_;
+        Read(t, "value", &value_);
+        Read(t, "timer", &timer);
+        Read(t, "timer_offset", &timerOffset_);
+        ReadEndObject(t);
+
+        Initialize(value_);
+        timerOffset = timerOffset_;
+    };
+
 };
 
 #endif // _GEM_CMP_H_

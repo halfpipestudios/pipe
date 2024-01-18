@@ -19,6 +19,11 @@ struct InputCMP : CMP<InputCMP> {
         WriteEndObject(s);
     };
 
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "input");
+        ReadEndObject(t);
+    };
+
 };
 
 #endif _INPUT_CMP_H_

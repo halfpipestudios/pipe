@@ -147,6 +147,11 @@ struct AnimationCMP : CMP<AnimationCMP> {
         WriteEndObject(s);
     };
 
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "player_animation");
+        ReadEndObject(t);
+    };
+
 };
 
 

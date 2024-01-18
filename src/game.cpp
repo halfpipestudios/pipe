@@ -26,7 +26,7 @@ void Game::Initialize() {
     level.Initialize("./data/maps/levelOP.map", &camera, mapShader, statShader, animShader);
 
     // TODO: Remove this test
-#if 0
+#if 1
     // NOTE: Serialize Test -----------------
     
     Serializer s;

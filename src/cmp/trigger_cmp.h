@@ -14,6 +14,11 @@ struct TriggerCMP : CMP<TriggerCMP> {
         WriteEndObject(s);
     };
 
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "trigger");
+        ReadEndObject(t);
+    };
+
 };
 
 #endif

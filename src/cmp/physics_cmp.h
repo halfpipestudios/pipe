@@ -29,27 +29,20 @@ struct PhysicsCMP : CMP<PhysicsCMP> {
 
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "physics");
-        
-        WriteBeginObject(s, "position");
-        Write(s, "x", physics.pos.x);
-        Write(s, "y", physics.pos.y);
-        Write(s, "z", physics.pos.z);
+        Write(s, "position", physics.pos);
+        Write(s, "velocity", physics.vel);
+        Write(s, "acceleration", physics.acc);
         WriteEndObject(s);
+    };
 
-        WriteBeginObject(s, "velocity");
-        Write(s, "x", physics.vel.x);
-        Write(s, "y", physics.vel.y);
-        Write(s, "z", physics.vel.z);
-        WriteEndObject(s);
-
-        WriteBeginObject(s, "acceleration");
-        Write(s, "x", physics.acc.x);
-        Write(s, "y", physics.acc.y);
-        Write(s, "z", physics.acc.z);
-        WriteEndObject(s);
-        
-        
-        WriteEndObject(s);
+    void Deserialize(Tokenizer *t) override {
+        Vec3 pos_, vel_, acc_;
+        ReadBeginObject(t, "physics");
+        Read(t, "position", &pos_);
+        Read(t, "velocity", &vel_);
+        Read(t, "acceleration", &acc_);
+        ReadEndObject(t);
+        Initialize(pos_, vel_, acc_);
     };
 
 };

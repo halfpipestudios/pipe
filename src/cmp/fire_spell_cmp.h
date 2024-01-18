@@ -53,6 +53,16 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
         }
         printf("Fire Spell Component Terminate\n");
     }
+
+    void Serialize(Serializer *s) override {
+        WriteBeginObject(s, "fire_spell");
+        WriteEndObject(s);
+    }
+
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "fire_spell");
+        ReadEndObject(t);
+    };
 };
 
 #endif

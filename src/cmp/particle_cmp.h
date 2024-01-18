@@ -26,6 +26,11 @@ struct ParticleCMP : CMP<ParticleCMP> {
         WriteEndObject(s);
     };
 
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "particle");
+        ReadEndObject(t);
+    };
+
 };
 
 #endif // _PARTICLE_CMP_H_

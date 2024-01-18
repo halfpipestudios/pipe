@@ -23,26 +23,30 @@ struct AiCMP : CMP<AiCMP> {
         active = active_;
     }
 
-    char *SteeringBehaviorToStr() {
-        switch(behavior) {
-            case STEERING_BEHAVIOR_FACE: return "face";
-            case STEERING_BEHAVIOR_SEEK: return "seek";
-            case STEERING_BEHAVIOR_FLEE: return "flee";
-            case STEERING_BEHAVIOR_ARRIVE: return "arrive";
-        }
-        
-        ASSERT(!"invalid code path");
-        return nullptr;
-    }
-
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "ai");
-        Write(s, "behavior", SteeringBehaviorToStr());
+        Write(s, "behavior", behavior);
         Write(s, "time_to_target", timeToTarget);
         Write(s, "arraival_radii", arrivalRadii);
         Write(s, "active", active);
         WriteEndObject(s);
-    };
+    }
+
+    void Deserialize(Tokenizer *t) override {
+        SteeringBehavior behavior_;
+        f32 timeToTarget_;
+        f32 arrivalRadii_;
+        bool active_;
+
+        ReadBeginObject(t, "ai");
+        Read(t, "behavior", &(i32)behavior_);
+        Read(t, "time_to_target", &timeToTarget_);
+        Read(t, "arraival_radii", &arrivalRadii_);
+        Read(t, "active", &active_);
+        ReadEndObject(t);
+
+        Initialize(behavior_, timeToTarget_, arrivalRadii_, active_, nullptr);
+    }
 
 
 };

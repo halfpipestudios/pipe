@@ -89,6 +89,15 @@ void Serializable::Write(Serializer *s, char *name, i32 num) {
     s->WriteCharacter('\n');
 }
 
+void Serializable::Write(Serializer *s, char *name, bool val) {
+    AdvanceTabs(s);
+    s->WriteString(name);
+    s->WriteString(": ");
+    s->WriteInt((i32)val);
+    s->WriteCharacter(',');
+    s->WriteCharacter('\n');
+}
+
 void Serializable::Write(Serializer *s, char *name, char *str) {
     AdvanceTabs(s);
     s->WriteString(name);
@@ -98,6 +107,14 @@ void Serializable::Write(Serializer *s, char *name, char *str) {
     s->WriteCharacter('\"');
     s->WriteCharacter(',');
     s->WriteCharacter('\n');
+}
+
+void Serializable::Write(Serializer *s, char *name, Vec3 vec) {
+    WriteBeginObject(s, name);
+    Write(s, "x", vec.x);
+    Write(s, "y", vec.y);
+    Write(s, "z", vec.z);
+    WriteEndObject(s); 
 }
 
 void Serializable::WriteBeginObject(Serializer *s, char *name) {
@@ -141,7 +158,7 @@ void Serializable::Error(Token *token, char *str...) {
     static char errorStr[256];
     va_list args;
     va_start(args, str);
-    snprintf(errorStr, 256, str, args);
+    vsnprintf(errorStr, 256, str, args);
     va_end(args);
     printf("line:%d:col:%d: error: %s\n", token->line, token->col, errorStr);
     ASSERT(!"SERIALIZER ERROR");
@@ -167,6 +184,17 @@ void Serializable::Read(Tokenizer *t, char *name, i32 *num) {
     Expect(t, &token, Token::Type::COMMA);
 }
 
+
+void Serializable::Read(Tokenizer *t, char *name, bool *val) {
+    Token token = {};
+    Expect(t, &token, Token::Type::IDENTIFIER);
+    if(!token.Contains(name)) Error(&token, "Expecting identifier named: %s", name);
+    Expect(t, &token, Token::Type::DOUBLE_DOT);
+    Expect(t, &token, Token::Type::INTEGER);
+    *val = token.iValue != 0;
+    Expect(t, &token, Token::Type::COMMA);
+}
+
 void Serializable::Read(Tokenizer *t, char *name, char *str, u32 maxSize) {
     Token token = {};
     Expect(t, &token, Token::Type::IDENTIFIER);
@@ -175,6 +203,15 @@ void Serializable::Read(Tokenizer *t, char *name, char *str, u32 maxSize) {
     Expect(t, &token, Token::Type::STRING);
     memcpy(str, token.start+1, MIN(token.end - token.start - 2, maxSize));
     Expect(t, &token, Token::Type::COMMA);
+}
+
+
+void Serializable::Read(Tokenizer *t, char *name, Vec3 *vec) {
+    ReadBeginObject(t, name);
+    Read(t, "x", &vec->x);
+    Read(t, "y", &vec->y);
+    Read(t, "z", &vec->z);
+    ReadEndObject(t);
 }
 
 void Serializable::ReadBeginObject(Tokenizer *t, char *name) {

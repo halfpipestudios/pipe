@@ -347,7 +347,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
         bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
         bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0, -6)),
         bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
-    );    
+    );
 
     // NOTE Load entities ------------------------------------------------------------------------------------    
     

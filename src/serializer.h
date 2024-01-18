@@ -1,6 +1,6 @@
 #ifndef _SERIALIZER_H_
 #define _SERIALIZER_H_
-
+#include "algebra.h"
 #include "common.h"
 #include "tokenizer.h"
 // TODO: Move tokenizer to this file
@@ -33,7 +33,9 @@ struct Serializable {
 
     void Write(Serializer *s, char *name, f32 num);
     void Write(Serializer *s, char *name, i32 num);
+    void Write(Serializer *s, char *name, bool val);
     void Write(Serializer *s, char *name, char *str);
+    void Write(Serializer *s, char *name, Vec3 vec);
 
     void WriteBeginObject(Serializer *s, char *name);
     void WriteEndObject(Serializer *s);
@@ -45,7 +47,9 @@ struct Serializable {
     
     void Read(Tokenizer *t, char *name, f32 *num);
     void Read(Tokenizer *t, char *name, i32 *num);
+    void Read(Tokenizer *t, char *name, bool *val);
     void Read(Tokenizer *t, char *name, char *str, u32 maxSize);
+    void Read(Tokenizer *t, char *name, Vec3 *vec);
 
     void ReadBeginObject(Tokenizer *t, char *name);
     void ReadEndObject(Tokenizer *t);

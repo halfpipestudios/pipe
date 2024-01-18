@@ -12,6 +12,19 @@ struct MovingPlatformCMP : CMP<MovingPlatformCMP> {
         a = a_;
         b = b_;
     }
+
+    void Serialize(Serializer *s) override {
+        WriteBeginObject(s, "moving_platform");
+        WriteEndObject(s);
+    }
+
+    void Deserialize(Tokenizer *t) override {
+        ReadBeginObject(t, "moving_platform");
+        ReadEndObject(t);
+    };
+
+
+
 };
 
 #endif // _MOVING_PLATFORM_CMP_

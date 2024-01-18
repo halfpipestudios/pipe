@@ -36,14 +36,47 @@ static CMPBase *CreateCMPFromNextToken(Tokenizer *t, Entity_ *entity) {
     Tokenizer tmp = *t;
     Token token;
     tmp.NextToken(&token);
-    if(token.Contains("collision")) {
+    if(token.Contains("ai")) {
+        return EntityManager::Get()->AddComponent<AiCMP>(entity->key);
+    }
+    else if(token.Contains("player_animation")) {
+        return EntityManager::Get()->AddComponent<AnimationCMP>(entity->key);
+    }
+    else if(token.Contains("collision")) {
         return EntityManager::Get()->AddComponent<CollisionCMP>(entity->key);
+    }
+    else if(token.Contains("enemy")) {
+        return EntityManager::Get()->AddComponent<EnemyCMP>(entity->key);
+    }
+    else if(token.Contains("fire_spell")) {
+        return EntityManager::Get()->AddComponent<FireSpellCMP>(entity->key);
+    }
+    else if(token.Contains("gem")) {
+        return EntityManager::Get()->AddComponent<GemCMP>(entity->key);
     }
     else if(token.Contains("graphics")) {
         return EntityManager::Get()->AddComponent<GraphicsCMP>(entity->key);
     }
+    else if(token.Contains("input")) {
+        return EntityManager::Get()->AddComponent<InputCMP>(entity->key);
+    }
+    else if(token.Contains("moving_platform")) {
+        return EntityManager::Get()->AddComponent<MovingPlatformCMP>(entity->key);
+    }
+    else if(token.Contains("particle")) {
+        return EntityManager::Get()->AddComponent<ParticleCMP>(entity->key);
+    }
+    else if(token.Contains("physics")) {
+        return EntityManager::Get()->AddComponent<PhysicsCMP>(entity->key);
+    }
+    else if(token.Contains("player")) {
+        return EntityManager::Get()->AddComponent<PlayerCMP>(entity->key);
+    }
     else if(token.Contains("transform")) {
         return EntityManager::Get()->AddComponent<TransformCMP>(entity->key);
+    }
+    else if(token.Contains("trigger")) {
+        return EntityManager::Get()->AddComponent<TriggerCMP>(entity->key);
     }
     ASSERT(!"cmp factory invalid code path");
     return nullptr;

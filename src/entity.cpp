@@ -23,11 +23,12 @@ void Entity_::Serialize(Serializer *s) {
 void Entity_::Deserialize(Tokenizer *t) {
     ReadBeginObject(t, "entity");
     
+    i32 numComponents = 0;
     Read(t, "name", name, MAX_ENTITY_NAME);
-    Read(t, "num_components", &((i32)componentsIds.size));
+    Read(t, "num_components", &numComponents);
     
     ReadBeginArray(t, "components");
-    for(u32 i = 0; i < componentsIds.size; ++i) {
+    for(u32 i = 0; i < numComponents; ++i) {
         CMPBase *cmp = CreateCMPFromNextToken(t, this);
         cmp->Deserialize(t);
     }
@@ -35,5 +36,3 @@ void Entity_::Deserialize(Tokenizer *t) {
 
     ReadEndObject(t);
 }
-
-
