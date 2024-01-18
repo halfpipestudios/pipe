@@ -1,8 +1,8 @@
 import os, glob, re
 
-path = os.getcwd() + "\\src\\cmp"
+path = os.getcwd() + "/src/cmp"
 
-out = open(".\\src\\cmp_factory.h", "w");
+out = open("./src/cmp_factory.h", "w");
 
 # NOTE: include components files --------------------------------------------------
 
