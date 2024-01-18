@@ -88,15 +88,14 @@ struct CollisionCMP : CMP<CollisionCMP> {
                 ReadBeginObject(t, "convex_hull");
                 Read(t, "count", &convexHull_.count);
                 convexHull_.points = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(convexHull_.count * sizeof(Vec3), 8);
-                for(i32 i = 0; i < poly3D.convexHull.count; i++) {
+                for(i32 i = 0; i < convexHull_.count; i++) {
                     Read(t, "v", convexHull_.points + i);
                 }
                 ReadEndObject(t);
                 MapImporter::Entity entity_ = {};
                 ReadBeginObject(t, "map_importer_entity");
                 Read(t, "faces_count", &entity_.facesCount);
-                entity_.faces = (MapImporter::EntityFace *)
-                    MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * entity_.facesCount, 8);
+                entity_.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * entity_.facesCount, 8);
                 memset(entity_.faces, 0, sizeof(MapImporter::EntityFace) * entity_.facesCount);
                 for(i32 i = 0; i < entity_.facesCount; i++) {
                     ReadBeginObject(t, "plane");

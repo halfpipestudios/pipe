@@ -69,7 +69,7 @@ bool Tokenizer::NextToken(Token *token) {
 
     case '1': case '2': case '3': case '4': case '5':
     case '6': case '7': case '8': case '9': case '0':
-    case '.': {
+    case '.': case '-': {
       TokenizeNumber(token);
     } break;
 
@@ -131,10 +131,19 @@ void Tokenizer::SkipSpaceAndNewLine() {
 }
 
 void Tokenizer::TokenizeNumber(Token *token) {
+    
+    bool neg = false;
+    if(*current == '-') {
+        neg = true;
+        ++current;
+    }
+    
     if(IsCurrentTokenNumberReal()) {
         TokenizeReal(token);
+        if(neg) token->fValue = -token->fValue;
     } else {
         TokenizeInteger(token);
+        if(neg) token->iValue = -token->iValue;
     }
 }
 

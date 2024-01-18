@@ -150,7 +150,7 @@ void Serializable::Expect(Tokenizer *t, Token *token, Token::Type type) {
     if(token->type != type) {
         Token tmpToken;
         tmpToken.type = type;
-        Error(token, "Expecting %s but get %s instead", tmpToken.TypeToString(), token->TypeToString());
+        Error(token, "Expecting %s but get %s(%.*s) instead", tmpToken.TypeToString(), token->TypeToString(), (u32)(token->end - token->start), token->start);
     }
 }
 

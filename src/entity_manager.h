@@ -4,7 +4,7 @@
 #include "component_storage.h"
 #include "entity.h"
 
-#define ENTITY_ARRAY_MAX_SIZE 120
+#define ENTITY_ARRAY_MAX_SIZE 1024 
 
 struct EntityManager {
     
