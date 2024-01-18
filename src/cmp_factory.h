@@ -15,6 +15,23 @@
 #include "cmp/trigger_cmp.h"
 #include "tokenizer.h"
 
+static void AddTypesToEntityManager() {
+    EntityManager::Get()->AddComponentType<AiCMP>();
+    EntityManager::Get()->AddComponentType<AnimationCMP>();
+    EntityManager::Get()->AddComponentType<CollisionCMP>();
+    EntityManager::Get()->AddComponentType<EnemyCMP>();
+    EntityManager::Get()->AddComponentType<FireSpellCMP>();
+    EntityManager::Get()->AddComponentType<GemCMP>();
+    EntityManager::Get()->AddComponentType<GraphicsCMP>();
+    EntityManager::Get()->AddComponentType<InputCMP>();
+    EntityManager::Get()->AddComponentType<MovingPlatformCMP>();
+    EntityManager::Get()->AddComponentType<ParticleCMP>();
+    EntityManager::Get()->AddComponentType<PhysicsCMP>();
+    EntityManager::Get()->AddComponentType<PlayerCMP>();
+    EntityManager::Get()->AddComponentType<TransformCMP>();
+    EntityManager::Get()->AddComponentType<TriggerCMP>();
+}
+
 static CMPBase *CreateCMPFromNextToken(Tokenizer *t, Entity_ *entity) {
     Tokenizer tmp = *t;
     Token token;

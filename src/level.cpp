@@ -7,20 +7,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include "cmp/transform_cmp.h"
-#include "cmp/graphics_cmp.h"
-#include "cmp/physics_cmp.h"
-#include "cmp/animation_cmp.h"
-#include "cmp/input_cmp.h"
-#include "cmp/collision_cmp.h"
-#include "cmp/moving_platform_cmp.h"
-#include "cmp/ai_cmp.h"
-#include "cmp/trigger_cmp.h"
-#include "cmp/gem_cmp.h"
-#include "cmp/particle_cmp.h"
-#include "cmp/fire_spell_cmp.h"
-#include "cmp/player_cmp.h"
-#include "cmp/enemy_cmp.h"
+#include "cmp_factory.h"
 
 #include "mgr/texture_manager.h"
 #include "mgr/model_manager.h"
@@ -336,24 +323,6 @@ void Level::DeleteEntitiesToRemove() {
     }
 }
 
-static void AddTypesToEM()
-{
-    EntityManager::Get()->AddComponentType<TransformCMP>();
-    EntityManager::Get()->AddComponentType<GraphicsCMP>();
-    EntityManager::Get()->AddComponentType<PhysicsCMP>();
-    EntityManager::Get()->AddComponentType<AnimationCMP>();
-    EntityManager::Get()->AddComponentType<InputCMP>();
-    EntityManager::Get()->AddComponentType<CollisionCMP>();
-    EntityManager::Get()->AddComponentType<MovingPlatformCMP>();
-    EntityManager::Get()->AddComponentType<AiCMP>();
-    EntityManager::Get()->AddComponentType<TriggerCMP>();
-    EntityManager::Get()->AddComponentType<GemCMP>();
-    EntityManager::Get()->AddComponentType<ParticleCMP>();
-    EntityManager::Get()->AddComponentType<FireSpellCMP>();
-    EntityManager::Get()->AddComponentType<PlayerCMP>();
-    EntityManager::Get()->AddComponentType<EnemyCMP>();
-}
-
 void Level::Initialize(char *mapFilePath, Camera *camera,
             Shader mapShader, Shader statShader, Shader animShader) {
 
@@ -366,7 +335,7 @@ void Level::Initialize(char *mapFilePath, Camera *camera,
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     
     EntityManager::Get()->Initialize();
-    AddTypesToEM();
+    AddTypesToEntityManager();
 
     // NOTE Load Map ------------------------------------------------------------------------------------------
     map.Initialize(mapFilePath, mapShader);
