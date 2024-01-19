@@ -2,5 +2,4 @@
 /build
 vc140.pdb
 tgui.dat
-level.dat
 /thirdparty/tgui/lib/tgui.lib
