@@ -119,7 +119,7 @@ static SlotmapKey CreateHero(Camera *camera) {
     graphicsCmp->Initialize("hero.twm", "animVert.hlsl", "mapFrag.hlsl");
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(heroKey);
-    animationCmp->Initialize(AnimationManager::Get()->Dereference(AnimationManager::Get()->GetAsset("hero.twa")));
+    animationCmp->Initialize("hero.twa");
 
     InputCMP *inputCmp = EntityManager::Get()->AddComponent<InputCMP>(heroKey);
 
@@ -156,7 +156,7 @@ static SlotmapKey CreateOrc(char *name, Vec3 pos, BehaviorTree *bhTree = nullptr
     graphicsCmp->Initialize("orc.twm", "animVert.hlsl", "mapFrag.hlsl");
 
     AnimationCMP *animationCmp = EntityManager::Get()->AddComponent<AnimationCMP>(orc);
-    animationCmp->Initialize(AnimationManager::Get()->Dereference(AnimationManager::Get()->GetAsset("hero.twa")));
+    animationCmp->Initialize("hero.twa");
 
     Cylinder cylinder = {};
     cylinder.c = pos;

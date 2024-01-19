@@ -1,9 +1,10 @@
 #ifndef _ANIMATION_CMP_H_
 #define _ANIMATION_CMP_H_
 
-#include "../common.h"
-#include "../animation.h"
+#include "common.h"
 #include "base_cmp.h"
+#include "animation.h"
+#include "mgr/animation_manager.h"
 
 struct Entity_;
 struct AnimationCMP;
@@ -94,8 +95,25 @@ struct PlayerAnimationFallState_ : public PlayerAnimationState_ {
 };
 
 #include <stdio.h>
+#include <string.h>
+
+#define MAX_ANIMATION_SET_NAME_SIZE 256 
 
 struct AnimationCMP : CMP<AnimationCMP> {
+
+    char animationSetName[MAX_ANIMATION_SET_NAME_SIZE];
+    PlayerAnimationState_ *state;
+
+    Mat4 *finalTransformMatrix;
+    u32 numFinalTransformMatrix;
+
+    PlayerAnimationTransition_ transition;
+
+    PlayerAnimationIdleState_ idle;
+    PlayerAnimationWalkState_ walk;
+    PlayerAnimationJumpState_ jump;
+    PlayerAnimationFallState_ fall;
+
     
     AnimationCMP &operator=(AnimationCMP &other) {
         
@@ -117,9 +135,12 @@ struct AnimationCMP : CMP<AnimationCMP> {
 
         return *this;
     }
+    
+    inline AnimationClipSet *GetAnimationSet() { return AnimationManager::Get()->Dereference(AnimationManager::Get()->GetAsset(animationSetName)); }
 
-    void Initialize(AnimationClipSet* animationSet_) { 
-        animationSet = animationSet_;
+    void Initialize(char *animationSetName_) { 
+        strcpy(animationSetName, animationSetName_);
+        AnimationClipSet *animationSet = GetAnimationSet();
         numFinalTransformMatrix = animationSet->skeleton->numJoints;
         idle.Initialize(this);
         walk.Initialize(this);
@@ -129,27 +150,18 @@ struct AnimationCMP : CMP<AnimationCMP> {
         state->anim = this;
     }
 
-    AnimationClipSet *animationSet;
-    PlayerAnimationState_ *state;
-
-    Mat4 *finalTransformMatrix;
-    u32 numFinalTransformMatrix;
-
-    PlayerAnimationTransition_ transition;
-
-    PlayerAnimationIdleState_ idle;
-    PlayerAnimationWalkState_ walk;
-    PlayerAnimationJumpState_ jump;
-    PlayerAnimationFallState_ fall;
-
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "player_animation");
+        Write(s, "animation_set", animationSetName);
         WriteEndObject(s);
     };
 
     void Deserialize(Tokenizer *t) override {
+        char animationSetName_[MAX_ANIMATION_SET_NAME_SIZE];
         ReadBeginObject(t, "player_animation");
+        Read(t, "animation_set", animationSetName_, MAX_ANIMATION_SET_NAME_SIZE);
         ReadEndObject(t);
+        Initialize(animationSetName_);
     };
 
 };

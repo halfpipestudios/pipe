@@ -175,7 +175,7 @@ void Tokenizer::TokenizeInteger(Token *token) {
     
     MemoryManager::Get()->BeginTemporalMemory();
     char *buffer = TemporalNullTerminatedTokenContent(token);
-    token->iValue = atoi(buffer);
+    token->iValue = atoll(buffer);
     MemoryManager::Get()->EndTemporalMemory();
 }
 

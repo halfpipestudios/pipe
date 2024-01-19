@@ -15,6 +15,8 @@ struct Serializer {
     void WriteCharacter(char character);
     void WriteString(char *str);
     void WriteInt(i32 number);
+    void WriteUInt(u32 number);
+    void WriteUInt64(u64 number);
     void WriteReal(f32 number);
     
     u8 *data;
@@ -33,6 +35,8 @@ struct Serializable {
 
     void Write(Serializer *s, char *name, f32 num);
     void Write(Serializer *s, char *name, i32 num);
+    void Write(Serializer *s, char *name, u32 num);
+    void Write(Serializer *s, char *name, u64 num);
     void Write(Serializer *s, char *name, bool val);
     void Write(Serializer *s, char *name, char *str);
     void Write(Serializer *s, char *name, Vec3 vec);
@@ -47,6 +51,8 @@ struct Serializable {
     
     void Read(Tokenizer *t, char *name, f32 *num);
     void Read(Tokenizer *t, char *name, i32 *num);
+    void Read(Tokenizer *t, char *name, u32 *num);
+    void Read(Tokenizer *t, char *name, u64 *num);
     void Read(Tokenizer *t, char *name, bool *val);
     void Read(Tokenizer *t, char *name, char *str, u32 maxSize);
     void Read(Tokenizer *t, char *name, Vec3 *vec);

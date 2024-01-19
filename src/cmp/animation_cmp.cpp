@@ -9,7 +9,7 @@
 // ----------------------------------------------------------
 
 void PlayerAnimationState_::CalculateCurrentAnimationFrame(EntityManager *em, SlotmapKey entityKey, f32 dt) {
-    Skeleton *skeleton = anim->animationSet->skeleton;
+    Skeleton *skeleton = anim->GetAnimationSet()->skeleton;
     ASSERT(skeleton != nullptr);
     
     anim->finalTransformMatrix = (Mat4 *)MemoryManager::Get()->AllocFrameMemory(sizeof(Mat4)*anim->numFinalTransformMatrix, 8);
@@ -34,7 +34,7 @@ void PlayerAnimationState_::CalculateCurrentAnimationFrame(EntityManager *em, Sl
 
 void PlayerAnimationIdleState_::Initialize(AnimationCMP *component) {
     anim = component;
-    AnimationClipSet *set = component->animationSet;
+    AnimationClipSet *set = component->GetAnimationSet();
     idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
 }
 
@@ -80,7 +80,7 @@ void PlayerAnimationIdleState_::Exit(SlotmapKey entityKey) {
 
 void PlayerAnimationWalkState_::Initialize(AnimationCMP *component) {
     anim = component;
-    AnimationClipSet *set = component->animationSet;
+    AnimationClipSet *set = component->GetAnimationSet();
     idleAnimation.Initialize(set->FindAnimationClipByName("idle"), -1, true);
     walkAnimation.Initialize(set->FindAnimationClipByName("walking"), -1, true);
 }
@@ -92,7 +92,7 @@ void PlayerAnimationWalkState_::SampleJointPose(JointPose *pose, EntityManager *
     Vec2 vel2d = Vec2(physicsComp->physics.vel.x, physicsComp->physics.vel.z);
     
     f32 t = CLAMP(vel2d.Len() * 0.25f, 0, 1);
-    u32 numJoints = anim->animationSet->skeleton->numJoints;
+    u32 numJoints = anim->GetAnimationSet()->skeleton->numJoints;
 
     MemoryManager::Get()->BeginTemporalMemory();
     
@@ -144,7 +144,7 @@ void PlayerAnimationWalkState_::Exit(SlotmapKey entityKey) {
 
 void PlayerAnimationJumpState_::Initialize(AnimationCMP *component) {
     anim = component;
-    AnimationClipSet *set = component->animationSet;
+    AnimationClipSet *set = component->GetAnimationSet();
     jumpAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, false);
 }
 
@@ -196,7 +196,7 @@ void PlayerAnimationJumpState_::Exit(SlotmapKey entityKey) {
 
 void PlayerAnimationFallState_::Initialize(AnimationCMP *component) {
     anim = component;
-    AnimationClipSet *set = component->animationSet;
+    AnimationClipSet *set = component->GetAnimationSet();
     fallAnimation.Initialize(set->FindAnimationClipByName("jump"), -1, true);
 }
 
@@ -255,9 +255,12 @@ void PlayerAnimationTransition_::SampleJointPose(JointPose *pose, EntityManager 
     ASSERT(duration > 0);
 
     f32 t = time / duration;
+    
+    AnimationClipSet *srcAnimationSet = src->anim->GetAnimationSet();
+    AnimationClipSet *desAnimationSet = des->anim->GetAnimationSet();
 
-    ASSERT(src->anim->animationSet->skeleton->numJoints == des->anim->animationSet->skeleton->numJoints)
-    u32 numJoints = src->anim->animationSet->skeleton->numJoints;
+    ASSERT(srcAnimationSet->skeleton->numJoints == desAnimationSet->skeleton->numJoints)
+    u32 numJoints = srcAnimationSet->skeleton->numJoints;
     
     MemoryManager::Get()->BeginTemporalMemory();
 
