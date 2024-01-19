@@ -72,6 +72,7 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
     void Deserialize(Tokenizer *t) override {
         ReadBeginObject(t, "fire_spell");
         ReadEndObject(t);
+        Initialize();
     };
 };
 

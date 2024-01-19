@@ -40,9 +40,12 @@ struct Map {
     void Render();
 };
 
+#define MAX_LEVEL_MAP_NAME_SIZE 32
+
 struct Level : Serializable {
 
-    void Initialize(char *mapFilePath, Camera *camera);
+    void Initialize(char *levelPath, Camera *camera);
+    //void Initialize(char *mapFilePath, Camera *camera);
     void Terminate();
 
     void BeginFrame(f32 dt);
@@ -76,6 +79,7 @@ struct Level : Serializable {
 
     Camera *camera;
     Map map;
+    char mapName[MAX_LEVEL_MAP_NAME_SIZE];
 
     SlotmapKey heroKey;
     Array<SlotmapKey> entities;

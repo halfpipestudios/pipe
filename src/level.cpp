@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cmp_factory.h"
 
@@ -187,7 +188,7 @@ static SlotmapKey CreateRain(char *name, Vec3 pos) {
     parCmp->Initialize(1000, 
             "soRainVert.hlsl", "soRainFrag.hlsl", "soRainGeo.hlsl",
             "dwRainVert.hlsl", "dwRainFrag.hlsl", "dwRainGeo.hlsl",
-            TextureManager::Get()->GetAsset("raindrop1.png"));
+            "raindrop1.png");
 
     return rain;
 }
@@ -206,7 +207,7 @@ static SlotmapKey CreateLava(char *name, Vec3 pos) {
     parCmp->Initialize(2000, 
             "soLavaVert.hlsl", "soLavaFrag.hlsl", "soLavaGeo.hlsl",
             "dwLavaVert.hlsl", "dwLavaFrag.hlsl", "dwLavaGeo.hlsl",
-            TextureManager::Get()->GetAsset("flare.png"));
+            "flare.png");
 
     return rain;
 }
@@ -305,13 +306,47 @@ void Level::DeleteEntitiesToRemove() {
     }
 }
 
-void Level::Initialize(char *mapFilePath, Camera *camera) {
+
+void Level::Initialize(char *levelPath, Camera *camera) {
 
     srand(time(NULL));
-    
     memory.BeginFrame();
     
     this->camera = camera;
+    entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
+    EntityManager::Get()->Initialize();
+    AddTypesToEntityManager();
+
+    // Load the BehaviorTree
+    bhTree.Initialize();
+    bhTree.AddNode<BehaviorSequence>(
+        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
+        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0, -6)),
+        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
+    );
+    
+    printf("deserializing level!! ...\n");
+
+    Tokenizer t;
+    t.Begin(levelPath);
+    Deserialize(&t);
+    t.End();
+
+    heroKey = entities[0];
+    TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
+    gBlackBoard.target = &heroTransform->pos;
+    
+}
+
+#if 0
+void Level::Initialize(char *mapFilePath, Camera *camera) {
+
+    srand(time(NULL));
+    memory.BeginFrame();
+    
+    this->camera = camera;
+    strcpy(mapName, mapFilePath);
 
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     
@@ -353,10 +388,10 @@ void Level::Initialize(char *mapFilePath, Camera *camera) {
     }
 
     heroKey = entities[0];
-
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
 }
+#endif
 
 #include "tokenizer.h"
 
@@ -422,6 +457,7 @@ void Level::Render() {
 void Level::Serialize(Serializer *s) {
     WriteBeginObject(s, "level");
     
+    Write(s, "map", mapName);
     Write(s, "num_entities", (i32)entities.size);
     WriteBeginArray(s, "entities");
     for(i32 i = 0; i <  entities.size; ++i) {
@@ -436,11 +472,14 @@ void Level::Serialize(Serializer *s) {
 void Level::Deserialize(Tokenizer *t) {
     ReadBeginObject(t, "level");
     
+    Read(t, "map", mapName, MAX_LEVEL_MAP_NAME_SIZE);
+    map.Initialize(mapName);
     i32 numEntities = 0;
     Read(t, "num_entities", &numEntities);
     ReadBeginArray(t, "entities");
     for(i32 i = 0; i <  numEntities; ++i) {
         SlotmapKey key = EntityManager::Get()->AddEntity();
+        entities.Push(key);
         Entity_ *entity = EntityManager::Get()->GetEntity(key);
         entity->Deserialize(t);
     }

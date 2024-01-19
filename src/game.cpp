@@ -16,7 +16,7 @@ void Game::Initialize() {
                 0.01f, 1000.0f));
     
     GraphicsManager::Get()->SetWorldMatrix(Mat4());
-    level.Initialize("./data/maps/levelOP.map", &camera);
+    level.Initialize("./data/levels/level.dat", &camera);
 
     // TODO: Remove this test
 #if 0

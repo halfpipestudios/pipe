@@ -1,0 +1,6558 @@
+level: {
+  map: "./data/maps/levelOP.map",
+  num_entities: 110,
+  entities: [
+    entity: {
+      name: "Hero",
+      num_components: 8,
+      components: [
+        player: {
+        }
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 8.000000,
+            z: 0.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.800000,
+            y: 0.800000,
+            z: 0.800000,
+          }
+        }
+        physics: {
+          position: {
+            x: 0.000000,
+            y: 8.000000,
+            z: 0.000000,
+          }
+          velocity: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          acceleration: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+        }
+        graphics: {
+          model: "hero.twm",
+          vshader: "animVert.hlsl",
+          fshader: "mapFrag.hlsl",
+        }
+        player_animation: {
+          animation_set: "hero.twa",
+        }
+        input: {
+        }
+        collision: {
+          type: 0,
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 30.000000,
+              z: 0.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.300000,
+            n: 0.750000,
+          }
+        }
+        fire_spell: {
+        }
+      ]
+    }
+    entity: {
+      name: "orc_1",
+      num_components: 7,
+      components: [
+        enemy: {
+        }
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 20.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 1.000000,
+            y: 1.000000,
+            z: 1.000000,
+          }
+        }
+        physics: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 20.000000,
+          }
+          velocity: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          acceleration: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+        }
+        graphics: {
+          model: "orc.twm",
+          vshader: "animVert.hlsl",
+          fshader: "mapFrag.hlsl",
+        }
+        player_animation: {
+          animation_set: "hero.twa",
+        }
+        collision: {
+          type: 0,
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 4.000000,
+              z: 20.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.300000,
+            n: 0.750000,
+          }
+        }
+        ai: {
+          behavior: 0,
+          time_to_target: 0.750000,
+          arraival_radii: 2.000000,
+          active: 1,
+        }
+      ]
+    }
+    entity: {
+      name: "orc_2",
+      num_components: 7,
+      components: [
+        enemy: {
+        }
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 1.000000,
+            y: 1.000000,
+            z: 1.000000,
+          }
+        }
+        physics: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 15.000000,
+          }
+          velocity: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          acceleration: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+        }
+        graphics: {
+          model: "orc.twm",
+          vshader: "animVert.hlsl",
+          fshader: "mapFrag.hlsl",
+        }
+        player_animation: {
+          animation_set: "hero.twa",
+        }
+        collision: {
+          type: 0,
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 4.000000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.300000,
+            n: 0.750000,
+          }
+        }
+        ai: {
+          behavior: 0,
+          time_to_target: 0.750000,
+          arraival_radii: 2.000000,
+          active: 1,
+        }
+      ]
+    }
+    entity: {
+      name: "orc_3",
+      num_components: 7,
+      components: [
+        enemy: {
+        }
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 1.000000,
+            y: 1.000000,
+            z: 1.000000,
+          }
+        }
+        physics: {
+          position: {
+            x: 0.000000,
+            y: 4.000000,
+            z: 8.000000,
+          }
+          velocity: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          acceleration: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+        }
+        graphics: {
+          model: "orc.twm",
+          vshader: "animVert.hlsl",
+          fshader: "mapFrag.hlsl",
+        }
+        player_animation: {
+          animation_set: "hero.twa",
+        }
+        collision: {
+          type: 0,
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 4.000000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.300000,
+            n: 0.750000,
+          }
+        }
+        ai: {
+          behavior: 0,
+          time_to_target: 0.750000,
+          arraival_radii: 2.000000,
+          active: 1,
+        }
+      ]
+    }
+    entity: {
+      name: "rain",
+      num_components: 2,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 1.000000,
+            y: 1.000000,
+            z: 1.000000,
+          }
+        }
+        particle: {
+          max_particles: 1000,
+          soVName: "soRainVert.hlsl",
+          soFName: "soRainFrag.hlsl",
+          soGName: "soRainGeo.hlsl",
+          dwVName: "dwRainVert.hlsl",
+          dwFName: "dwRainFrag.hlsl",
+          dwGName: "dwRainGeo.hlsl",
+          texture: "raindrop1.png",
+        }
+      ]
+    }
+    entity: {
+      name: "lava",
+      num_components: 2,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: -11.110000,
+            z: 73.500000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 1.000000,
+            y: 1.000000,
+            z: 1.000000,
+          }
+        }
+        particle: {
+          max_particles: 2000,
+          soVName: "soLavaVert.hlsl",
+          soFName: "soLavaFrag.hlsl",
+          soGName: "soLavaGeo.hlsl",
+          dwVName: "dwLavaVert.hlsl",
+          dwFName: "dwLavaFrag.hlsl",
+          dwGName: "dwLavaGeo.hlsl",
+          texture: "flare.png",
+        }
+      ]
+    }
+    entity: {
+      name: "mov_plat_1",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: -0.500000,
+            z: 67.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 2.000000,
+            y: 0.500000,
+            z: 2.000000,
+          }
+        }
+        graphics: {
+          model: "cube.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        collision: {
+          type: 1,
+          convex_hull: {
+            count: 24,
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+          }
+          map_importer_entity: {
+            faces_count: 6,
+            plane: {
+              n: {
+                x: 0.000000,
+                y: -1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: -1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: 1.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: -1.000000,
+              }
+              d: 32.000000,
+            }
+          }
+        }
+        moving_platform: {
+          a: {
+            x: 1.000000,
+            y: -0.500000,
+            z: 67.000000,
+          }
+          b: {
+            x: 22.000000,
+            y: -0.500000,
+            z: 67.000000,
+          }
+          movement: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          dt_elapse: 0.000000,
+          speed: 15.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "mov_plat_2",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: -0.500000,
+            z: 78.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 4.000000,
+            y: 0.500000,
+            z: 2.000000,
+          }
+        }
+        graphics: {
+          model: "cube.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        collision: {
+          type: 1,
+          convex_hull: {
+            count: 24,
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+          }
+          map_importer_entity: {
+            faces_count: 6,
+            plane: {
+              n: {
+                x: 0.000000,
+                y: -1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: -1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: 1.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: -1.000000,
+              }
+              d: 32.000000,
+            }
+          }
+        }
+        moving_platform: {
+          a: {
+            x: 0.000000,
+            y: -0.500000,
+            z: 78.000000,
+          }
+          b: {
+            x: 26.000000,
+            y: -0.500000,
+            z: 78.000000,
+          }
+          movement: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          dt_elapse: 0.000000,
+          speed: 15.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "mov_plat_3",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 22.000000,
+            y: -0.500000,
+            z: 86.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 4.000000,
+            y: 0.500000,
+            z: 2.000000,
+          }
+        }
+        graphics: {
+          model: "cube.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        collision: {
+          type: 1,
+          convex_hull: {
+            count: 24,
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+          }
+          map_importer_entity: {
+            faces_count: 6,
+            plane: {
+              n: {
+                x: 0.000000,
+                y: -1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: -1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: 1.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: -1.000000,
+              }
+              d: 32.000000,
+            }
+          }
+        }
+        moving_platform: {
+          a: {
+            x: 22.000000,
+            y: -0.500000,
+            z: 86.000000,
+          }
+          b: {
+            x: 0.000000,
+            y: -0.500000,
+            z: 86.000000,
+          }
+          movement: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          dt_elapse: 0.000000,
+          speed: 15.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "mov_plat_4",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -22.000000,
+            y: 0.000000,
+            z: 88.199997,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 4.000000,
+            y: 0.500000,
+            z: 2.000000,
+          }
+        }
+        graphics: {
+          model: "cube.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        collision: {
+          type: 1,
+          convex_hull: {
+            count: 24,
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: -0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: -0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: 0.500000,
+              z: 0.500000,
+            }
+            v: {
+              x: 0.500000,
+              y: -0.500000,
+              z: 0.500000,
+            }
+          }
+          map_importer_entity: {
+            faces_count: 6,
+            plane: {
+              n: {
+                x: 0.000000,
+                y: -1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 1.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: -1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 1.000000,
+                y: 0.000000,
+                z: 0.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: 1.000000,
+              }
+              d: 32.000000,
+            }
+            plane: {
+              n: {
+                x: 0.000000,
+                y: 0.000000,
+                z: -1.000000,
+              }
+              d: 32.000000,
+            }
+          }
+        }
+        moving_platform: {
+          a: {
+            x: -22.000000,
+            y: 0.000000,
+            z: 88.199997,
+          }
+          b: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 88.199997,
+          }
+          movement: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          dt_elapse: 0.000000,
+          speed: 15.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 68,
+          timer: 0.000000,
+          timer_offset: 68.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 85,
+          timer: 0.000000,
+          timer_offset: 85.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 65,
+          timer: 0.000000,
+          timer_offset: 65.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 68,
+          timer: 0.000000,
+          timer_offset: 68.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 62,
+          timer: 0.000000,
+          timer_offset: 62.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 74,
+          timer: 0.000000,
+          timer_offset: 74.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 86,
+          timer: 0.000000,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 88,
+          timer: 0.000000,
+          timer_offset: 88.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 52,
+          timer: 0.000000,
+          timer_offset: 52.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 8.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 8.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 90,
+          timer: 0.000000,
+          timer_offset: 90.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 95,
+          timer: 0.000000,
+          timer_offset: 95.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 79,
+          timer: 0.000000,
+          timer_offset: 79.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 73,
+          timer: 0.000000,
+          timer_offset: 73.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 65,
+          timer: 0.000000,
+          timer_offset: 65.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 71,
+          timer: 0.000000,
+          timer_offset: 71.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 73,
+          timer: 0.000000,
+          timer_offset: 73.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 87,
+          timer: 0.000000,
+          timer_offset: 87.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 61,
+          timer: 0.000000,
+          timer_offset: 61.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 50,
+          timer: 0.000000,
+          timer_offset: 50.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 9.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 9.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 77,
+          timer: 0.000000,
+          timer_offset: 77.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 51,
+          timer: 0.000000,
+          timer_offset: 51.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 76,
+          timer: 0.000000,
+          timer_offset: 76.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 80,
+          timer: 0.000000,
+          timer_offset: 80.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 60,
+          timer: 0.000000,
+          timer_offset: 60.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 68,
+          timer: 0.000000,
+          timer_offset: 68.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 77,
+          timer: 0.000000,
+          timer_offset: 77.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 67,
+          timer: 0.000000,
+          timer_offset: 67.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 99,
+          timer: 0.000000,
+          timer_offset: 99.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 68,
+          timer: 0.000000,
+          timer_offset: 68.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 10.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 10.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 90,
+          timer: 0.000000,
+          timer_offset: 90.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 52,
+          timer: 0.000000,
+          timer_offset: 52.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 98,
+          timer: 0.000000,
+          timer_offset: 98.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 81,
+          timer: 0.000000,
+          timer_offset: 81.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 79,
+          timer: 0.000000,
+          timer_offset: 79.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 57,
+          timer: 0.000000,
+          timer_offset: 57.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 78,
+          timer: 0.000000,
+          timer_offset: 78.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 60,
+          timer: 0.000000,
+          timer_offset: 60.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 70,
+          timer: 0.000000,
+          timer_offset: 70.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 55,
+          timer: 0.000000,
+          timer_offset: 55.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 11.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 11.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 78,
+          timer: 0.000000,
+          timer_offset: 78.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 81,
+          timer: 0.000000,
+          timer_offset: 81.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 55,
+          timer: 0.000000,
+          timer_offset: 55.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 53,
+          timer: 0.000000,
+          timer_offset: 53.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 86,
+          timer: 0.000000,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 100,
+          timer: 0.000000,
+          timer_offset: 100.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 54,
+          timer: 0.000000,
+          timer_offset: 54.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 96,
+          timer: 0.000000,
+          timer_offset: 96.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 61,
+          timer: 0.000000,
+          timer_offset: 61.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 97,
+          timer: 0.000000,
+          timer_offset: 97.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 12.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 12.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 68,
+          timer: 0.000000,
+          timer_offset: 68.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 62,
+          timer: 0.000000,
+          timer_offset: 62.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 53,
+          timer: 0.000000,
+          timer_offset: 53.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 62,
+          timer: 0.000000,
+          timer_offset: 62.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 86,
+          timer: 0.000000,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 52,
+          timer: 0.000000,
+          timer_offset: 52.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 77,
+          timer: 0.000000,
+          timer_offset: 77.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 72,
+          timer: 0.000000,
+          timer_offset: 72.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 93,
+          timer: 0.000000,
+          timer_offset: 93.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 66,
+          timer: 0.000000,
+          timer_offset: 66.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 13.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 13.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 93,
+          timer: 0.000000,
+          timer_offset: 93.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 86,
+          timer: 0.000000,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 66,
+          timer: 0.000000,
+          timer_offset: 66.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 79,
+          timer: 0.000000,
+          timer_offset: 79.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 85,
+          timer: 0.000000,
+          timer_offset: 85.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 54,
+          timer: 0.000000,
+          timer_offset: 54.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 74,
+          timer: 0.000000,
+          timer_offset: 74.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 51,
+          timer: 0.000000,
+          timer_offset: 51.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 70,
+          timer: 0.000000,
+          timer_offset: 70.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 67,
+          timer: 0.000000,
+          timer_offset: 67.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 14.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 14.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 89,
+          timer: 0.000000,
+          timer_offset: 89.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 85,
+          timer: 0.000000,
+          timer_offset: 85.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 99,
+          timer: 0.000000,
+          timer_offset: 99.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 84,
+          timer: 0.000000,
+          timer_offset: 84.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 100,
+          timer: 0.000000,
+          timer_offset: 100.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 96,
+          timer: 0.000000,
+          timer_offset: 96.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 89,
+          timer: 0.000000,
+          timer_offset: 89.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 71,
+          timer: 0.000000,
+          timer_offset: 71.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 73,
+          timer: 0.000000,
+          timer_offset: 73.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 98,
+          timer: 0.000000,
+          timer_offset: 98.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 15.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 15.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 84,
+          timer: 0.000000,
+          timer_offset: 84.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 70,
+          timer: 0.000000,
+          timer_offset: 70.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 59,
+          timer: 0.000000,
+          timer_offset: 59.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 80,
+          timer: 0.000000,
+          timer_offset: 80.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 71,
+          timer: 0.000000,
+          timer_offset: 71.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 66,
+          timer: 0.000000,
+          timer_offset: 66.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 56,
+          timer: 0.000000,
+          timer_offset: 56.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 78,
+          timer: 0.000000,
+          timer_offset: 78.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 64,
+          timer: 0.000000,
+          timer_offset: 64.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 85,
+          timer: 0.000000,
+          timer_offset: 85.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 16.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 16.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 78,
+          timer: 0.000000,
+          timer_offset: 78.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -4.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -4.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 51,
+          timer: 0.000000,
+          timer_offset: 51.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -3.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -3.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 64,
+          timer: 0.000000,
+          timer_offset: 64.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -2.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -2.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 59,
+          timer: 0.000000,
+          timer_offset: 59.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: -1.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: -1.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 82,
+          timer: 0.000000,
+          timer_offset: 82.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 0.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 0.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 83,
+          timer: 0.000000,
+          timer_offset: 83.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 1.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 1.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 97,
+          timer: 0.000000,
+          timer_offset: 97.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 2.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 2.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 69,
+          timer: 0.000000,
+          timer_offset: 69.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 3.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 3.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 81,
+          timer: 0.000000,
+          timer_offset: 81.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 4.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 4.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 70,
+          timer: 0.000000,
+          timer_offset: 70.000000,
+        }
+      ]
+    }
+    entity: {
+      name: "gem",
+      num_components: 4,
+      components: [
+        transform: {
+          position: {
+            x: 5.000000,
+            y: 2.200000,
+            z: 17.000000,
+          }
+          rotation: {
+            x: 0.000000,
+            y: 0.000000,
+            z: 0.000000,
+          }
+          scale: {
+            x: 0.200000,
+            y: 0.200000,
+            z: 0.200000,
+          }
+        }
+        graphics: {
+          model: "gem.twm",
+          vshader: "staticVert.hlsl",
+          fshader: "staticFrag.hlsl",
+        }
+        trigger: {
+          cylinder: {
+            c: {
+              x: 5.000000,
+              y: 2.200000,
+              z: 17.000000,
+            }
+            u: {
+              x: 0.000000,
+              y: 1.000000,
+              z: 0.000000,
+            }
+            radii: 0.200000,
+            n: 0.250000,
+          }
+          who: {
+            id: 0,
+            gen: 0,
+          }
+        }
+        gem: {
+          value: 86,
+          timer: 0.000000,
+          timer_offset: 86.000000,
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 #include "editor.h"
 
 #include "level.h"
+#include "serializer.h"
 #include "graphics_manager.h"
 #include "platform_manager.h"
 #include "gizmo.h"
@@ -143,6 +144,14 @@ void Editor::Update(f32 dt) {
     
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
+    if(PlatformManager::Get()->GetInput()->KeyJustPress(KEY_0)) {
+        printf("Saving level!!\n");
+        Serializer s;
+        s.Begin();
+        level->Serialize(&s);
+        s.End("./data/levels/level.dat");
+    }
+
     if(selectedEntity) {
         GizmoManager::Get()->UpdateInput();
     }

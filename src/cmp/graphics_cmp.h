@@ -28,17 +28,28 @@ struct GraphicsCMP : CMP<GraphicsCMP> {
     char modelName[MAX_MODEL_NAME];
     char vShaderName[MAX_SHADER_NAME];
     char fShaderName[MAX_SHADER_NAME];
-    
-    void Deserialize(Tokenizer *t) override {
-        ReadBeginObject(t, "graphics");
-        Read(t, "model", modelName, MAX_MODEL_NAME);
-        ReadEndObject(t);
-    };
 
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "graphics");
         Write(s, "model", modelName);
+        Write(s, "vshader", vShaderName);
+        Write(s, "fshader", fShaderName);
         WriteEndObject(s);
+    };
+    
+    void Deserialize(Tokenizer *t) override {
+        char modelName_[MAX_MODEL_NAME];
+        char vShaderName_[MAX_SHADER_NAME];
+        char fShaderName_[MAX_SHADER_NAME];
+
+        ReadBeginObject(t, "graphics");
+        Read(t, "model", modelName_, MAX_MODEL_NAME);
+        Read(t, "vshader", vShaderName_, MAX_SHADER_NAME);
+        Read(t, "fshader", fShaderName_, MAX_SHADER_NAME);
+        ReadEndObject(t);
+
+        Initialize(modelName_, vShaderName_, fShaderName_);
+
     };
 
 };
