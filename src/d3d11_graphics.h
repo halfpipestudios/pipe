@@ -48,6 +48,15 @@ struct D3D11Shader {
     ID3D11InputLayout *layout; 
 };
 
+struct D3D11VertexShader {
+    ID3D11VertexShader *vertex;
+    ID3D11InputLayout *layout; 
+};
+
+struct D3D11FragmentShader {
+    ID3D11PixelShader *fragment;
+};
+
 struct D3D11GeometryShader {
     ID3D11GeometryShader *geometry;
 };
@@ -147,6 +156,7 @@ struct D3D11Graphics : public Graphics {
 
     void Present(i32 vsync) override;
 
+/*
     Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) override;
     Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
@@ -154,6 +164,22 @@ struct D3D11Graphics : public Graphics {
     Shader CreateShaderParticle(char *vertpath, char *fragpath) override;
     void DestroyShader(Shader shaderHandle) override;
     void BindShader(Shader shaderHandle) override;
+*/
+/*
+    VShader CreateVShaderVertex(char *vertpath) override;
+    VShader CreateVShaderVertexSkin(char *vertpath) override;
+    VShader CreateVShaderVertexMap(char *vertpath) override;
+    VShader CreateVShaderTGui(char *vertpath) override;
+    VShader CreateVShaderParticle(char *vertpath) override;
+*/
+
+    VShader CreateVShader(char *vertpath) override;
+    void DestroyVShader(VShader shaderHandle) override;
+    void BindVShader(VShader shaderHandle) override;
+
+    FShader CreateFShader(char *fragpath) override;
+    void DestroyFShader(FShader shaderHandle) override;
+    void BindFShader(FShader shaderHandle) override;
 
     GeometryShader CreateGeometryShader(char *filepath) override;
     GeometryShader CreateGeometryShaderWithStreamOutput(char *filepath) override;
@@ -177,11 +203,11 @@ struct D3D11Graphics : public Graphics {
 
     VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) override;
     void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) override;
-    void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) override;
+    void DrawVertexBuffer(VertexBuffer vertexBufferHandle, VShader vshaderHandle, FShader fshaderHandle) override;
 
     IndexBuffer CreateIndexBuffer(u32 *indices, u32 count) override;
     void DestroyIndexBuffer(IndexBuffer indexBuffer) override;
-    void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) override;
+    void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, VShader vshaderHandle, FShader fshaderHandle) override;
 
     TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) override;
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
@@ -198,7 +224,10 @@ struct D3D11Graphics : public Graphics {
     TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) override;
     void FlushFrameBuffer(FrameBuffer frameBufferHandle) override;
 
-    ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader, Handle texture) override;
+    ParticleSystem CreateParticleSystem(u32 maxParticle,
+                                        VShader soVShader, FShader soFShader, GeometryShader soGShader,
+                                        VShader dwVShader, FShader dwFShader, GeometryShader dwGShader,
+                                        Handle texture) override;
     void DestroyParticleSystem(ParticleSystem particleSystemHandle) override;
     void ResetParticleSystem(ParticleSystem particleSystemHandle) override;
     void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) override;
@@ -210,7 +239,9 @@ struct D3D11Graphics : public Graphics {
     void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) override;
 private:
 
-    ObjectAllocator<D3D11Shader> shadersStorage;
+    //ObjectAllocator<D3D11Shader> shadersStorage;
+    ObjectAllocator<D3D11VertexShader> vertShadersStorage;
+    ObjectAllocator<D3D11FragmentShader> fragShadersStorage;
     ObjectAllocator<D3D11GeometryShader> geometryShadersStorage;
     ObjectAllocator<D3D11ConstBuffer> constBufferStorage;
     ObjectAllocator<D3D11VertexBuffer> vertexBufferStorage;

@@ -30,21 +30,19 @@ struct Map {
     MapImporter::ConvexHullArray covexHulls;
     MapImporter::EntityArray entities;
     VertexBuffer vertexBuffer;
-    Shader shader;
-
+    
     TextureBuffer texture;
     
     f32 scale;
 
-    void Initialize(char *filename, Shader mapShader);
+    void Initialize(char *filename);
     void Terminate();
     void Render();
 };
 
 struct Level : Serializable {
 
-    void Initialize(char *mapFilePath, Camera *camera,
-            Shader mapShader, Shader statShader, Shader animShader);
+    void Initialize(char *mapFilePath, Camera *camera);
     void Terminate();
 
     void BeginFrame(f32 dt);
@@ -84,36 +82,6 @@ struct Level : Serializable {
     FrameArray<SlotmapKey> entitiesToRemove;
  
     BehaviorTree bhTree;
-    
-    // Fire particle system shaders
-    Shader soFireShader;
-    GeometryShader soFireGeoShader;
-    Shader dwFireShader;
-    GeometryShader dwFireGeoShader;
- 
-    // Rain particle system shaders
-    Shader soRainShader;
-    GeometryShader soRainGeoShader;
-    Shader dwRainShader;
-    GeometryShader dwRainGeoShader;
-
-    // Lava particle system shaders
-    Shader soLavaShader;
-    GeometryShader soLavaGeoShader;
-    Shader dwLavaShader;
-    GeometryShader dwLavaGeoShader;
-
-    // Spell particle system shaders
-    Shader soSpellShader;
-    GeometryShader soSpellGeoShader;
-    Shader dwSpellShader;
-    GeometryShader dwSpellGeoShader;
-
-    // Shoot Spell particle system shaders
-    Shader soShootShader;
-    GeometryShader soShootGeoShader;
-    Shader dwShootShader;
-    GeometryShader dwShootGeoShader;
 
     f32 gameTime { 0 };
 

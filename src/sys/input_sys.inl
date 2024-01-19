@@ -3,9 +3,13 @@
 #include "../cmp/physics_cmp.h"
 
 template <typename EM>
-void InputSys<EM>::Update(EM& em, f32 dt) {
+void InputSys<EM>::Update(EM& em, Camera *camera, f32 dt) {
     
+    Input *input = PlatformManager::Get()->GetInput();
     auto& inputs = em.GetComponents<InputCMP>();
+
+    Vec3 worldFront = camera->GetWorldFront();
+    Vec3 right = camera->right;
 
     for(i32 i = 0; i < inputs.size; ++i) {
         InputCMP *inp = &inputs[i];
@@ -14,22 +18,20 @@ void InputSys<EM>::Update(EM& em, f32 dt) {
         PhysicsCMP *physicsComp = em.GetComponent<PhysicsCMP>(entityKey);
         if(physicsComp == nullptr) continue;
 
-        Vec3 worldFront = inp->camera->GetWorldFront();
-        Vec3 right = inp->camera->right;
-        if(inp->input->KeyIsPress(KEY_W)) {
+        if(input->KeyIsPress(KEY_W)) {
             physicsComp->physics.acc += worldFront;
         }
-        if(inp->input->KeyIsPress(KEY_S)) {
+        if(input->KeyIsPress(KEY_S)) {
             physicsComp->physics.acc -= worldFront;
         }
-        if(inp->input->KeyIsPress(KEY_A)) {
+        if(input->KeyIsPress(KEY_A)) {
             physicsComp->physics.acc -= right;
         }
-        if(inp->input->KeyIsPress(KEY_D)) {
+        if(input->KeyIsPress(KEY_D)) {
             physicsComp->physics.acc += right;
         }
 
-        if(entity->HaveFlag(ENTITY_GROUNDED) && (inp->input->KeyJustPress(KEY_SPACE) || inp->input->JoystickJustPress(JOYSTICK_BUTTON_A))) {
+        if(entity->HaveFlag(ENTITY_GROUNDED) && (input->KeyJustPress(KEY_SPACE) || input->JoystickJustPress(JOYSTICK_BUTTON_A))) {
             physicsComp->physics.vel += Vec3(0, 15, 0);
         }
         
@@ -40,8 +42,8 @@ void InputSys<EM>::Update(EM& em, f32 dt) {
             drag = 0.1f;
         }
 
-        physicsComp->physics.acc += worldFront * inp->input->state[0].leftStickY;
-        physicsComp->physics.acc += right      * inp->input->state[0].leftStickX;
+        physicsComp->physics.acc += worldFront * input->state[0].leftStickY;
+        physicsComp->physics.acc += right      * input->state[0].leftStickX;
         physicsComp->physics.acc.Normalize();
         physicsComp->physics.acc *= acc * drag;
 

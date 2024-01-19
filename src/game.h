@@ -17,10 +17,6 @@ struct Game {
 
     void Render();
 
-    Shader mapShader;
-    Shader animShader;
-    Shader statShader;
-
     Level level;
     Camera camera;
 

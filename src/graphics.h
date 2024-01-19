@@ -4,8 +4,12 @@
 #include "common.h"
 #include "algebra.h"
 
-typedef void * Shader;
+// typedef void * Shader;
+
+typedef void * VShader;
+typedef void * FShader; 
 typedef void * GeometryShader;
+
 typedef void * ConstBuffer;
 typedef void * VertexBuffer;
 typedef void * IndexBuffer;
@@ -143,7 +147,7 @@ struct Graphics {
     virtual void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) = 0;
     virtual void ClearDepthStencilBuffer(FrameBuffer frameBufferHandle)  = 0;
     virtual void Present(i32 vsync) = 0;
-
+/*
     virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) = 0;
     virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
@@ -151,6 +155,22 @@ struct Graphics {
     virtual Shader CreateShaderParticle(char *vertpath, char *fragpath) = 0;
     virtual void DestroyShader(Shader shaderHandle) = 0;
     virtual void BindShader(Shader shaderHandle) = 0;
+*/
+/*
+    virtual VShader CreateVShaderVertex(char *vertpath) = 0;
+    virtual VShader CreateVShaderVertexSkin(char *vertpath) = 0;
+    virtual VShader CreateVShaderVertexMap(char *vertpath) = 0;
+    virtual VShader CreateVShaderTGui(char *vertpath) = 0;
+    virtual VShader CreateVShaderParticle(char *vertpath) = 0;
+*/
+
+    virtual VShader CreateVShader(char *vertpath) = 0;
+    virtual void DestroyVShader(VShader shaderHandle) = 0;
+    virtual void BindVShader(VShader shaderHandle) = 0;
+
+    virtual FShader CreateFShader(char *fragpath) = 0;
+    virtual void DestroyFShader(FShader shaderHandle) = 0;
+    virtual void BindFShader(FShader shaderHandle) = 0;
 
     virtual GeometryShader CreateGeometryShader(char *filepath) = 0;
     virtual GeometryShader CreateGeometryShaderWithStreamOutput(char *filepath) = 0;
@@ -174,11 +194,11 @@ struct Graphics {
 
     virtual VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) = 0;
     virtual void DestroyVertexBuffer(VertexBuffer vertexBufferHandle) = 0;
-    virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) = 0;
+    virtual void DrawVertexBuffer(VertexBuffer vertexBufferHandle, VShader vshaderHandle, FShader fshaderHandle) = 0;
 
     virtual IndexBuffer CreateIndexBuffer(u32 *indices, u32 count) = 0;
     virtual void DestroyIndexBuffer(IndexBuffer indexBuffer) = 0;
-    virtual void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) = 0;
+    virtual void DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, VShader vshaderHandle, FShader fshaderHandle) = 0;
 
     virtual TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) = 0;
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
@@ -195,7 +215,10 @@ struct Graphics {
     virtual TextureBuffer FrameBufferGetTexture(FrameBuffer frameBufferHandle) = 0;
     virtual void FlushFrameBuffer(FrameBuffer frameBufferHandle) = 0;
 
-    virtual ParticleSystem CreateParticleSystem(u32 maxParticle, Shader soShader, GeometryShader soGeoShader, Shader drawShader, GeometryShader drawGeoShader, Handle texture) = 0;
+    virtual ParticleSystem CreateParticleSystem(u32 maxParticle,
+                                                VShader soVShader, FShader soFShader, GeometryShader soGShader,
+                                                VShader dwVShader, FShader dwFShader, GeometryShader dwGShader,
+                                                Handle texture) = 0;
     virtual void DestroyParticleSystem(ParticleSystem particleSystemHandle) = 0;
     virtual void ResetParticleSystem(ParticleSystem particleSystemHandle) = 0;
     virtual void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) = 0;

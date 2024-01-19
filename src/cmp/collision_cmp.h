@@ -11,17 +11,12 @@ enum ColliderType_ {
 };
 
 struct CollisionCMP : CMP<CollisionCMP> {
-
-    // TODO(IMPORTANT): change this component 
-    // this is ugly ...
-
     ColliderType_ type;
     union {
     
     Cylinder cylinder;
     struct Poly3D {
         ConvexHull convexHull;
-        // TODO: not use a MapImporter::Entity here ...
         MapImporter::Entity entity;
     } poly3D;
 

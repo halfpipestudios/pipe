@@ -400,17 +400,82 @@ void D3D11Graphics::Present(i32 vsync) {
     swapChain->Present(vsync, 0);
 }
 
-static Shader CreateShader(ID3D11Device *device, ObjectAllocator<D3D11Shader>* shadersStorage,
-                           char *vertpath, char *fragpath,
-                           D3D11_INPUT_ELEMENT_DESC *inputLayoutDesc, i32 totalLayoutElements) {
-    D3D11Shader shader = {}; 
+struct InputLayoutDesc {
+    D3D11_INPUT_ELEMENT_DESC desc[5];
+    i32 count = 0;
+};
+
+static InputLayoutDesc inputLayoutDescArray[5] = {
+    {
+        {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+             0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        }, 3
+    },
+    {
+        {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+             0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32_UINT,
+             0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        }, 4
+    },
+    {
+        {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+             0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_SINT,
+             0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,
+             0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        }, 5
+    },
+    {
+        {
+            {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,
+             0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+             0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        }, 3
+    },
+    {
+        {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+             0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,
+             0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 2, DXGI_FORMAT_R32_FLOAT,
+             0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 3, DXGI_FORMAT_R32_UINT,
+             0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        }, 5
+    }
+
+};
+
+static VShader CreateVShader_(ID3D11Device *device, ObjectAllocator<D3D11VertexShader>* shadersStorage, char *vertpath) {
+    D3D11VertexShader shader = {}; 
 
     MemoryManager::Get()->BeginTemporalMemory();
     File vertfile = PlatformManager::Get()->ReadFileToTemporalMemory(vertpath);
-    File fragfile = PlatformManager::Get()->ReadFileToTemporalMemory(fragpath);
 
     ID3DBlob *vertexShaderCompiled = 0;
-    ID3DBlob *fragmentShaderCompiled = 0;
     
     HRESULT result = 0;
     ID3DBlob *errorVertexShader = 0;
@@ -426,6 +491,70 @@ static Shader CreateShader(ID3D11Device *device, ObjectAllocator<D3D11Shader>* s
         ASSERT(!"INVALID_CODE_PATH");
     }
 
+    // create the vertex and fragment shader
+    result = device->CreateVertexShader(
+            vertexShaderCompiled->GetBufferPointer(),
+            vertexShaderCompiled->GetBufferSize(), 0,
+            &shader.vertex);
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+    bool inputLayoutCreated = false;
+    for(i32 i = 0; i < ARRAY_LENGTH(inputLayoutDescArray); i++) {
+        InputLayoutDesc *inputLayoutDesc = inputLayoutDescArray + i;
+
+        // create input layout
+        HRESULT layoutResult = device->CreateInputLayout(
+                inputLayoutDesc->desc,
+                inputLayoutDesc->count,
+                vertexShaderCompiled->GetBufferPointer(),
+                vertexShaderCompiled->GetBufferSize(),
+                &shader.layout);
+        if(!FAILED(layoutResult)) {
+            inputLayoutCreated = true;
+            break;
+        } else {
+            if(shader.layout) shader.layout->Release();
+        }
+    }
+
+    ASSERT(inputLayoutCreated == true);
+
+    if(vertexShaderCompiled) vertexShaderCompiled->Release();
+
+    D3D11VertexShader *shaderHandle = shadersStorage->Alloc();
+    *shaderHandle = shader;
+    return (VShader)shaderHandle;
+}
+
+VShader D3D11Graphics::CreateVShader(char *vertpath) {
+    return CreateVShader_(device, &vertShadersStorage, vertpath);
+}
+
+void D3D11Graphics::DestroyVShader(VShader shaderHandle) {
+    D3D11VertexShader *shader = (D3D11VertexShader *)shaderHandle;
+    if(shader->vertex) shader->vertex->Release();
+    if(shader->layout) shader->layout->Release();
+    vertShadersStorage.Free(shader);
+}
+
+void D3D11Graphics::BindVShader(VShader shaderHandle) {
+    D3D11VertexShader *shader = (D3D11VertexShader *)shaderHandle;
+    deviceContext->VSSetShader(shader->vertex, 0, 0);
+    deviceContext->IASetInputLayout(shader->layout);
+}
+
+static FShader CreateFShader_(ID3D11Device *device, ObjectAllocator<D3D11FragmentShader>* shadersStorage,
+                             char *fragpath) {
+    D3D11FragmentShader shader = {}; 
+
+    MemoryManager::Get()->BeginTemporalMemory();
+    File fragfile = PlatformManager::Get()->ReadFileToTemporalMemory(fragpath);
+
+    ID3DBlob *fragmentShaderCompiled = 0;
+    
+    HRESULT result = 0;
+
     ID3DBlob *errorFragmentShader = 0;
     result = D3DCompile(fragfile.data, fragfile.size,
                         0, 0, 0, "fs_main", "ps_5_0",
@@ -439,11 +568,6 @@ static Shader CreateShader(ID3D11Device *device, ObjectAllocator<D3D11Shader>* s
         ASSERT(!"INVALID_CODE_PATH")
     }
 
-    // create the vertex and fragment shader
-    result = device->CreateVertexShader(
-            vertexShaderCompiled->GetBufferPointer(),
-            vertexShaderCompiled->GetBufferSize(), 0,
-            &shader.vertex);
     result = device->CreatePixelShader(
             fragmentShaderCompiled->GetBufferPointer(),
             fragmentShaderCompiled->GetBufferSize(), 0,
@@ -451,124 +575,27 @@ static Shader CreateShader(ID3D11Device *device, ObjectAllocator<D3D11Shader>* s
 
     MemoryManager::Get()->EndTemporalMemory();
 
-    // create input layout
-    HRESULT layoutResult = device->CreateInputLayout(inputLayoutDesc,
-        totalLayoutElements,
-        vertexShaderCompiled->GetBufferPointer(),
-        vertexShaderCompiled->GetBufferSize(),
-        &shader.layout);
-
-    if(FAILED(layoutResult)) {
-        OutputDebugString("ERROR Creating Layout Input\n");
-        ASSERT(!"ERROR");
-    }
-
-    if(vertexShaderCompiled) vertexShaderCompiled->Release();
     if(fragmentShaderCompiled) fragmentShaderCompiled->Release();
 
-    D3D11Shader *shaderHandle = shadersStorage->Alloc();
+    D3D11FragmentShader *shaderHandle = shadersStorage->Alloc();
     *shaderHandle = shader;
-    return (Shader)shaderHandle;
+    return (FShader)shaderHandle;
 }
 
-Shader D3D11Graphics::CreateShaderVertex(char *vertpath, char *fragpath) {
-    // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
 
-    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
-    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
+FShader D3D11Graphics::CreateFShader(char *fragpath) {
+    return CreateFShader_(device, &fragShadersStorage, fragpath);
 }
 
-Shader D3D11Graphics::CreateShaderVertexSkin(char *vertpath, char *fragpath) {
-    // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_SINT,
-         0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,
-         0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
-    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
-    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
-}
-
-Shader D3D11Graphics::CreateShaderVertexMap(char *vertpath, char *fragpath) {
-    // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 1, DXGI_FORMAT_R32_UINT,
-         0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
-    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
-    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
-}
-
-Shader D3D11Graphics::CreateShaderTGui(char *vertpath, char *fragpath) {
-    // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,
-         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-         0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
-    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
-    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
-}
-
-Shader D3D11Graphics::CreateShaderParticle(char *vertpath, char *fragpath) {
-    // create input layout
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-         0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,
-         0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 2, DXGI_FORMAT_R32_FLOAT,
-         0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 3, DXGI_FORMAT_R32_UINT,
-         0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
-    i32 totalLayoutElements = ARRAY_LENGTH(inputLayoutDesc);
-    return CreateShader(device, &shadersStorage, vertpath, fragpath, inputLayoutDesc, totalLayoutElements);
-}
-
-void D3D11Graphics::DestroyShader(Shader shaderHandle) {
-    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
-    if(shader->vertex) shader->vertex->Release();
+void D3D11Graphics::DestroyFShader(FShader shaderHandle) {
+    D3D11FragmentShader *shader = (D3D11FragmentShader *)shaderHandle;
     if(shader->fragment) shader->fragment->Release();
-    if(shader->layout) shader->layout->Release();
-    shadersStorage.Free(shader);
+    fragShadersStorage.Free(shader);
 }
 
-void D3D11Graphics::BindShader(Shader shaderHandle) {
-    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
-    deviceContext->VSSetShader(shader->vertex, 0, 0);
+void D3D11Graphics::BindFShader(FShader shaderHandle) {
+    D3D11FragmentShader *shader = (D3D11FragmentShader *)shaderHandle;
     deviceContext->PSSetShader(shader->fragment, 0, 0);
-    deviceContext->IASetInputLayout(shader->layout);
 }
 
 GeometryShader D3D11Graphics::CreateGeometryShader(char *filepath) {
@@ -789,12 +816,14 @@ void D3D11Graphics::DestroyVertexBuffer(VertexBuffer vertexBufferHandle) {
     vertexBufferStorage.Free(vertexBuffer);
 }
 
-void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, Shader shaderHandle) {
+void D3D11Graphics::DrawVertexBuffer(VertexBuffer vertexBufferHandle, VShader vshaderHandle, FShader fshaderHandle) {
     // set shader
-    D3D11Shader *shader = (D3D11Shader *)shaderHandle;
-    deviceContext->VSSetShader(shader->vertex, 0, 0);
-    deviceContext->PSSetShader(shader->fragment, 0, 0);
-    deviceContext->IASetInputLayout(shader->layout);
+    D3D11VertexShader *vShader = (D3D11VertexShader *)vshaderHandle;
+    D3D11FragmentShader *fShader = (D3D11FragmentShader *)fshaderHandle;
+
+    deviceContext->VSSetShader(vShader->vertex, 0, 0);
+    deviceContext->PSSetShader(fShader->fragment, 0, 0);
+    deviceContext->IASetInputLayout(vShader->layout);
 
     // set buffer
     D3D11VertexBuffer *vertexBuffer = (D3D11VertexBuffer *)vertexBufferHandle;
@@ -838,13 +867,15 @@ void D3D11Graphics::DestroyIndexBuffer(IndexBuffer indexBuffer) {
     indexBufferStorage.Free(indexBufferHandle);
 }
 
-void D3D11Graphics::DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, Shader shader) {
+void D3D11Graphics::DrawIndexBuffer(IndexBuffer indexBuffer, VertexBuffer vertexBuffer, VShader vshaderHandle, FShader fshaderHandle) {
     
     // NOTE: set shader
-    D3D11Shader *shaderHandle = (D3D11Shader *)shader;
-    deviceContext->VSSetShader(shaderHandle->vertex, 0, 0);
-    deviceContext->PSSetShader(shaderHandle->fragment, 0, 0);
-    deviceContext->IASetInputLayout(shaderHandle->layout);
+    D3D11VertexShader *vShader = (D3D11VertexShader *)vshaderHandle;
+    D3D11FragmentShader *fShader = (D3D11FragmentShader *)fshaderHandle;
+
+    deviceContext->VSSetShader(vShader->vertex, 0, 0);
+    deviceContext->PSSetShader(fShader->fragment, 0, 0);
+    deviceContext->IASetInputLayout(vShader->layout);
 
     // NOTE: set buffer
     D3D11VertexBuffer *vertexBufferHandle = (D3D11VertexBuffer *)vertexBuffer;
@@ -1220,15 +1251,18 @@ void D3D11Graphics::FlushFrameBuffer(FrameBuffer frameBufferHandle) {
 }
 
 ParticleSystem D3D11Graphics::CreateParticleSystem(u32 maxParticle,
-        Shader soShader, GeometryShader soGeoShader,
-        Shader drawShader, GeometryShader drawGeoShader,
-        Handle texture) {
+                                                   VShader soVShader, FShader soFShader, GeometryShader soGShader,
+                                                   VShader dwVShader, FShader dwFShader, GeometryShader dwGShader,
+                                                   Handle texture) {
 
     D3D11ParticleSystem particleSystem;
     D3D11ParticleSystem *particleSystemHandle = particleSystemStoraget.Alloc();
     *particleSystemHandle = particleSystem;
 
-    particleSystemHandle->Initialize(device, maxParticle, soShader, soGeoShader, drawShader, drawGeoShader, gpuParticleBuffer, texture);
+    particleSystemHandle->Initialize(device, maxParticle,
+                                     soVShader, soFShader, soGShader,
+                                     dwVShader, dwFShader, dwGShader,
+                                     gpuParticleBuffer, texture);
 
     return (ParticleSystem)particleSystemHandle;
 

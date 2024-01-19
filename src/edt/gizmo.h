@@ -13,7 +13,8 @@ struct GameWindow;
 struct TGuiWindow;
 
 struct GizmoManager {
-    Shader shader;
+    VShader vShader;
+    FShader fShader;
     
     u32 active;
     u32 hot;
@@ -57,7 +58,7 @@ struct Gizmo {
     void SetActive(bool state);
 
     void SetTransform(Camera *camera, TransformCMP transform);
-    void RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader);
+    void RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, VShader vShader, FShader fShader);
 
 private:
 

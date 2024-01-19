@@ -3,22 +3,31 @@
 
 #include "graphics.h"
 #include "mgr/model_manager.h"
+#include "mgr/shader_manager.h"
 
-#define MAX_MODEL_NAME 256
+#define MAX_MODEL_NAME 32
+#define MAX_SHADER_NAME 32
 
 struct GraphicsCMP : CMP<GraphicsCMP> {
     
-    void Initialize(char *name, Shader shader_) {
+    void Initialize(char *name, char *vName, char *fName) {
         strcpy(modelName, name);
-        model = *ModelManager::Get()->Dereference(ModelManager::Get()->GetAsset(name));
-        shader = shader_;
+        model = ModelManager::Get()->GetAsset(name);
+
+        strcpy(vShaderName, vName);
+        vShader = VShaderManager::Get()->GetAsset(vName);
+
+        strcpy(fShaderName, fName);
+        fShader = FShaderManager::Get()->GetAsset(fName);
     }
 
-    Model model;
+    Handle model;
+    Handle vShader;
+    Handle fShader;
+
     char modelName[MAX_MODEL_NAME];
-    
-    Shader shader;
-    // TODO: char *shaderName;
+    char vShaderName[MAX_SHADER_NAME];
+    char fShaderName[MAX_SHADER_NAME];
     
     void Deserialize(Tokenizer *t) override {
         ReadBeginObject(t, "graphics");

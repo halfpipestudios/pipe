@@ -19,8 +19,8 @@ void GraphicsSys<EM>::Update(EM& em) {
 
         TransformCMP renderTransform = *transform;
         renderTransform.pos += transform->renderOffset;
-
-        if(graphic->model.type == MODEL_TYPE_ANIMATED) {
+        Model *model = ModelManager::Get()->Dereference(graphic->model);
+        if(model->type == MODEL_TYPE_ANIMATED) {
             renderTransform.pos.y -= 0.75f;
             AnimationCMP *animationCmp = em.template GetComponent<AnimationCMP>(e);
             if(animationCmp != nullptr) {
@@ -40,14 +40,18 @@ void GraphicsSys<EM>::Update(EM& em) {
 
         
         GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
+
+
+        VShader vShader = *VShaderManager::Get()->Dereference(graphic->vShader);
+        FShader fShader = *FShaderManager::Get()->Dereference(graphic->fShader);
         
-        for(u32 meshIndex = 0; meshIndex < graphic->model.numMeshes; ++meshIndex) {
-            Mesh *mesh = graphic->model.meshes + meshIndex;
+        for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
+            Mesh *mesh = model->meshes + meshIndex;
             GraphicsManager::Get()->BindTextureBuffer(*TextureManager::Get()->Dereference(mesh->texture));
             if(mesh->indexBuffer) {
-                GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, graphic->shader);
+                GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, vShader, fShader);
             } else {
-                GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, graphic->shader);
+                GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, vShader, fShader);
             }
         }
     }

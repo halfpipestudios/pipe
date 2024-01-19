@@ -13,8 +13,8 @@
 void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *otherWindow, TGuiSplitDirection dir) {
     EditorWindow::Initialize(name, flags, otherWindow, dir);
     gameFrameBuffer = GraphicsManager::Get()->CreateFrameBuffer(0, 0, 1280, 720);
-    gizmoShader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/gizmoVert.hlsl",
-                                                             "./data/shaders/gizmoFrag.hlsl");
+    gizmoVShader = GraphicsManager::Get()->CreateVShader("./data/shaders/gizmoVert.hlsl");
+    gizmoFShader = GraphicsManager::Get()->CreateFShader("./data/shaders/gizmoFrag.hlsl");
 
     X.Initialize("transform.twm", Vec3(0.8f, 0, 0));
     Y.Initialize("transform.twm", Vec3(0, 0.8f, 0));
@@ -24,7 +24,8 @@ void GameWindow::Initialize(char *name, TGuiWindowFlags flags, EditorWindow *oth
 
 void GameWindow::Terminate() {
     EditorWindow::Terminate();
-    GraphicsManager::Get()->DestroyShader(gizmoShader);
+    GraphicsManager::Get()->DestroyVShader(gizmoVShader);
+    GraphicsManager::Get()->DestroyFShader(gizmoFShader);
     GraphicsManager::Get()->DestroyFrameBuffer(gameFrameBuffer);
 }
 

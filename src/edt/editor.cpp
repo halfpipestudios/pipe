@@ -5,14 +5,22 @@
 #include "platform_manager.h"
 #include "gizmo.h"
 
+struct TGuiShader {
+    VShader v;
+    FShader f;
+};
+
 void *TGuiCreateShader(char *vert, char *frag) {
-    Shader shader = GraphicsManager::Get()->CreateShaderTGui(vert, frag);
+    TGuiShader *shader = (TGuiShader *)MemoryManager::Get()->AllocStaticMemory(sizeof(TGuiShader), 8);
+    shader->v = GraphicsManager::Get()->CreateVShader(vert);
+    shader->f = GraphicsManager::Get()->CreateFShader(frag);
     return (void *)shader;
 }
 
 void TGuiDestroyShader(void *program) {
-    Shader shader = (Shader)program;
-    GraphicsManager::Get()->DestroyShader(shader);
+    TGuiShader *shader = (TGuiShader *)program;
+    GraphicsManager::Get()->DestroyVShader(shader->v);
+    GraphicsManager::Get()->DestroyFShader(shader->f);
 }
 
 void *TGuiCreateTexture(tgui_u32 *data, tgui_u32 width, tgui_u32 height) {
@@ -42,7 +50,10 @@ void TGuiDrawBuffers(void *shader, void *texture, TGuiVertexArray *vertex_buffer
 
     GraphicsManager::Get()->SetDepthStencilState(false);
 
-    GraphicsManager::Get()->BindShader(shader);
+    TGuiShader *tguiShader = (TGuiShader *)shader;
+    GraphicsManager::Get()->BindVShader(tguiShader->v);
+    GraphicsManager::Get()->BindFShader(tguiShader->f);
+
     GraphicsManager::Get()->BindTextureBuffer(texture);
     GraphicsManager::Get()->Draw2DBatch((D3D112DVertex *)tgui_array_data(vertex_buffer), tgui_array_size(vertex_buffer),
                                         tgui_array_data(index_buffer), tgui_array_size(index_buffer));

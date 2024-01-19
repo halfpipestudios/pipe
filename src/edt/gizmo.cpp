@@ -10,8 +10,8 @@
 GizmoManager GizmoManager::gizmoManager;
 
 void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
-    shader = GraphicsManager::Get()->CreateShaderVertex("./data/shaders/pickingVert.hlsl",
-                                                        "./data/shaders/pickingFrag.hlsl");
+    vShader = GraphicsManager::Get()->CreateVShader("./data/shaders/pickingVert.hlsl");
+    fShader = GraphicsManager::Get()->CreateFShader("./data/shaders/pickingFrag.hlsl");
     idFrameBufferW = 1280;
     idFrameBufferH = 720;
     
@@ -25,7 +25,8 @@ void GizmoManager::Initialize(GameWindow *window, Camera *camera) {
 }
 
 void GizmoManager::Terminate() {
-    GraphicsManager::Get()->DestroyShader(shader);
+    GraphicsManager::Get()->DestroyVShader(vShader);
+    GraphicsManager::Get()->DestroyFShader(fShader);
     GraphicsManager::Get()->DestroyFrameBuffer(idWriteFrameBuffer);
     GraphicsManager::Get()->DestroyFrameBuffer(idReadFrameBuffer);
 }
@@ -86,7 +87,7 @@ void Gizmo::Render() {
             ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuGizmoBuffer;
             buffer->color = color;
             GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
-            RenderModel(model, color, window->gameFrameBuffer, window->gizmoShader);
+            RenderModel(model, color, window->gameFrameBuffer, window->gizmoVShader, window->gizmoFShader);
         }
        
         { 
@@ -94,7 +95,7 @@ void Gizmo::Render() {
             ConstBuffer constBufferHandle = GraphicsManager::Get()->gpuIndexBuffer;
             buffer->id = (f32)id;
             GraphicsManager::Get()->UpdateConstBuffer(constBufferHandle, buffer);
-            RenderModel(model, color, GizmoManager::Get()->idWriteFrameBuffer, GizmoManager::Get()->shader);
+            RenderModel(model, color, GizmoManager::Get()->idWriteFrameBuffer, GizmoManager::Get()->vShader, GizmoManager::Get()->fShader);
         }
 
         GraphicsManager::Get()->BindFrameBuffer(window->gameFrameBuffer);
@@ -156,7 +157,7 @@ void Gizmo::SetTransform(Camera *camera, TransformCMP transform) {
     this->renderTransform = renderTransform;
 }
 
-void Gizmo::RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, Shader shader) {
+void Gizmo::RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle, VShader vShader, FShader fShader) {
     
     GraphicsManager::Get()->BindFrameBuffer(frameBufferHandle);
 
@@ -165,9 +166,9 @@ void Gizmo::RenderModel(Handle handle, Vec3 color, FrameBuffer frameBufferHandle
     for(u32 meshIndex = 0; meshIndex < model->numMeshes; ++meshIndex) {
         Mesh *mesh = model->meshes + meshIndex;
         if(mesh->indexBuffer) {
-            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, shader);
+            GraphicsManager::Get()->DrawIndexBuffer(mesh->indexBuffer, mesh->vertexBuffer, vShader, fShader);
         } else {
-            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, shader);
+            GraphicsManager::Get()->DrawVertexBuffer(mesh->vertexBuffer, vShader, fShader);
         }
     }
 }

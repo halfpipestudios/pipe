@@ -98,17 +98,21 @@ void D3D11ParticleSystem::CreateVertexBuffers(ID3D11Device *device) {
 }
 
 void D3D11ParticleSystem::Initialize(ID3D11Device *device, 
-                u32 maxParticles_,
-                Shader soShader_, GeometryShader soGeoShader_,
-                Shader drawShader_, GeometryShader drawGeoShader_,
-                ConstBuffer constBuffer_, Handle texture_) {
+                                     u32 maxParticles_,
+                                     VShader soVShader_, FShader soFShader_, GeometryShader soGShader_,
+                                     VShader dwVShader_, FShader dwFShader_, GeometryShader dwGShader_,
+                                     ConstBuffer constBuffer_,
+                                     Handle texture_) {
 
     maxParticles = maxParticles_;
 
-    soShader = soShader_;
-    soGeoShader = soGeoShader_;
-    drawShader = drawShader_;
-    drawGeoShader = drawGeoShader_;
+    soVShader = soVShader_;
+    soFShader = soFShader_;
+    soGShader = soGShader_;
+
+    dwVShader = dwVShader_;
+    dwFShader = dwFShader_;
+    dwGShader = dwGShader_;
     
     constBuffer = constBuffer_;
     texture = texture_;
@@ -153,9 +157,10 @@ void D3D11ParticleSystem::Draw(ID3D11Device *device, ID3D11DeviceContext *device
 
     deviceContext->GSSetShaderResources(0, 1, &randomTexSRV);
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-    GraphicsManager::Get()->BindShader(soShader);
+    GraphicsManager::Get()->BindVShader(soVShader);
+    GraphicsManager::Get()->BindFShader(soFShader);
     GraphicsManager::Get()->DisablePixelShader();
-    GraphicsManager::Get()->BindGeometryShader(soGeoShader);
+    GraphicsManager::Get()->BindGeometryShader(soGShader);
 
     u32 stride = sizeof(VertexParticle);
     u32 offset = 0;
@@ -193,8 +198,9 @@ void D3D11ParticleSystem::Draw(ID3D11Device *device, ID3D11DeviceContext *device
     deviceContext->IASetVertexBuffers(0, 1, &drawVB, &stride, &offset);
 
     GraphicsManager::Get()->BindTextureBuffer(*TextureManager::Get()->Dereference(texture));
-    GraphicsManager::Get()->BindShader(drawShader);
-    GraphicsManager::Get()->BindGeometryShader(drawGeoShader);
+    GraphicsManager::Get()->BindVShader(dwVShader);
+    GraphicsManager::Get()->BindFShader(dwFShader);
+    GraphicsManager::Get()->BindGeometryShader(dwGShader);
 
     deviceContext->DrawAuto();
     

@@ -26,7 +26,8 @@ struct GameWindow : EditorWindow {
     bool FirstClick;
     Vec3 Offset;
 
-    Shader gizmoShader;
+    VShader gizmoVShader;
+    FShader gizmoFShader;
     FrameBuffer gameFrameBuffer;
 
 private:

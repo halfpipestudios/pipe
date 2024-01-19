@@ -2,6 +2,7 @@
 #define _FIRE_SPELL_CMP_
 
 #include "graphics.h"
+#include "mgr/shader_manager.h"
 
 struct Fireball {
     bool active { false };
@@ -23,9 +24,7 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
     f32 timer     { 0.0f };
     f32 speed    { 10.0f };
 
-    void Initialize(Shader soShader, GeometryShader soGeoShader,
-                    Shader dwShader, GeometryShader dwGeoShader,
-                    Handle texture) {
+    void Initialize() {
 
         for(i32 i = 0; i < ARRAY_LENGTH(fireballs); i++) {
             Fireball *fireball = fireballs + i;
@@ -38,9 +37,20 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
                 fireball->spinDir = 1.0f;
             }
 
+            VShader soVShader = *VShaderManager::Get()->Dereference(VShaderManager::Get()->GetAsset("soShootVert.hlsl"));
+            FShader soFShader = *FShaderManager::Get()->Dereference(FShaderManager::Get()->GetAsset("soShootFrag.hlsl"));
+            GeometryShader soGShader = *GSOShaderManager::Get()->Dereference(GSOShaderManager::Get()->GetAsset("soShootGeo.hlsl"));
+
+            VShader dwVShader = *VShaderManager::Get()->Dereference(VShaderManager::Get()->GetAsset("dwShootVert.hlsl"));
+            FShader dwFShader = *FShaderManager::Get()->Dereference(FShaderManager::Get()->GetAsset("dwShootFrag.hlsl"));
+            GeometryShader dwGShader = *GShaderManager::Get()->Dereference(GShaderManager::Get()->GetAsset("dwShootGeo.hlsl"));
+
+            Handle texture = TextureManager::Get()->GetAsset("fire_test.png");
+
             fireball->particleSys = 
-                GraphicsManager::Get()->CreateParticleSystem(1000, soShader, soGeoShader,
-                                                             dwShader, dwGeoShader, texture);
+                GraphicsManager::Get()->CreateParticleSystem(1000, soVShader, soFShader, soGShader,
+                                                                   dwVShader, dwFShader, dwGShader,
+                                                                   texture);
         }
     }
 

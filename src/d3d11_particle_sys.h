@@ -21,8 +21,8 @@ struct D3D11ParticleSystem {
 
     void Initialize(ID3D11Device *device, 
                     u32 maxParticles_,
-                    Shader soShader_, GeometryShader soGeoShader_,
-                    Shader drawShader_, GeometryShader drawGeoShader_,
+                    VShader soVShader_, FShader soFShader_, GeometryShader soGShader_,
+                    VShader dwVShader_, FShader dwFShader_, GeometryShader dwGShader_,
                     ConstBuffer constBuffer_,
                     Handle texture);
 
@@ -50,10 +50,14 @@ struct D3D11ParticleSystem {
     ID3D11ShaderResourceView *randomTexSRV;
     Handle texture;
     
-    Shader soShader;
-    GeometryShader soGeoShader;
-    Shader drawShader;
-    GeometryShader drawGeoShader;
+    //Shader soShader;
+    VShader soVShader;
+    FShader soFShader;
+    GeometryShader soGShader;
+    //Shader drawShader;
+    VShader dwVShader;
+    FShader dwFShader;
+    GeometryShader dwGShader;
 
     ConstBuffer constBuffer;
 
