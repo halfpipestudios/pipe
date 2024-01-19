@@ -10,9 +10,6 @@ struct CMPBase : Serializable {
     i32 id               { -1 };
     SlotmapKey entityKey { };
 
-    // void Serialize(Serializer *s) override { Write(s, "type", "unknow"); }
-    void Deserialize(Tokenizer *t) override { ASSERT(!"Deserialize not implemented"); }
-
 protected:
     inline static i32 counter { 0 };
 };
