@@ -40,6 +40,7 @@ struct Serializable {
     void Write(Serializer *s, char *name, bool val);
     void Write(Serializer *s, char *name, char *str);
     void Write(Serializer *s, char *name, Vec3 vec);
+    void Write(Serializer *s, char *name, Vec2 vec);
 
     void WriteBeginObject(Serializer *s, char *name);
     void WriteEndObject(Serializer *s);
@@ -56,6 +57,7 @@ struct Serializable {
     void Read(Tokenizer *t, char *name, bool *val);
     void Read(Tokenizer *t, char *name, char *str, u32 maxSize);
     void Read(Tokenizer *t, char *name, Vec3 *vec);
+    void Read(Tokenizer *t, char *name, Vec2 *vec);
 
     void ReadBeginObject(Tokenizer *t, char *name);
     void ReadEndObject(Tokenizer *t);

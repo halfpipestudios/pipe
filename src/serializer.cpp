@@ -149,6 +149,13 @@ void Serializable::Write(Serializer *s, char *name, Vec3 vec) {
     WriteEndObject(s); 
 }
 
+void Serializable::Write(Serializer *s, char *name, Vec2 vec) {
+    WriteBeginObject(s, name);
+    Write(s, "x", vec.x);
+    Write(s, "y", vec.y);
+    WriteEndObject(s); 
+}
+
 void Serializable::WriteBeginObject(Serializer *s, char *name) {
     AdvanceTabs(s);
     s->WriteString(name);
@@ -259,12 +266,18 @@ void Serializable::Read(Tokenizer *t, char *name, char *str, u32 maxSize) {
     Expect(t, &token, Token::Type::COMMA);
 }
 
-
 void Serializable::Read(Tokenizer *t, char *name, Vec3 *vec) {
     ReadBeginObject(t, name);
     Read(t, "x", &vec->x);
     Read(t, "y", &vec->y);
     Read(t, "z", &vec->z);
+    ReadEndObject(t);
+}
+
+void Serializable::Read(Tokenizer *t, char *name, Vec2 *vec) {
+    ReadBeginObject(t, name);
+    Read(t, "x", &vec->x);
+    Read(t, "y", &vec->y);
     ReadEndObject(t);
 }
 

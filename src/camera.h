@@ -4,6 +4,8 @@
 #include "common.h"
 #include "algebra.h"
 #include "geometry.h"
+#include "serializer.h"
+#include "tokenizer.h"
 
 struct Map;
 struct EditorWindow;
@@ -16,7 +18,7 @@ enum CameraType {
     FREE_CAMERA
 };
 
-struct Camera {
+struct Camera : Serializable {
 
     CameraType type;
 
@@ -43,6 +45,9 @@ struct Camera {
     Vec3 GetWorldFront();
 
     Ray GetMouseRay(Mat4 proj, f32 w, f32 h, f32 mouseX, f32 mouseY);
+
+    void Serialize(Serializer *s) override;
+    void Deserialize(Tokenizer *t) override;
 
 private:
     void ProcessThirdPersonCamera(Map *map, f32 deltaTime);

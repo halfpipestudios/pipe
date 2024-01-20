@@ -258,3 +258,32 @@ Ray Camera::GetMouseRay(Mat4 proj, f32 w, f32 h, f32 mouseX, f32 mouseY) {
     ray.d.Normalize();
     return ray;
 }
+
+void Camera::Serialize(Serializer *s) {
+    WriteBeginObject(s,"camera");
+    Write(s, "type", (u32)type);
+    Write(s, "pos", pos);
+    Write(s, "target", target);
+    Write(s, "dist", dist);
+    Write(s, "maxDist", maxDist);
+    Write(s, "rot", rot);
+    Write(s, "front", front);
+    Write(s, "right", right);
+    Write(s, "up", up);
+    WriteEndObject(s);
+}
+
+void Camera::Deserialize(Tokenizer *t) {
+    ReadBeginObject(t,"camera");
+    Read(t, "type", (u32 *)&type);
+    Read(t, "pos", &pos);
+    Read(t, "target", &target);
+    Read(t, "dist", &dist);
+    Read(t, "maxDist", &maxDist);
+    Read(t, "rot", &rot);
+    Read(t, "front", &front);
+    Read(t, "right", &right);
+    Read(t, "up", &up);
+    ReadEndObject(t);
+}
+

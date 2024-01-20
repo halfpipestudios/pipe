@@ -102,6 +102,12 @@ void Editor::Initialize(Level *level) {
     this->paused = false;
 
     camera.Initialize(FREE_CAMERA);
+    Tokenizer t;
+    t.Begin("./data/levels/camera.dat");
+    camera.Deserialize(&t);
+    // TODO: Serialize selected entity
+    t.End();
+
 
     tguiBackend.create_program  = TGuiCreateShader;
     tguiBackend.destroy_program = TGuiDestroyShader;
@@ -127,6 +133,11 @@ void Editor::Initialize(Level *level) {
 }
 
 void Editor::Terminate() {
+
+    Serializer s;
+    s.Begin();
+    camera.Serialize(&s);
+    s.End("./data/levels/camera.dat");
     
     gameWindow.Terminate();
     toolWindow.Terminate();
@@ -145,11 +156,18 @@ void Editor::Update(f32 dt) {
     TGuiUpdateInput(PlatformManager::Get()->GetInput(), tgui_get_input());
     
     if(PlatformManager::Get()->GetInput()->KeyJustPress(KEY_0)) {
+        
         printf("Saving level!!\n");
+        
         Serializer s;
         s.Begin();
         level->Serialize(&s);
         s.End("./data/levels/level.dat");
+        
+        s.Begin();
+        camera.Serialize(&s);
+        s.End("./data/levels/camera.dat");
+
     }
 
     if(selectedEntity) {
