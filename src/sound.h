@@ -5,10 +5,14 @@
 #include <xaudio2.h>
 
 // NOTE: Sound manager -----------------------------------------------------------------
+//
+
+struct Sound;
 
 struct SoundData {
-    WAVEFORMATEXTENSIBLE wfx;
-    XAUDIO2_BUFFER buffer;
+    WAVEFORMATEXTENSIBLE format;
+    void *data;
+    u32 size;
 };
 
 struct SoundManager : AssetManager<SoundData> {
@@ -21,22 +25,47 @@ struct SoundManager : AssetManager<SoundData> {
 
 };
 
-struct SoundChannel {
-    IXAudio2SourceVoice* voice;
+struct ChannelCallback : IXAudio2VoiceCallback {
 
-    SoundChannel *prev;
-    SoundChannel *next;
+    void OnStreamEnd() override {}
+    void OnVoiceProcessingPassEnd() override {}
+    void OnVoiceProcessingPassStart(u32 samplreRequire) override {}
+
+    void OnBufferEnd(void *context) override;
+    void OnBufferStart(void *context) override {}
+    
+    void OnLoopEnd(void *context) override {}
+    void OnVoiceError(void *context, HRESULT error) override {}
+
+};
+
+
+struct SoundChannel {
 
     void Initialize();
     void Terminate();
+
+    void Activate(Sound *sound_, bool loop);
+    void Desactivate();
+    
+    IXAudio2SourceVoice* voice;
+    XAUDIO2_BUFFER buffer;
+    Sound *sound;
+
+    SoundChannel *prev;
+    SoundChannel *next;
 };
 
 struct Sound {
-    SoundData    *data;
+    
+    void Initialize(char *path);
+
+    void Play(bool loop);
+    void Pause();
+    void Stop();
+
+    Handle data;
     SoundChannel *channel;
-
-    // TODO: Function to play stop and set volume of sound HERE!
-
 };
 
 // NOTE: Sound system -----------------------------------------------------------------
@@ -46,15 +75,15 @@ struct SoundMixer {
     void Initialize();
     void Terminate();
 
-    void Play(Sound *sound);
+    void Play(Sound *sound, bool loop);
     void Stop(Sound *sound);
 
     IXAudio2* xaudio2;
     WAVEFORMATEX format;
     IXAudio2MasteringVoice* masterVoice;
 
-    SoundChannel *idleChannelList;
-    SoundChannel *activeChannelList;
+    SoundChannel idleChannelList;
+    SoundChannel activeChannelList;
     
     inline static SoundMixer *Get() { return &soundMixer; }
 

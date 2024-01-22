@@ -14,9 +14,19 @@ void SoundManager::Unload(SoundData *data) {
 
 // NOTE: playing sound for sound system ------------------------------------------------
 
+void ChannelCallback::OnBufferEnd(void *context) {
+    SoundChannel *channel = (SoundChannel *)context;
+    channel->Desactivate();
+}
+
 void SoundChannel::Initialize() {
-    
-    if(FAILED(SoundMixer::Get()->xaudio2->CreateSourceVoice(&voice, (WAVEFORMATEX*)&SoundMixer::Get()->format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, 0, NULL, NULL))) {
+
+    memset(&buffer, 0, sizeof(XAUDIO2_BUFFER));
+    buffer.Flags = XAUDIO2_END_OF_STREAM;	
+    buffer.pContext = this;
+
+    static ChannelCallback channelCallback;
+    if(FAILED(SoundMixer::Get()->xaudio2->CreateSourceVoice(&voice, (WAVEFORMATEX*)&SoundMixer::Get()->format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &channelCallback, NULL, NULL))) {
         ASSERT(!"Error initializing source voice");
     }
 
@@ -31,6 +41,28 @@ void SoundChannel::Terminate() {
     prev = nullptr; 
 }
 
+void SoundChannel::Activate(Sound *sound_, bool loop) {
+    ASSERT(sound->channel == nullptr);
+    ListRemove(this);
+    ListInsertBack(&SoundMixer::Get()->activeChannelList, this);
+    sound = sound_;
+    sound->channel = this;
+    SoundData *data = SoundManager::Get()->Dereference(sound->data);
+    buffer.AudioBytes = data->size;
+    buffer.pAudioData = (const BYTE *)data->data;
+    buffer.LoopCount = loop ? XAUDIO2_LOOP_INFINITE : 0;
+}
+
+void SoundChannel::Desactivate() {
+    sound->channel = nullptr;
+    sound = nullptr;
+    buffer.AudioBytes = 0;
+    buffer.pAudioData = nullptr;
+    buffer.LoopCount = 0;
+    ListRemove(this);
+    ListInsertBack(&SoundMixer::Get()->idleChannelList, this);
+}
+
 // NOTE: Sound system -----------------------------------------------------------------
 
 SoundMixer SoundMixer::soundMixer;
@@ -38,7 +70,7 @@ SoundMixer SoundMixer::soundMixer;
 SoundChannel *SoundMixer::AddSoundChannel() {
     SoundChannel *channel = (SoundChannel *)MemoryManager::Get()->AllocStaticMemory(sizeof(SoundChannel), 8);
     channel->Initialize();
-    ListInsertBack(idleChannelList, channel);
+    ListInsertBack(&idleChannelList, channel);
     return channel;
 }
 
@@ -78,8 +110,8 @@ void SoundMixer::Initialize() {
     
     // NOTE: Setup audio buffers lists  
     
-    ListInit(idleChannelList);
-    ListInit(activeChannelList);
+    ListInit(&idleChannelList);
+    ListInit(&activeChannelList);
 
     reserveChannels = 64;
 
@@ -95,15 +127,15 @@ void SoundMixer::Terminate() {
 
     SoundChannel *channel = nullptr;
     
-    channel = ListGetTop(idleChannelList);
-    while(!ListIsEnd(idleChannelList, channel)) {
+    channel = ListGetTop(&idleChannelList);
+    while(!ListIsEnd(&idleChannelList, channel)) {
         SoundChannel *toFree = channel;
         channel = channel->next;
         RemoveSoundChannel(toFree);
     }
     
-    channel = ListGetTop(activeChannelList);
-    while(!ListIsEnd(activeChannelList, channel)) {
+    channel = ListGetTop(&activeChannelList);
+    while(!ListIsEnd(&activeChannelList, channel)) {
         SoundChannel *toFree = channel;
         channel = channel->next;
         RemoveSoundChannel(toFree);
@@ -120,26 +152,42 @@ void SoundMixer::Terminate() {
 
 }
 
-void SoundMixer::Play(Sound *sound) {
-    ASSERT(sound->channel == nullptr);
-    sound->channel = ListGetTop(idleChannelList);
-    ListRemove(sound->channel);
-    ListInsertBack(activeChannelList, sound->channel);
+void SoundMixer::Play(Sound *sound, bool loop) {
+    SoundChannel *channel = ListGetTop(&idleChannelList);
+    channel->Activate(sound, loop);
 
-    if(FAILED(sound->channel->voice->SubmitSourceBuffer(&sound->data->buffer))) {
+    if(FAILED(channel->voice->SubmitSourceBuffer(&channel->buffer))) {
         ASSERT(!"Cannot submit sound data to channel");
     }
-    sound->channel->voice->Start(0);
+    channel->voice->Start(0);
 }
 
 void SoundMixer::Stop(Sound *sound) {
+    
     ASSERT(sound->channel);
     sound->channel->voice->Stop(0);
     if(FAILED(sound->channel->voice->FlushSourceBuffers())) {
         ASSERT(!"Cannot flush channel");
     }
+    
+    sound->channel->Desactivate();
+}
 
-    ListRemove(sound->channel);
-    ListInsertBack(idleChannelList, sound->channel);
-    sound->channel = nullptr;
+// Sound interface -------------------------------------------------------
+
+void Sound::Initialize(char *path) {
+    data = SoundManager::Get()->GetAsset(path);
+    channel = nullptr;
+}
+
+void Sound::Sound::Play(bool loop) {
+    SoundMixer::Get()->Play(this, loop);
+}
+
+void Sound::Pause() {
+    ASSERT(!"Uninplemented function!");
+}
+
+void Sound::Stop() {
+    SoundMixer::Get()->Stop(this);
 }
