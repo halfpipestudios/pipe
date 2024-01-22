@@ -287,6 +287,7 @@ void SoundMixer::Play(Sound *sound, bool loop) {
 
 void SoundMixer::Stop(Sound *sound) {
     
+    if(!sound->channel) return;
     ASSERT(sound->channel);
     sound->channel->voice->Stop(0);
     if(FAILED(sound->channel->voice->FlushSourceBuffers())) {
