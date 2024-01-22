@@ -58,6 +58,10 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, Slot
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
+
+            PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
+            if(playerCmp) playerCmp->jumpSound.Play(false);
+            
             anim->transition.Start(this, &anim->jump, 0.2f);
         }
     }
@@ -118,7 +122,12 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, Slot
     if(!anim->transition.InProgress()) {
         Entity_ *entity = em->GetEntity(entityKey);
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
+        
+            PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
+            if(playerCmp) playerCmp->jumpSound.Play(false);
+            
             anim->transition.Start(this, &anim->jump, 0.2f);
+        
         } else if(physicsComp->physics.vel.Len() < 0.01f) {
             anim->transition.Start(this, &anim->idle, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
@@ -188,8 +197,6 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(EntityManager *em, Slot
 }
 
 void PlayerAnimationJumpState_::Enter(EntityManager *em, SlotmapKey entityKey) {
-    PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
-    playerCmp->jumpSound.Play(false);
 }
 
 void PlayerAnimationJumpState_::Exit(EntityManager *em, SlotmapKey entityKey) {
