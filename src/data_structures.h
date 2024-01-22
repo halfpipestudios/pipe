@@ -3,6 +3,47 @@
 
 #include "common.h"
 
+
+/* ------------------------
+      Circular Link list 
+   ------------------------ */
+
+/* NOTE: This is a Circular double link list and need to have a dummy object setup, pease dont forget to call dll_init */
+#define ListInit(node) ((node)->prev = (node), (node)->next = (node))
+
+#define ListInsertFront(node0, node1) \
+    (node1)->prev = (node0); \
+    (node1)->next = (node0)->next; \
+    (node1)->prev->next = (node1); \
+    (node1)->next->prev = (node1); \
+
+#define ListInsertBack(node0, node1) \
+    (node1)->prev = (node0)->prev; \
+    (node1)->next = (node0); \
+    (node1)->prev->next = (node1); \
+    (node1)->next->prev = (node1); \
+
+#define ListRemove(node) \
+    (node)->prev->next = (node)->next; \
+    (node)->next->prev = (node)->prev;
+
+#define ListIsEmpty(dummy) \
+    ((dummy)->next == (dummy) && (dummy)->prev == (dummy))
+
+#define ListIsEnd(node, dummy) ((node) == (dummy))
+
+#define ListIsFirst(node, dummy) ((node)->prev == (dummy))
+
+#define ListIsLast(node, dummy) ((node)->next == (dummy))
+
+#define ListGetBack(dummy) (dummy)->prev
+
+#define ListGetTop(dummy) (dummy)->next
+
+/* ------------------------
+        Hash Map 
+   ------------------------ */
+
 template <typename Type>
 struct HashMap {
     
