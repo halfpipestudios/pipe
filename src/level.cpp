@@ -14,61 +14,7 @@
 #include "mgr/model_manager.h"
 #include "mgr/animation_manager.h"
 
-static Vec3 gCube[] = {
-
-    // bottom
-    Vec3(-0.5, -0.5f,  0.5f),
-    Vec3( 0.5, -0.5f,  0.5f),
-    Vec3( 0.5, -0.5f, -0.5f),
-    Vec3(-0.5, -0.5f, -0.5f),
-    // top
-    Vec3(-0.5, 0.5f,  0.5f),
-    Vec3( 0.5, 0.5f,  0.5f),
-    Vec3( 0.5, 0.5f, -0.5f),
-    Vec3(-0.5, 0.5f, -0.5f),
-    // left
-    Vec3(-0.5, -0.5f,  0.5f),
-    Vec3(-0.5, -0.5f, -0.5f),
-    Vec3(-0.5,  0.5f, -0.5f),
-    Vec3(-0.5,  0.5f,  0.5f),
-    // right
-    Vec3(0.5, -0.5f,  0.5f),
-    Vec3(0.5, -0.5f, -0.5f),
-    Vec3(0.5,  0.5f, -0.5f),
-    Vec3(0.5,  0.5f,  0.5f),
-    // front
-    Vec3(-0.5, -0.5f, -0.5f),
-    Vec3(-0.5,  0.5f, -0.5f),
-    Vec3( 0.5,  0.5f, -0.5f),
-    Vec3( 0.5, -0.5f, -0.5f),
-    // back
-    Vec3(-0.5, -0.5f, 0.5f),
-    Vec3(-0.5,  0.5f, 0.5f),
-    Vec3( 0.5,  0.5f, 0.5f),
-    Vec3( 0.5, -0.5f, 0.5f)
-
-};
-
-static MapImporter::EntityFace gCubeFaces[] = {
-    // bottom
-    { {{ 0, -1,  0}, 32.0f}, {}, 0 },
-    // top
-    { {{ 0,  1,  0}, 32.0f}, {}, 0 },
-    // left
-    { {{-1,  0,  0}, 32.0f}, {}, 0 },
-    // right
-    { {{ 1,  0,  0}, 32.0f}, {}, 0 },
-    // front
-    { {{ 0,  0,  1}, 32.0f}, {}, 0 },
-    // back
-    { {{ 0,  0, -1}, 32.0f}, {}, 0 }
-};
-
-Vec3 *CreateCube() {
-    Vec3 *cube = (Vec3 *)MemoryManager::Get()->AllocStaticMemory(ARRAY_LENGTH(gCube) * sizeof(Vec3), 1);
-    memcpy(cube, gCube, ARRAY_LENGTH(gCube) * sizeof(Vec3));
-    return cube;
-}
+#include "globals.h"
 
 void Map::Initialize(char *filename) {
 
@@ -242,6 +188,38 @@ static SlotmapKey CreateMovingPlatform(char *name, Vec3 scale, Vec3 a, Vec3 b) {
     return platform;
 }
 
+static SlotmapKey CreateBox(char *name, Vec3 pos, Vec3 scale) {
+    SlotmapKey box = EntityManager::Get()->AddEntity();
+    Entity_ *boxPtr = EntityManager::Get()->GetEntity(box);
+    strcpy(boxPtr->name, name);
+    
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(box);
+    transformCmp->Initialize(pos, Vec3(), scale);
+
+    PhysicsCMP *physicsCmp = EntityManager::Get()->AddComponent<PhysicsCMP>(box);
+    physicsCmp->Initialize(pos, Vec3(), Vec3());
+    physicsCmp->physics.orientation = (f32)(PI*0.5);
+
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(box);
+    graphicsCmp->Initialize("cube.twm", "staticVert.hlsl", "staticFrag.hlsl");
+
+    // Collider
+    ConvexHull convexHull {};
+    convexHull.points = CreateCube();
+    convexHull.count  = ARRAY_LENGTH(gCube);
+    MapImporter::Entity entity {};
+    entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
+    memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
+    entity.facesCount = 6;
+
+    CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(box);
+    collisionCmp->Initialize(convexHull, entity);
+
+    EntityManager::Get()->AddComponent<MovableBoxCMP>(box);
+
+    return box;
+}
+
 static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Vec3 position) {
 
     SlotmapKey gem = EntityManager::Get()->AddEntity();
@@ -336,6 +314,15 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     heroKey = entities[0];
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
+
+
+    entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    /*
+    entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    entities.Push(CreateBox("box2", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    entities.Push(CreateBox("box3", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    entities.Push(CreateBox("box4", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    */
     
 }
 
@@ -442,6 +429,8 @@ void Level::Update(f32 dt) {
 
     particleSys.Update(em, camera->pos, gameTime, dt);
     fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
+    // TODO: mabye this can go erlier...
+    levitationSpellSys.Update(em, this, camera->pos, gameTime, dt);
 }
 
 void Level::Render() {
@@ -452,11 +441,11 @@ void Level::Render() {
     graphicsSys.Update(em);
     particleSys.Render(em);
     fireSpellSys.Render(em);
+    levitationSpellSys.Render(em);
 }
 
 void Level::Serialize(Serializer *s) {
     WriteBeginObject(s, "level");
-    
     Write(s, "map", mapName);
     Write(s, "num_entities", (i32)entities.size);
     WriteBeginArray(s, "entities");
@@ -471,7 +460,6 @@ void Level::Serialize(Serializer *s) {
 
 void Level::Deserialize(Tokenizer *t) {
     ReadBeginObject(t, "level");
-    
     Read(t, "map", mapName, MAX_LEVEL_MAP_NAME_SIZE);
     map.Initialize(mapName);
     i32 numEntities = 0;

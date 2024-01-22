@@ -147,22 +147,6 @@ struct Graphics {
     virtual void ClearColorBuffer(FrameBuffer frameBufferHandle, f32 r, f32 g, f32 b) = 0;
     virtual void ClearDepthStencilBuffer(FrameBuffer frameBufferHandle)  = 0;
     virtual void Present(i32 vsync) = 0;
-/*
-    virtual Shader CreateShaderVertex(char *vertpath, char *fragpath) = 0;
-    virtual Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) = 0;
-    virtual Shader CreateShaderVertexMap(char *vertpath, char *fragpath) = 0;
-    virtual Shader CreateShaderTGui(char *vertpath, char *fragpath) = 0;
-    virtual Shader CreateShaderParticle(char *vertpath, char *fragpath) = 0;
-    virtual void DestroyShader(Shader shaderHandle) = 0;
-    virtual void BindShader(Shader shaderHandle) = 0;
-*/
-/*
-    virtual VShader CreateVShaderVertex(char *vertpath) = 0;
-    virtual VShader CreateVShaderVertexSkin(char *vertpath) = 0;
-    virtual VShader CreateVShaderVertexMap(char *vertpath) = 0;
-    virtual VShader CreateVShaderTGui(char *vertpath) = 0;
-    virtual VShader CreateVShaderParticle(char *vertpath) = 0;
-*/
 
     virtual VShader CreateVShader(char *vertpath) = 0;
     virtual void DestroyVShader(VShader shaderHandle) = 0;

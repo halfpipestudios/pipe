@@ -156,23 +156,6 @@ struct D3D11Graphics : public Graphics {
 
     void Present(i32 vsync) override;
 
-/*
-    Shader CreateShaderVertex(char *vertpath, char *fragpath) override;
-    Shader CreateShaderVertexSkin(char *vertpath, char *fragpath) override;
-    Shader CreateShaderVertexMap(char *vertpath, char *fragpath) override;
-    Shader CreateShaderTGui(char *vertpath, char *fragpath) override;
-    Shader CreateShaderParticle(char *vertpath, char *fragpath) override;
-    void DestroyShader(Shader shaderHandle) override;
-    void BindShader(Shader shaderHandle) override;
-*/
-/*
-    VShader CreateVShaderVertex(char *vertpath) override;
-    VShader CreateVShaderVertexSkin(char *vertpath) override;
-    VShader CreateVShaderVertexMap(char *vertpath) override;
-    VShader CreateVShaderTGui(char *vertpath) override;
-    VShader CreateVShaderParticle(char *vertpath) override;
-*/
-
     VShader CreateVShader(char *vertpath) override;
     void DestroyVShader(VShader shaderHandle) override;
     void BindVShader(VShader shaderHandle) override;

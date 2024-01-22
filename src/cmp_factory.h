@@ -7,6 +7,7 @@
 #include "cmp/gem_cmp.h"
 #include "cmp/graphics_cmp.h"
 #include "cmp/input_cmp.h"
+#include "cmp/movable_box_cmp.h"
 #include "cmp/moving_platform_cmp.h"
 #include "cmp/particle_cmp.h"
 #include "cmp/physics_cmp.h"
@@ -24,6 +25,7 @@ static void AddTypesToEntityManager() {
     EntityManager::Get()->AddComponentType<GemCMP>();
     EntityManager::Get()->AddComponentType<GraphicsCMP>();
     EntityManager::Get()->AddComponentType<InputCMP>();
+    EntityManager::Get()->AddComponentType<MovableBoxCMP>();
     EntityManager::Get()->AddComponentType<MovingPlatformCMP>();
     EntityManager::Get()->AddComponentType<ParticleCMP>();
     EntityManager::Get()->AddComponentType<PhysicsCMP>();
@@ -59,6 +61,9 @@ static CMPBase *CreateCMPFromNextToken(Tokenizer *t, Entity_ *entity) {
     }
     else if(token.Contains("input")) {
         return EntityManager::Get()->AddComponent<InputCMP>(entity->key);
+    }
+    else if(token.Contains("movable_box")) {
+        return EntityManager::Get()->AddComponent<MovableBoxCMP>(entity->key);
     }
     else if(token.Contains("moving_platform")) {
         return EntityManager::Get()->AddComponent<MovingPlatformCMP>(entity->key);
