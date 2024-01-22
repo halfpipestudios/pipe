@@ -9,6 +9,8 @@
 #include "mgr/animation_manager.h"
 #include "mgr/shader_manager.h"
 
+#include "sound.h"
+
 #include "game.h"
 #include "edt/editor.h"
 
@@ -21,12 +23,15 @@ int main() {
     ModelManager::Get()->Initialize(256);
     AnimationManager::Get()->Initialize(256);
 
-
     VShaderManager::Get()->Initialize(32);
     FShaderManager::Get()->Initialize(32);
     GShaderManager::Get()->Initialize(32);
     GSOShaderManager::Get()->Initialize(32);
-
+    
+    SoundMixer::Get()->Initialize();
+    Sound testSound;
+    testSound.Initialize("Lugia's Song (Original).wav");
+    testSound.Play(true);
 
     GraphicsManager::Get()->SetRasterizerState(RASTERIZER_STATE_CULL_NONE);
     
@@ -80,11 +85,12 @@ int main() {
     editor.Terminate();
     game.Terminate();
 
+    SoundMixer::Get()->Terminate();
+
     VShaderManager::Get()->Terminate();
     FShaderManager::Get()->Terminate();
     GShaderManager::Get()->Terminate();
     GSOShaderManager::Get()->Terminate();
-
 
     AnimationManager::Get()->Terminate();
     ModelManager::Get()->Terminate();

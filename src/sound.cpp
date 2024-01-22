@@ -1,14 +1,136 @@
 #include "sound.h"
 #include "memory_manager.h"
 
+#define fourccRIFF 'FFIR'
+#define fourccDATA 'atad'
+#define fourccFMT ' tmf'
+#define fourccWAVE 'EVAW'
+#define fourccXWMA 'AMWX'
+#define fourccDPDS 'sdpd'
+
+static HRESULT FindChunk(HANDLE hFile, DWORD fourcc, DWORD & dwChunkSize, DWORD & dwChunkDataPosition) {
+    HRESULT hr = S_OK;
+    if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, 0, NULL, FILE_BEGIN ) )
+        return HRESULT_FROM_WIN32( GetLastError() );
+
+    DWORD dwChunkType;
+    DWORD dwChunkDataSize;
+    DWORD dwRIFFDataSize = 0;
+    DWORD dwFileType;
+    DWORD bytesRead = 0;
+    DWORD dwOffset = 0;
+
+    while (hr == S_OK) {
+        DWORD dwRead;
+        if( 0 == ReadFile( hFile, &dwChunkType, sizeof(DWORD), &dwRead, NULL ) )
+            hr = HRESULT_FROM_WIN32( GetLastError() );
+
+        if( 0 == ReadFile( hFile, &dwChunkDataSize, sizeof(DWORD), &dwRead, NULL ) )
+            hr = HRESULT_FROM_WIN32( GetLastError() );
+
+        switch (dwChunkType) {
+        case fourccRIFF:
+            dwRIFFDataSize = dwChunkDataSize;
+            dwChunkDataSize = 4;
+            if( 0 == ReadFile( hFile, &dwFileType, sizeof(DWORD), &dwRead, NULL ) )
+                hr = HRESULT_FROM_WIN32( GetLastError() );
+            break;
+
+        default:
+            if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, dwChunkDataSize, NULL, FILE_CURRENT ) )
+            return HRESULT_FROM_WIN32( GetLastError() );            
+        }
+
+        dwOffset += sizeof(DWORD) * 2;
+
+        if (dwChunkType == fourcc) {
+            dwChunkSize = dwChunkDataSize;
+            dwChunkDataPosition = dwOffset;
+            return S_OK;
+        }
+
+        dwOffset += dwChunkDataSize;
+
+        if (bytesRead >= dwRIFFDataSize) return S_FALSE;
+
+    }
+
+    return S_OK;
+
+}
+
+static HRESULT ReadChunkData(HANDLE hFile, void * buffer, DWORD buffersize, DWORD bufferoffset) {
+    HRESULT hr = S_OK;
+    if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, bufferoffset, NULL, FILE_BEGIN ) )
+        return HRESULT_FROM_WIN32( GetLastError() );
+    DWORD dwRead;
+    if( 0 == ReadFile( hFile, buffer, buffersize, &dwRead, NULL ) )
+        hr = HRESULT_FROM_WIN32( GetLastError() );
+    return hr;
+}
+
+static HRESULT LoadAudioFile(const char *path, SoundData *soundData) {
+    
+    HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+
+    if(INVALID_HANDLE_VALUE == hFile)
+        return HRESULT_FROM_WIN32(GetLastError());
+
+    if(INVALID_SET_FILE_POINTER == SetFilePointer(hFile, 0, NULL, FILE_BEGIN))
+        return HRESULT_FROM_WIN32( GetLastError());
+
+    DWORD dwChunkSize;
+    DWORD dwChunkPosition;
+    
+    // NOTE: Locate the RIFF chuck
+    FindChunk(hFile, fourccRIFF, dwChunkSize, dwChunkPosition);
+    DWORD filetype;
+    ReadChunkData(hFile, &filetype, sizeof(DWORD), dwChunkPosition);
+    if (filetype != fourccWAVE)
+        return S_FALSE;
+
+    // NOTE: Locate the FMT chuck
+    FindChunk(hFile,fourccFMT, dwChunkSize, dwChunkPosition);
+    ReadChunkData(hFile, &soundData->format, dwChunkSize, dwChunkPosition);
+    
+    WAVEFORMATEX expectedFormat = SoundMixer::Get()->format; 
+    ASSERT(soundData->format.Format.wFormatTag      == expectedFormat.wFormatTag);
+    ASSERT(soundData->format.Format.nChannels       == expectedFormat.nChannels);
+    ASSERT(soundData->format.Format.nSamplesPerSec  == expectedFormat.nSamplesPerSec);
+    ASSERT(soundData->format.Format.wBitsPerSample  == expectedFormat.wBitsPerSample);
+    ASSERT(soundData->format.Format.nBlockAlign     == expectedFormat.nBlockAlign);
+    ASSERT(soundData->format.Format.nAvgBytesPerSec == expectedFormat.nAvgBytesPerSec);
+    
+    // NOTE: Locate the DATA chuck
+    FindChunk(hFile,fourccDATA,dwChunkSize, dwChunkPosition);
+    BYTE * pDataBuffer = (BYTE *)MemoryManager::Get()->AllocStaticMemory(dwChunkSize, 8);
+    ReadChunkData(hFile, pDataBuffer, dwChunkSize, dwChunkPosition);
+
+    // NOTE: Populate XAudio2 buffer
+    soundData->size = dwChunkSize;
+    soundData->data = (void *)pDataBuffer;
+
+    CloseHandle(hFile);
+
+    return S_OK;
+}
+
+
+
 // NOTE: Sound manager -----------------------------------------------------------------
 
 SoundManager SoundManager::soundManager;
 
 void SoundManager::Load(SoundData *data, const char *name) {
+    static char path[4096];
+    sprintf(path, "%s%s", "./data/sounds/", name); 
+    LoadAudioFile(path, data);
+
+    printf("Sound: %s loaded\n", path);
 }
 
 void SoundManager::Unload(SoundData *data) {
+    printf("remove sound: %llu\n", (u64)data);
 }
 
 
@@ -36,13 +158,9 @@ void SoundChannel::Initialize() {
 
 void SoundChannel::Terminate() {
     voice->DestroyVoice();
-
-    next = nullptr;
-    prev = nullptr; 
 }
 
 void SoundChannel::Activate(Sound *sound_, bool loop) {
-    ASSERT(sound->channel == nullptr);
     ListRemove(this);
     ListInsertBack(&SoundMixer::Get()->activeChannelList, this);
     sound = sound_;
@@ -81,8 +199,11 @@ void SoundMixer::RemoveSoundChannel(SoundChannel *channel) {
 
 void SoundMixer::Initialize() {
     
-    HRESULT hr;
+    // NOTE: Initialize sound manager
+    SoundManager::Get()->Initialize(256);
 
+    
+    HRESULT hr;
     // NOTE: Initialize COM object
     hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if(FAILED(hr)) {
@@ -150,6 +271,8 @@ void SoundMixer::Terminate() {
     // NOTE: Terminate COM object
     CoUninitialize();
 
+    // NOTE: Terminate sound manager
+    SoundManager::Get()->Terminate();
 }
 
 void SoundMixer::Play(Sound *sound, bool loop) {

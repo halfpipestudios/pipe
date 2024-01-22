@@ -15,8 +15,8 @@ void AnimationSys<EM>::Update(EM& em, f32 dt) {
         
         PlayerAnimationState_ *newState = animation->state->Update(&em, entity, input, dt);
         if(newState != nullptr) {
-            animation->state->Exit(entity);
-            newState->Enter(entity);
+            animation->state->Exit(&em, entity);
+            newState->Enter(&em, entity);
             animation->state = newState;
         }
     }

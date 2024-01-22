@@ -1,5 +1,7 @@
 #include "animation_cmp.h"
 #include "physics_cmp.h"
+#include "player_cmp.h"
+
 #include "../entity.h"
 #include "../memory_manager.h"
 
@@ -70,10 +72,10 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, Slot
 
 }
 
-void PlayerAnimationIdleState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationIdleState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationIdleState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationIdleState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 // Walk Animation state -------------------------------
@@ -134,10 +136,10 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, Slot
 
 }
 
-void PlayerAnimationWalkState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationWalkState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationWalkState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationWalkState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 // Jump Animation state -------------------------------
@@ -185,10 +187,12 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(EntityManager *em, Slot
     return nullptr;
 }
 
-void PlayerAnimationJumpState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationJumpState_::Enter(EntityManager *em, SlotmapKey entityKey) {
+    PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
+    playerCmp->jumpSound.Play(false);
 }
 
-void PlayerAnimationJumpState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationJumpState_::Exit(EntityManager *em, SlotmapKey entityKey) {
     jumpAnimation.time = 0;
 }
 
@@ -230,10 +234,10 @@ PlayerAnimationState_ *PlayerAnimationFallState_::Update(EntityManager *em, Slot
     return nullptr;
 }
 
-void PlayerAnimationFallState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationFallState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationFallState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationFallState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 
