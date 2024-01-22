@@ -1,5 +1,7 @@
 #include "animation_cmp.h"
 #include "physics_cmp.h"
+#include "player_cmp.h"
+
 #include "../entity.h"
 #include "../memory_manager.h"
 
@@ -56,6 +58,10 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, Slot
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
             anim->transition.Start(this, &anim->fall, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
+
+            PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
+            if(playerCmp) playerCmp->jumpSound.Play(false);
+            
             anim->transition.Start(this, &anim->jump, 0.2f);
         }
     }
@@ -70,10 +76,10 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, Slot
 
 }
 
-void PlayerAnimationIdleState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationIdleState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationIdleState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationIdleState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 // Walk Animation state -------------------------------
@@ -116,7 +122,12 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, Slot
     if(!anim->transition.InProgress()) {
         Entity_ *entity = em->GetEntity(entityKey);
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
+        
+            PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
+            if(playerCmp) playerCmp->jumpSound.Play(false);
+            
             anim->transition.Start(this, &anim->jump, 0.2f);
+        
         } else if(physicsComp->physics.vel.Len() < 0.01f) {
             anim->transition.Start(this, &anim->idle, 0.2f);
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y < (e*10)) {
@@ -134,10 +145,10 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, Slot
 
 }
 
-void PlayerAnimationWalkState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationWalkState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationWalkState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationWalkState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 // Jump Animation state -------------------------------
@@ -185,10 +196,10 @@ PlayerAnimationState_ *PlayerAnimationJumpState_::Update(EntityManager *em, Slot
     return nullptr;
 }
 
-void PlayerAnimationJumpState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationJumpState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationJumpState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationJumpState_::Exit(EntityManager *em, SlotmapKey entityKey) {
     jumpAnimation.time = 0;
 }
 
@@ -230,10 +241,10 @@ PlayerAnimationState_ *PlayerAnimationFallState_::Update(EntityManager *em, Slot
     return nullptr;
 }
 
-void PlayerAnimationFallState_::Enter(SlotmapKey entityKey) {
+void PlayerAnimationFallState_::Enter(EntityManager *em, SlotmapKey entityKey) {
 }
 
-void PlayerAnimationFallState_::Exit(SlotmapKey entityKey) {
+void PlayerAnimationFallState_::Exit(EntityManager *em, SlotmapKey entityKey) {
 }
 
 

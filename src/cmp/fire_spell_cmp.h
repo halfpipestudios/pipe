@@ -3,6 +3,7 @@
 
 #include "graphics.h"
 #include "mgr/shader_manager.h"
+#include "sound.h"
 
 struct Fireball {
     bool active { false };
@@ -12,6 +13,7 @@ struct Fireball {
     Vec3 pos;
     Vec3 vel;
     ParticleSystem particleSys { nullptr };
+    Sound sound;
 };
 
 struct FireSpellCMP : CMP<FireSpellCMP> {
@@ -25,7 +27,6 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
     f32 speed    { 10.0f };
 
     void Initialize() {
-
         for(i32 i = 0; i < ARRAY_LENGTH(fireballs); i++) {
             Fireball *fireball = fireballs + i;
             fireball->renderTimer = RandF32(0, 2.0f*(f32)PI);
@@ -36,6 +37,8 @@ struct FireSpellCMP : CMP<FireSpellCMP> {
             {
                 fireball->spinDir = 1.0f;
             }
+
+            fireball->sound.Initialize("fireSpell.wav");
 
             VShader soVShader = *VShaderManager::Get()->Dereference(VShaderManager::Get()->GetAsset("soShootVert.hlsl"));
             FShader soFShader = *FShaderManager::Get()->Dereference(FShaderManager::Get()->GetAsset("soShootFrag.hlsl"));

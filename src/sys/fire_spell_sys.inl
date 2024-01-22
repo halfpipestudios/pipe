@@ -92,6 +92,7 @@ void FireSpellSys<EM>::Update(EM& em, Level *level, Vec3 cameraPos, f32 gameTime
 
                 Fireball *fireball = fir->fireballs + fir->nextToShoot;
                 
+                fireball->sound.Play(false);
                 fireball->active = true;
                 fireball->life = 0.0f;
                 fireball->pos = phy->physics.pos;

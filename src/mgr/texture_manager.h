@@ -10,7 +10,6 @@ struct TextureManager : AssetManager<TextureBuffer> {
     void Unload(TextureBuffer *data) override;
     
     inline static TextureManager *Get() { return &textureManager; }
-
     static TextureManager textureManager; 
 
 };
