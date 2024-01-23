@@ -16,7 +16,7 @@ void ParticleSys<EM>::Update(EM& em, Vec3 cameraPos, f32 gameTime, f32 dt) {
         TransformCMP *transform = em.template GetComponent<TransformCMP>(e);
 
         GraphicsManager::Get()->UpdateParticleSystem(par->particleSys,
-                transform->pos, cameraPos, gameTime, dt);
+                transform->pos, Vec3(), cameraPos, gameTime, dt);
 
 
     }

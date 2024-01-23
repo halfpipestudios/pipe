@@ -64,7 +64,10 @@ struct CBParticle {
     f32 timeStep;
     
     Vec3 emitDirW;
-    f32 padding[1];
+    f32 pad0;
+
+    Vec3 targetPosW;
+    f32 pad1;
 };
 
 #define MAX_BONES 100
@@ -205,7 +208,7 @@ struct Graphics {
                                                 Handle texture) = 0;
     virtual void DestroyParticleSystem(ParticleSystem particleSystemHandle) = 0;
     virtual void ResetParticleSystem(ParticleSystem particleSystemHandle) = 0;
-    virtual void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) = 0;
+    virtual void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 targetPos, Vec3 cameraPos, f32 gameTime, f32 dt) = 0;
     virtual void RenderParticleSystem(ParticleSystem particleSystemHandle) = 0;
 
     virtual void SetViewport(u32 x, u32 y, u32 w, u32 h) = 0;

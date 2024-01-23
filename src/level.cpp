@@ -316,7 +316,7 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     gBlackBoard.target = &heroTransform->pos;
 
 
-    entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
+    //entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
     /*
     entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
     entities.Push(CreateBox("box2", Vec3(0, 3, 0), Vec3(1, 1, 1)));
@@ -415,6 +415,10 @@ void Level::Update(f32 dt) {
     physicsSys.PreUpdate(em, dt);
     inputSys.Update(em, camera, dt);
     aiSys.Update(em, dt);
+
+
+    levitationSpellSys.Update(em, camera, gameTime, dt);
+
     physicsSys.Update(em, dt);
     movingPlatformSys.Update(em, dt);
     triggerSys.Update(em, dt);
@@ -429,8 +433,6 @@ void Level::Update(f32 dt) {
 
     particleSys.Update(em, camera->pos, gameTime, dt);
     fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
-    // TODO: mabye this can go erlier...
-    levitationSpellSys.Update(em, this, camera->pos, gameTime, dt);
 }
 
 void Level::Render() {

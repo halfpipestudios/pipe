@@ -1281,9 +1281,9 @@ void D3D11Graphics::ResetParticleSystem(ParticleSystem particleSystemHandle) {
     particleSystem->Reset();
 }
 
-void D3D11Graphics::UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) {
+void D3D11Graphics::UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 targetPos, Vec3 cameraPos, f32 gameTime, f32 dt) {
     D3D11ParticleSystem *particleSystem = (D3D11ParticleSystem *)particleSystemHandle;
-    particleSystem->Update(startPos, cameraPos, gameTime, dt);
+    particleSystem->Update(startPos, targetPos, cameraPos, gameTime, dt);
 }
 
 void D3D11Graphics::RenderParticleSystem(ParticleSystem particleSystemHandle) {

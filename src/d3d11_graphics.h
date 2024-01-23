@@ -213,7 +213,7 @@ struct D3D11Graphics : public Graphics {
                                         Handle texture) override;
     void DestroyParticleSystem(ParticleSystem particleSystemHandle) override;
     void ResetParticleSystem(ParticleSystem particleSystemHandle) override;
-    void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 cameraPos, f32 gameTime, f32 dt) override;
+    void UpdateParticleSystem(ParticleSystem particleSystemHandle, Vec3 startPos, Vec3 targetPos, Vec3 cameraPos, f32 gameTime, f32 dt) override;
     void RenderParticleSystem(ParticleSystem particleSystemHandle) override;
 
     void SetViewport(u32 x, u32 y, u32 w, u32 h) override;

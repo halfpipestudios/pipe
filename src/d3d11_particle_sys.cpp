@@ -135,8 +135,9 @@ void D3D11ParticleSystem::Reset() {
     age = 0.0f;
 }
 
-void D3D11ParticleSystem::Update(Vec3 startPos, Vec3 cameraPos, f32 gameTime_, f32 dt) {
+void D3D11ParticleSystem::Update(Vec3 startPos, Vec3 targetPos, Vec3 cameraPos, f32 gameTime_, f32 dt) {
     eyePosW = cameraPos;
+    targetPosW = targetPos;
     emitPosW = startPos;
     gameTime = gameTime_;
     timeStep = dt;
@@ -151,6 +152,7 @@ void D3D11ParticleSystem::Draw(ID3D11Device *device, ID3D11DeviceContext *device
     particlesData.eyePosW = eyePosW;
     particlesData.emitPosW = emitPosW;
     particlesData.emitDirW = emitDirW; 
+    particlesData.targetPosW = targetPosW;
     GraphicsManager::Get()->UpdateConstBuffer(constBuffer, &particlesData);
 
     GraphicsManager::Get()->SetDepthStencilState(false);
