@@ -16,6 +16,10 @@ cbuffer CBParticle : register(b2) {
     float timeStep;
     
     float3 emitDirW;
+    float pad0;
+
+    float3 targetPosW;
+    float pad1;
     
 }
 
@@ -57,6 +61,10 @@ void GS(point Particle gin[1],
                 float3 vRandom = RandomUnitVec3((float)i/5.0f);
                 vRandom.x *= 0.5f;
                 vRandom.z *= 0.5f;
+
+                float3 dir = normalize(targetPosW - emitPosW);
+
+                vRandom = vRandom + dir * 1.5f;
 
 
                 float3 uRandom = RandomUnitVec3((float)i/5.0f);

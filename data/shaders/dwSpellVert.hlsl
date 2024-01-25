@@ -7,6 +7,10 @@ cbuffer CBParticle : register(b2) {
     float timeStep;
     
     float3 emitDirW;
+    float pad0;
+
+    float3 targetPosW;
+    float pad1;
 }
 
 struct VS_Input {
@@ -28,7 +32,8 @@ PS_Input vs_main(VS_Input vin) {
     PS_Input vout;
     
     float t  = vin.age;
-    float3 target = float3(0, 2.75f, 0);
+    //float3 target = float3(0, 2.75f, 0);
+    float3 target = targetPosW;
     
     float3 dirA = vin.vel;
     float3 dirB = target - vin.pos;

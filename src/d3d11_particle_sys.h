@@ -29,7 +29,7 @@ struct D3D11ParticleSystem {
     void Terminate();
 
     void Reset();
-    void Update(Vec3 startPos, Vec3 cameraPos, f32 gameTime_, f32 dt);
+    void Update(Vec3 startPos, Vec3 targetPos, Vec3 cameraPos, f32 gameTime_, f32 dt);
     void Draw(ID3D11Device *device, ID3D11DeviceContext *deviceContext);
 
     u32 maxParticles { 1000 };
@@ -40,6 +40,7 @@ struct D3D11ParticleSystem {
     f32 gameTime { 0.0f };
 
     Vec3 eyePosW  { 0, 0, 0 };
+    Vec3 targetPosW { 0, 0, 0 };
     Vec3 emitPosW { 0, 0, 0 };
     Vec3 emitDirW { 0, 1, 0 };
 

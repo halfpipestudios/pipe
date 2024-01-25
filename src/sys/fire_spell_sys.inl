@@ -127,7 +127,7 @@ void FireSpellSys<EM>::Update(EM& em, Level *level, Vec3 cameraPos, f32 gameTime
                 Vec3 worldP = Mat4::TransformPoint(transformMatrix, localP);
 
                 GraphicsManager::Get()->UpdateParticleSystem(fireball->particleSys,
-                            worldP, cameraPos, gameTime, dt);
+                            worldP, Vec3(), cameraPos, gameTime, dt);
 
 
                 for(i32 k = 0; k < enemyComponents.size; k++) {
