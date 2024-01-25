@@ -24,8 +24,17 @@ void DoorSys<EM>::Update(EM& em, f32 dt) {
         i32 platesPressed = 0;
 
         for(i32 plateIndex = 0; plateIndex < door->platesCount; ++plateIndex) {
+            
+            SlotmapKey plate = door->plates[plateIndex];
+            
+            TransformCMP *plateTrans = em.GetComponent<TransformCMP>(plate);
+            plateTrans->renderOffset = Vec3(0, 0, 0);
+
             for(i32 boxIndex = 0; boxIndex < boxs.size; ++boxIndex) {
-                if(TestBoxPressurePlate(em, door->plates[plateIndex], boxs[boxIndex].entityKey)) {
+                if(TestBoxPressurePlate(em, plate, boxs[boxIndex].entityKey)) {
+
+                    plateTrans->renderOffset = Vec3(0, -plateTrans->scale.y * 0.4f, 0);
+
                     platesPressed++;
                     break;
                 }
