@@ -1,6 +1,7 @@
 #include "algebra.h"
 #include "map_importer.h"
 #include "memory_manager.h"
+#include "gjk_collision.h"
 
 Vec3 gCube[24] = {
 
@@ -78,4 +79,61 @@ void TransformEntity(MapImporter::Entity *mapEntity, Vec3 scale, Vec3 movement) 
         }
 
     }
+}
+
+
+void DrawCube(Vec3 *cube, u32 color) {
+    for(i32 faceIndex = 0; faceIndex < 6; ++faceIndex) {
+        
+        Vec3 *vertices = &cube[faceIndex * 4];
+        
+        for(i32 i = 0; i < 4; ++i) {
+            Vec3 a = vertices[i];
+            Vec3 b = vertices[(i + 1) % 4];
+
+            GraphicsManager::Get()->DrawLine(a, b, color);
+        }
+    }
+}
+
+void DrawCylinder(Cylinder cylinder, u32 color) {
+    Vec3 vertices[40] = {};
+
+    // Top face
+    f32 increment = (2.0f * (f32)PI) / 20;
+    f32 angle = 0.0f;
+    for(i32 i = 0; i < 20; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c + cylinder.u * cylinder.n;
+        angle += increment;
+    }
+
+    // Bottom face
+    angle = 0.0f;
+    for(i32 i = 20; i < 40; ++i) {
+        vertices[i] = Vec3(sinf(angle), 0, cosf(angle)) * cylinder.radii + cylinder.c - cylinder.u * cylinder.n;
+        angle += increment;
+    }
+
+    // Rendering code
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[i];
+        Vec3 b = vertices[(i + 1) % 20];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[20 + i];
+        Vec3 b = vertices[20 + (i + 1) % 20];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
+    for(i32 i = 0; i < 20; ++i) {
+        Vec3 a = vertices[i];
+        Vec3 b = vertices[20 + i];
+
+        GraphicsManager::Get()->DrawLine(a, b, color);
+    }
+
 }

@@ -11,9 +11,30 @@ void LevitationSpellSys<EM>::Update(EM& em, Camera *camera, f32 gameTime, f32 dt
     auto& movableBoxComponents = em.GetComponents<MovableBoxCMP>();
     auto& playerComponents = em.GetComponents<PlayerCMP>();
 
+
     // TODO: select the object that is closer to the camera front direction
+    if(selectedBox == nullptr) {
+        f32 maxDot_ = 0;
+        MovableBoxCMP *currentToSelect = nullptr;
+        for(i32 i = 0; i < movableBoxComponents.size; i++) {
+            MovableBoxCMP *mov = &movableBoxComponents[i];
+            PhysicsCMP *phy = em.GetComponent<PhysicsCMP>(mov->entityKey);
 
+            Vec3 relP = phy->physics.pos - camera->pos;
+            Vec3 front = camera->front;
 
+            f32 dot = relP.Dot(front);
+            if(dot > maxDot_) {
+                currentToSelect = mov;
+                maxDot_ = dot;
+            }
+        }
+
+        if(currentToSelect) {
+            CollisionCMP *col = em.GetComponent<CollisionCMP>(currentToSelect->entityKey);
+            DrawCube(col->poly3D.convexHull.points, 0xFFFFFFFF);
+        }
+    }
 
 
     PlayerCMP *playerCmp = &playerComponents[0];
@@ -64,6 +85,8 @@ void LevitationSpellSys<EM>::Update(EM& em, Camera *camera, f32 gameTime, f32 dt
         Vec3 newP = Vec3(pos.x, pos.y + 5, pos.z) + worldFront * 4.0f;
         phy->physics.acc = (newP - phy->physics.pos)*4.0f;
         phy->physics.acc.y *= 2.5f;
+
+        GraphicsManager::Get()->DrawLine(phy->physics.pos, phy->physics.pos - Vec3(0, 100, 0), 0xFF00FF00);
 
         GraphicsManager::Get()->UpdateParticleSystem(playerCmp->particleSys, pos, phy->physics.pos, camera->pos, gameTime, dt);
     }

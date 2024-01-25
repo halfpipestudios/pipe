@@ -78,6 +78,7 @@ int main() {
             game.Update(deltaTime);
             game.Render();
         }
+        GraphicsManager::Get()->FlushFrameBuffer(nullptr);
         GraphicsManager::Get()->Present(1);
         game.EndFrame(deltaTime);
     }
