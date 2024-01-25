@@ -31,7 +31,7 @@ int main() {
     SoundMixer::Get()->Initialize();
     Sound testSound;
     testSound.Initialize("Lugia's Song (Original).wav");
-    testSound.Play(true);
+    testSound.Play(true, 0.2f);
 
     GraphicsManager::Get()->SetRasterizerState(RASTERIZER_STATE_CULL_NONE);
     

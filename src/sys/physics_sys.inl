@@ -46,6 +46,7 @@ void PhysicsSys<EM>::Update(EM& em, f32 dt) {
         phy->physics.orientation += phy->physics.angularVel * dt;
     }
 
+
 }
 
 template <typename EM>

@@ -416,7 +416,6 @@ void Level::Update(f32 dt) {
     inputSys.Update(em, camera, dt);
     aiSys.Update(em, dt);
 
-
     levitationSpellSys.Update(em, camera, gameTime, dt);
 
     physicsSys.Update(em, dt);
@@ -427,12 +426,16 @@ void Level::Update(f32 dt) {
     animationSys.Update(em, dt);
     gemSys.Update(em , this, dt);
     transformSys.Update(em);
+    orcSys.Update(em, dt);
 
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     camera->SetTarget(heroTransform->pos);
 
     particleSys.Update(em, camera->pos, gameTime, dt);
     fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
+
+    PhysicsCMP *heroPhysics = EntityManager::Get()->GetComponent<PhysicsCMP>(heroKey);
+    SoundMixer::Get()->Update(camera, heroPhysics->physics.pos, heroPhysics->physics.vel);
 }
 
 void Level::Render() {

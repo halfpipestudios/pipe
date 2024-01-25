@@ -172,13 +172,16 @@ void SoundChannel::Activate(Sound *sound_, bool loop) {
 }
 
 void SoundChannel::Desactivate() {
-    sound->channel = nullptr;
+    sound->Deactivate();
     sound = nullptr;
     buffer.AudioBytes = 0;
     buffer.pAudioData = nullptr;
     buffer.LoopCount = 0;
     ListRemove(this);
     ListInsertBack(&SoundMixer::Get()->idleChannelList, this);
+    
+    static float volumes[2] = {1.0f, 1.0f};
+    voice->SetChannelVolumes(2, volumes);
 }
 
 // NOTE: Sound system -----------------------------------------------------------------
@@ -240,6 +243,14 @@ void SoundMixer::Initialize() {
         AddSoundChannel();
     }
 
+    // NOTE: Setup 3d sound system
+
+    DWORD channelMask;
+    masterVoice->GetChannelMask(&channelMask);
+
+    X3DAudioInitialize(channelMask, X3DAUDIO_SPEED_OF_SOUND, X3DInstance);
+    memset(&listener, 0, sizeof(X3DAUDIO_LISTENER));
+
 }
 
 void SoundMixer::Terminate() {
@@ -275,12 +286,27 @@ void SoundMixer::Terminate() {
     SoundManager::Get()->Terminate();
 }
 
-void SoundMixer::Play(Sound *sound, bool loop) {
+void SoundMixer::Update(Camera *camera, Vec3 pos, Vec3 vel) {
+    Vec3 nFront = camera->front.Normalized();
+    Vec3 nUp = camera->up.Normalized();
+
+    listener.OrientFront = {nFront.x, nFront.y, nFront.z};
+    listener.OrientTop   = {nUp.x, nUp.y, nUp.z};
+    listener.Position    = {pos.x, pos.y, pos.z};
+    listener.Velocity    = {vel.x, vel.y, vel.z};
+}
+
+void SoundMixer::Play(Sound *sound, bool loop, f32 vol, bool is3d) {
     SoundChannel *channel = ListGetTop(&idleChannelList);
     channel->Activate(sound, loop);
 
     if(FAILED(channel->voice->SubmitSourceBuffer(&channel->buffer))) {
         ASSERT(!"Cannot submit sound data to channel");
+    }
+    sound->SetVolume(vol);
+    if(is3d) {
+        static float volumes[2] = {};
+        channel->voice->SetChannelVolumes(2, volumes);
     }
     channel->voice->Start(0);
 }
@@ -304,8 +330,12 @@ void Sound::Initialize(char *path) {
     channel = nullptr;
 }
 
-void Sound::Sound::Play(bool loop) {
-    SoundMixer::Get()->Play(this, loop);
+void Sound::Deactivate() {
+    channel = nullptr;
+}
+
+void Sound::Sound::Play(bool loop, f32 vol) {
+    SoundMixer::Get()->Play(this, loop, vol);
 }
 
 void Sound::Pause() {
@@ -314,4 +344,54 @@ void Sound::Pause() {
 
 void Sound::Stop() {
     SoundMixer::Get()->Stop(this);
+}
+
+void Sound::SetVolume(float vol) {
+    if(channel) channel->voice->SetVolume(vol);
+}
+
+// 3D Sound interface -------------------------------------------------------
+
+void Sound3D::Initialize(char *path) {
+    Sound::Initialize(path);
+    emitter.ChannelCount = 1;
+    emitter.CurveDistanceScaler = 1.0f;
+    emitter.DopplerScaler = 1.0f;
+}
+
+void Sound3D::Deactivate() {
+    ListRemove(this);
+    Sound::Deactivate();
+}
+
+void Sound3D::Update(Vec3 pos_, Vec3 vel_) {
+    // NOTE: Setup emmiter
+    
+    emitter.OrientFront = {0, 0, 1};
+    emitter.OrientTop   = {0, 1, 0};
+    emitter.Position    = {pos_.x, pos_.y, pos_.z};
+    emitter.Velocity    = {vel_.x, vel_.y, vel_.z};
+    
+    // NOTE: Calculate Sound Channel volumes 
+    
+    MemoryManager::Get()->BeginTemporalMemory();
+
+    X3DAUDIO_DSP_SETTINGS DSPSettings = {};
+    DSPSettings.SrcChannelCount = 1;
+    DSPSettings.DstChannelCount = 2;
+    DSPSettings.pMatrixCoefficients = (FLOAT32 *)MemoryManager::Get()->AllocTemporalMemory(sizeof(FLOAT32)*DSPSettings.DstChannelCount, 8);
+
+    X3DAudioCalculate(SoundMixer::Get()->X3DInstance, &SoundMixer::Get()->listener, &emitter,
+                      X3DAUDIO_CALCULATE_MATRIX|X3DAUDIO_CALCULATE_DOPPLER|X3DAUDIO_CALCULATE_LPF_DIRECT|X3DAUDIO_CALCULATE_REVERB,
+                      &DSPSettings);
+
+    channel->voice->SetChannelVolumes(DSPSettings.DstChannelCount, DSPSettings.pMatrixCoefficients);
+    channel->voice->SetFrequencyRatio(DSPSettings.DopplerFactor);
+
+    MemoryManager::Get()->EndTemporalMemory();
+
+}
+
+void Sound3D::Play(bool loop, f32 vol) {
+    SoundMixer::Get()->Play(this, loop, 1.0f, true);
 }

@@ -3,7 +3,6 @@
 
 template <typename EM>
 struct AnimationSys {
-
     void Update(EM& em, f32 dt);
 
 };

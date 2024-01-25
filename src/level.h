@@ -26,6 +26,7 @@
 #include "sys/particle_sys.inl"
 #include "sys/fire_spell_sys.inl"
 #include "sys/levitation_spell_sys.inl"
+#include "sys/orc_sys.inl"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -78,6 +79,7 @@ struct Level : Serializable {
     ParticleSys<EntityManager> particleSys;
     FireSpellSys<EntityManager> fireSpellSys;
     LevitationSpellSys<EntityManager> levitationSpellSys;
+    OrcSys<EntityManager> orcSys;
 
     Camera *camera;
     Map map;
