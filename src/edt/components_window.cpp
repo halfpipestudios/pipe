@@ -163,6 +163,18 @@ void ComponentsWindow::UpdateCollisionComponent(Editor *editor, SlotmapKey entit
         current_y += h + 10;
         _tgui_label(window, "c =", 0x222222, label_x, current_y, TGUI_ID);
         _tgui_dropdown_menu(window, x, current_y, options, optionsSize, (i32 *)&col->type, TGUI_ID); 
+
+        current_y += h;
+
+        // TODO: improve this
+        if(col->type == COLLIDER_CONVEXHULL_ && _tgui_button(window, "Recalculate", label_x, current_y, TGUI_ID)) {
+            TransformCMP *transform = EntityManager::Get()->GetComponent<TransformCMP>(entityKey);
+            if(transform != nullptr) { 
+                TransformCube(col->poly3D.convexHull.points, transform->GetWorldMatrix()); 
+                TransformEntity(&col->poly3D.entity, transform->scale, transform->pos);
+            }
+        }
+
         current_y += 10;
     }
     current_y += h;

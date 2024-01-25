@@ -220,6 +220,65 @@ static SlotmapKey CreateBox(char *name, Vec3 pos, Vec3 scale) {
     return box;
 }
 
+static SlotmapKey CreatePressurePlate(char *name, Vec3 pos, Vec3 scale) {
+
+    SlotmapKey plate = EntityManager::Get()->AddEntity();
+    Entity_ *platePtr = EntityManager::Get()->GetEntity(plate);
+    strcpy(platePtr->name, name);
+    
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(plate);
+    transformCmp->Initialize(pos, Vec3(), scale);
+
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(plate);
+    graphicsCmp->Initialize("cube.twm", "staticVert.hlsl", "staticFrag.hlsl");
+
+    // Collider
+    ConvexHull convexHull {};
+    convexHull.points = CreateCube();
+    convexHull.count  = ARRAY_LENGTH(gCube);
+    // this is becouse this is a static game object and we dont have to update its position
+    TransformCube(convexHull.points, transformCmp->GetWorldMatrix());
+
+    PressurePlateCMP *plateCmp = EntityManager::Get()->AddComponent<PressurePlateCMP>(plate);
+    plateCmp->Initialize(convexHull);
+
+    return plate;
+}
+
+static SlotmapKey CreateDoor(char *name, Vec3 pos, Vec3 scale, SlotmapKey *plates, i32 count) {
+
+    SlotmapKey door = EntityManager::Get()->AddEntity();
+    Entity_ *doorPtr = EntityManager::Get()->GetEntity(door);
+    strcpy(doorPtr->name, name);
+    
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(door);
+    transformCmp->Initialize(pos, Vec3(), scale);
+
+    GraphicsCMP *graphicsCmp = EntityManager::Get()->AddComponent<GraphicsCMP>(door);
+    graphicsCmp->Initialize("cube.twm", "staticVert.hlsl", "staticFrag.hlsl");
+
+    // Collider
+    ConvexHull convexHull {};
+    convexHull.points = CreateCube();
+    convexHull.count  = ARRAY_LENGTH(gCube);
+    MapImporter::Entity entity {};
+    entity.faces = (MapImporter::EntityFace *)MemoryManager::Get()->AllocStaticMemory(sizeof(MapImporter::EntityFace) * 6, 1);
+    memcpy(entity.faces, gCubeFaces, sizeof(MapImporter::EntityFace) * 6);
+    entity.facesCount = 6;
+
+    TransformCube(convexHull.points, transformCmp->GetWorldMatrix());
+    TransformEntity(&entity, scale, pos);
+
+    CollisionCMP *collisionCmp = EntityManager::Get()->AddComponent<CollisionCMP>(door);
+    collisionCmp->Initialize(convexHull, entity);
+
+    DoorCMP *doorCmp = EntityManager::Get()->AddComponent<DoorCMP>(door);
+    doorCmp->Initialize(plates, count);
+
+    return door;
+
+}
+
 static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Vec3 position) {
 
     SlotmapKey gem = EntityManager::Get()->AddEntity();
@@ -315,14 +374,29 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
 
+   /* 
+    
+    SlotmapKey plate0 = CreatePressurePlate("plate0", Vec3(0, 2, 0), Vec3(1, 0.25f, 1));
+    SlotmapKey plate1 = CreatePressurePlate("plate1", Vec3(2.0f, 2, 0), Vec3(1, 0.25f, 1));
 
-    //entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
-    /*
-    entities.Push(CreateBox("box1", Vec3(0, 3, 0), Vec3(1, 1, 1)));
-    entities.Push(CreateBox("box2", Vec3(0, 3, 0), Vec3(1, 1, 1)));
-    entities.Push(CreateBox("box3", Vec3(0, 3, 0), Vec3(1, 1, 1)));
-    entities.Push(CreateBox("box4", Vec3(0, 3, 0), Vec3(1, 1, 1)));
-    */
+    entities.Push(plate0);
+    entities.Push(plate1);
+    
+    MemoryManager::Get()->BeginTemporalMemory();
+
+    SlotmapKey *keys = (SlotmapKey *)MemoryManager::Get()->AllocTemporalMemory(sizeof(SlotmapKey) * 2, 8);
+    i32 count = 0;
+    keys[count++] = plate0;
+    keys[count++] = plate1;
+    entities.Push(CreateDoor("door", Vec3(0, 6, 0), Vec3(2, 3, 0.5f), keys, count));
+
+    MemoryManager::Get()->EndTemporalMemory();
+    
+
+    entities.Push(CreateBox("box0", Vec3(2, 3, 1), Vec3(1, 1, 1)));
+    entities.Push(CreateBox("box1", Vec3(-2, 3, 1), Vec3(1, 1, 1)));
+*/
+
     
 }
 
@@ -415,11 +489,9 @@ void Level::Update(f32 dt) {
     physicsSys.PreUpdate(em, dt);
     inputSys.Update(em, camera, dt);
     aiSys.Update(em, dt);
-
-
     levitationSpellSys.Update(em, camera, gameTime, dt);
-
     physicsSys.Update(em, dt);
+    doorSys.Update(em, dt);
     movingPlatformSys.Update(em, dt);
     triggerSys.Update(em, dt);
     collisionSys.Update(em, &map, dt);

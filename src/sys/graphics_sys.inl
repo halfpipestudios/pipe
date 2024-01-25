@@ -11,6 +11,9 @@ void GraphicsSys<EM>::Update(EM& em) {
  
     for(i32 i = 0; i < components.size; ++i) {
         GraphicsCMP* graphic = &components[i];
+
+        if(graphic->active == false) continue;
+
         SlotmapKey e = graphic->entityKey;
         
         // NOTE: the transform component says where to draw the component

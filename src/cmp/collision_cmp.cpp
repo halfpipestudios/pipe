@@ -3,6 +3,7 @@
 void CollisionCMP::Initialize(Cylinder cylinder_) {
     type = COLLIDER_CYLINDER_;
     cylinder = cylinder_;
+    active = true;
 }
 
 void CollisionCMP::Initialize(ConvexHull convexHull, MapImporter::Entity entity) {

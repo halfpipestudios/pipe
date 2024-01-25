@@ -21,6 +21,7 @@ struct CollisionCMP : CMP<CollisionCMP> {
     } poly3D;
 
     };
+    bool active { true };
 
     CollisionCMP() {}
     void Initialize(Cylinder cylinder);
@@ -29,6 +30,8 @@ struct CollisionCMP : CMP<CollisionCMP> {
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "collision");
         Write(s, "type", (i32)type);
+        // TODO: ...
+        // Write(s, "active", (i32)active);
         switch(type) {
             case COLLIDER_CYLINDER_: {
                 WriteBeginObject(s, "cylinder");
@@ -66,7 +69,8 @@ struct CollisionCMP : CMP<CollisionCMP> {
     void Deserialize(Tokenizer *t) override {
         ReadBeginObject(t, "collision");
         Read(t, "type", &(i32)type);
-
+        // TODO:
+        // Read(t, "active", (i32 *)&active);
         switch(type) {
             case COLLIDER_CYLINDER_: {
                 Cylinder cylinder_;

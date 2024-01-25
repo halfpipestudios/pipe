@@ -80,6 +80,7 @@ void CollisionSys<EM>::ProcessCylinderColliders(EM& em, CollisionCMP *collider, 
 
         // not collide with itself ...
         if(collider == otherCollider) continue;
+        if(otherCollider->active == false) continue;
 
 
         Vec3 lastVelXZ = Vec3(phy->physics.vel.x, 0.0f, phy->physics.vel.z);
@@ -225,6 +226,7 @@ void CollisionSys<EM>::ProcessConvexHullColliders(EM& em, CollisionCMP *collider
 
         // not collide with itself ...
         if(collider == otherCollider) continue;
+        if(otherCollider->active == false) continue;
         if(otherCollider->type == COLLIDER_CYLINDER_) continue;
  
         CollisionData collisionData = gjk.Intersect(&otherCollider->poly3D.convexHull, &collider->poly3D.convexHull);
@@ -288,6 +290,8 @@ void CollisionSys<EM>::Update(EM& em, Map *map, f32 dt) {
     for(i32 i = 0; i < colliders.size; ++i) {
 
         CollisionCMP *collider = &colliders[i];
+        if(collider->active == false) continue;
+
         SlotmapKey entityKey = collider->entityKey;
         Entity_ *entity = em.GetEntity(entityKey);
         PhysicsCMP *phy = em.GetComponent<PhysicsCMP>(entityKey);
