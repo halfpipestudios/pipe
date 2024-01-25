@@ -60,7 +60,7 @@ PlayerAnimationState_ *PlayerAnimationIdleState_::Update(EntityManager *em, Slot
         } else if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
 
             PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
-            if(playerCmp) playerCmp->jumpSound.Play(false);
+            if(playerCmp) playerCmp->jumpSound.Play(false, 1.0f);
             
             anim->transition.Start(this, &anim->jump, 0.2f);
         }
@@ -124,7 +124,7 @@ PlayerAnimationState_ *PlayerAnimationWalkState_::Update(EntityManager *em, Slot
         if(!entity->HaveFlag(ENTITY_GROUNDED) && physicsComp->physics.vel.y > (e*10)) {
         
             PlayerCMP *playerCmp = em->GetComponent<PlayerCMP>(entityKey);
-            if(playerCmp) playerCmp->jumpSound.Play(false);
+            if(playerCmp) playerCmp->jumpSound.Play(false, 1.0f);
             
             anim->transition.Start(this, &anim->jump, 0.2f);
         

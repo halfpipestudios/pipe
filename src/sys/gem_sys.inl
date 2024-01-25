@@ -18,7 +18,7 @@ void GemSys<EM>::GrabGems(Level *level, GemCMP *gem,
     }
 
     if(collisionData.hasCollision) {
-        gem->sound.Play(false);
+        gem->sound.Play(false, 0.5f);
         level->DeleteEntity(gem->entityKey); 
         printf("gem catched, value: %d\n", gem->value);
     }

@@ -1,11 +1,14 @@
 #ifndef _SOUND_H_
 #define _SOUND_H_
 
+#include "camera.h"
+#include "algebra.h"
 #include "asset_manager.h"
+
 #include <xaudio2.h>
+#include <x3daudio.h>
 
 // NOTE: Sound manager -----------------------------------------------------------------
-//
 
 struct Sound;
 
@@ -58,14 +61,31 @@ struct SoundChannel {
 
 struct Sound {
     
-    void Initialize(char *path);
+    virtual void Initialize(char *path);
+    virtual void Deactivate(); 
 
-    void Play(bool loop);
-    void Pause();
-    void Stop();
-
+    virtual void Play(bool loop, f32 vol);
+    virtual void Pause();
+    virtual void Stop();
+    void SetVolume(float vol);
+    
     Handle data;
     SoundChannel *channel;
+
+};
+
+struct Sound3D : Sound {
+    
+    virtual void Initialize(char *path) override;
+    virtual void Deactivate() override;
+
+    virtual void Play(bool loop, f32 vol) override;
+    void Update(Vec3 pos_, Vec3 vel_);
+    
+    X3DAUDIO_EMITTER emitter;
+
+    Sound3D *prev;
+    Sound3D *next;
 };
 
 // NOTE: Sound system -----------------------------------------------------------------
@@ -74,16 +94,21 @@ struct SoundMixer {
     
     void Initialize();
     void Terminate();
+    
+    void Update(Camera *camera, Vec3 pos, Vec3 vel);
 
-    void Play(Sound *sound, bool loop);
+    void Play(Sound *sound, bool loop, f32 vol, bool is3d = false);
     void Stop(Sound *sound);
 
     IXAudio2* xaudio2;
     WAVEFORMATEX format;
     IXAudio2MasteringVoice* masterVoice;
+    X3DAUDIO_HANDLE X3DInstance;
 
     SoundChannel idleChannelList;
     SoundChannel activeChannelList;
+
+    X3DAUDIO_LISTENER listener;
     
     inline static SoundMixer *Get() { return &soundMixer; }
 
