@@ -220,6 +220,9 @@ void D3D11Graphics::Initialize() {
     cpuGizmoBuffer = {};
     cpuIndexBuffer = {};
 
+    cpuLightsBuffer = {};
+    cpuMaterialBuffer = {};
+
     CBParticle particlesData;
 
     gpuMatrices     = CreateConstBuffer(  (void *)&cpuMatrices,     sizeof(cpuMatrices),     0, nullptr);
@@ -228,6 +231,10 @@ void D3D11Graphics::Initialize() {
     gpuGizmoBuffer  = CreateConstBuffer(  (void *)&cpuGizmoBuffer,  sizeof(cpuGizmoBuffer),  3, nullptr);
     gpuIndexBuffer  = CreateConstBuffer(  (void *)&cpuIndexBuffer,  sizeof(cpuIndexBuffer),  4, nullptr);
     gpuTGuiBuffer   = CreateConstBuffer(  (void *)&cpuTGuiBuffer,   sizeof(cpuTGuiBuffer),   5, nullptr);
+    gpuLightsBuffer = CreateConstBuffer((void *)&cpuLightsBuffer, sizeof(cpuLightsBuffer), 6, nullptr);
+    gpuMaterialBuffer = CreateConstBuffer((void *)&cpuMaterialBuffer, sizeof(cpuMaterialBuffer), 7, nullptr);
+
+
 
     lineRenderer.Initialize(200, device);
     batchRenderer.Initialize(200, device);
@@ -259,6 +266,8 @@ void  D3D11Graphics::Terminate() {
     DestroyConstBuffer(gpuGizmoBuffer);
     DestroyConstBuffer(gpuIndexBuffer);
     DestroyConstBuffer(gpuParticleBuffer);
+    DestroyConstBuffer(gpuMaterialBuffer);
+    DestroyConstBuffer(gpuLightsBuffer);
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
@@ -770,6 +779,23 @@ void D3D11Graphics::SetViewMatrix(Mat4 view) {
 void D3D11Graphics::SetWorldMatrix(Mat4 world) {
     cpuMatrices.world = world;
     UpdateConstBuffer(gpuMatrices, (void *)&cpuMatrices);
+}
+
+void D3D11Graphics::SetMaterial(const Material& material) {
+    cpuMaterialBuffer.ambient = material.ambient;
+    cpuMaterialBuffer.diffuse = material.diffuse;
+    cpuMaterialBuffer.specular = material.specular;
+    cpuMaterialBuffer.shininess = material.shininess;
+    UpdateConstBuffer(gpuMaterialBuffer, (void *)&cpuMaterialBuffer);
+}
+
+void D3D11Graphics::UpdateLights(Vec3 cameraP, Light *lights, i32 count) {
+    ASSERT(count <= MAX_LIGHTS_COUNT);
+    
+    memcpy(cpuLightsBuffer.lights, lights, sizeof(Light) * count);
+    cpuLightsBuffer.count = count;
+    cpuLightsBuffer.viewPos = cameraP;
+    UpdateConstBuffer(gpuLightsBuffer, (void *)&cpuLightsBuffer);
 }
 
 void D3D11Graphics::SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) {

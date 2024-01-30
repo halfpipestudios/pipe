@@ -44,6 +44,14 @@ void GraphicsSys<EM>::Update(EM& em) {
         
         GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
 
+        Material defaultMat = {};
+        defaultMat.ambient = Vec3(0.1f, 0.1f, 0.1f);
+        defaultMat.diffuse = Vec3(0.5f, 0.5f, 0.5f);
+        defaultMat.specular = Vec3(0.6f, 0.6f, 0.6f);
+        defaultMat.shininess = 2.0f;
+
+        GraphicsManager::Get()->SetMaterial(defaultMat);
+
 
         VShader vShader = *VShaderManager::Get()->Dereference(graphic->vShader);
         FShader fShader = *FShaderManager::Get()->Dereference(graphic->fShader);

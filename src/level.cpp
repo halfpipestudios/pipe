@@ -308,6 +308,44 @@ static SlotmapKey CreateGem(SlotmapKey whoTriggerThis, Vec3 position) {
     return gem;
 }
 
+static SlotmapKey CreatePointLight(char *name, Vec3 pos) {
+
+    SlotmapKey light = EntityManager::Get()->AddEntity();
+
+    Entity_ *lightPtr = EntityManager::Get()->GetEntity(light);
+    strcpy(lightPtr->name, name);
+    
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(light);
+    transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
+
+    LightCMP *lightCmp = EntityManager::Get()->AddComponent<LightCMP>(light);
+    lightCmp->InitializePointLight(pos,
+                                   Vec3(0.2f, 0.2f, 0.2f),
+                                   Vec3(0.8f, 0.8f, 0.8f),
+                                   Vec3(1.0f, 1.0f, 1.0f),
+                                   1.0f, 0.09f, 0.032f);
+
+    return light;
+}
+
+static SlotmapKey CreateDirLight(char *name, Vec3 pos) {
+
+    SlotmapKey light = EntityManager::Get()->AddEntity();
+
+    Entity_ *lightPtr = EntityManager::Get()->GetEntity(light);
+    strcpy(lightPtr->name, name);
+    
+    TransformCMP *transformCmp = EntityManager::Get()->AddComponent<TransformCMP>(light);
+    transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
+
+    LightCMP *lightCmp = EntityManager::Get()->AddComponent<LightCMP>(light);
+    lightCmp->InitializeDirLight(Vec3(1, -1, 1),
+                                 Vec3(0.1f, 0.1f, 0.1f),
+                                 Vec3(0.3f, 0.3f, 0.3f),
+                                 Vec3(0.3f, 0.3f, 0.3f));
+    return light;
+}
+
 
 
 
@@ -374,30 +412,13 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
 
-   /* 
+    /*
+    entities.Push(CreatePointLight("point_light0", Vec3(0, 6, 0))); 
+    entities.Push(CreatePointLight("point_light1", Vec3(0, 6, 9))); 
+    entities.Push(CreatePointLight("point_light2", Vec3(0, 6, 18))); 
     
-    SlotmapKey plate0 = CreatePressurePlate("plate0", Vec3(0, 2, 0), Vec3(1, 0.25f, 1));
-    SlotmapKey plate1 = CreatePressurePlate("plate1", Vec3(2.0f, 2, 0), Vec3(1, 0.25f, 1));
-
-    entities.Push(plate0);
-    entities.Push(plate1);
-    
-    MemoryManager::Get()->BeginTemporalMemory();
-
-    SlotmapKey *keys = (SlotmapKey *)MemoryManager::Get()->AllocTemporalMemory(sizeof(SlotmapKey) * 2, 8);
-    i32 count = 0;
-    keys[count++] = plate0;
-    keys[count++] = plate1;
-    entities.Push(CreateDoor("door", Vec3(0, 6, 0), Vec3(2, 3, 0.5f), keys, count));
-
-    MemoryManager::Get()->EndTemporalMemory();
-    
-
-    entities.Push(CreateBox("box0", Vec3(2, 3, 1), Vec3(1, 1, 1)));
-    entities.Push(CreateBox("box1", Vec3(-2, 3, 1), Vec3(1, 1, 1)));
-*/
-
-    
+    entities.Push(CreateDirLight("dir_light", Vec3(0, 6, 3)));     
+    */
 }
 
 #if 0
@@ -428,6 +449,27 @@ void Level::Initialize(char *mapFilePath, Camera *camera) {
 
     // NOTE Load entities ------------------------------------------------------------------------------------    
     entities.Push(CreateHero(camera));
+
+    
+    SlotmapKey plate0 = CreatePressurePlate("plate0", Vec3(0, 2, 0), Vec3(1, 0.25f, 1));
+    SlotmapKey plate1 = CreatePressurePlate("plate1", Vec3(2.0f, 2, 0), Vec3(1, 0.25f, 1));
+
+    entities.Push(plate0);
+    entities.Push(plate1);
+    
+    MemoryManager::Get()->BeginTemporalMemory();
+
+    SlotmapKey *keys = (SlotmapKey *)MemoryManager::Get()->AllocTemporalMemory(sizeof(SlotmapKey) * 2, 8);
+    i32 count = 0;
+    keys[count++] = plate0;
+    keys[count++] = plate1;
+    entities.Push(CreateDoor("door", Vec3(0, 6, 0), Vec3(2, 3, 0.5f), keys, count));
+
+    MemoryManager::Get()->EndTemporalMemory();
+    
+
+    entities.Push(CreateBox("box0", Vec3(2, 3, 1), Vec3(1, 1, 1)));
+    entities.Push(CreateBox("box1", Vec3(-2, 3, 1), Vec3(1, 1, 1)));
 
     entities.Push(CreateOrc("orc_1", Vec3(0, 4, 20)));
     entities.Push(CreateOrc("orc_2", Vec3(0, 4, 15)));
@@ -506,6 +548,8 @@ void Level::Update(f32 dt) {
 
     particleSys.Update(em, camera->pos, gameTime, dt);
     fireSpellSys.Update(em, this, camera->pos, gameTime, dt);
+
+    lightSys.Update(em, camera);
 
     PhysicsCMP *heroPhysics = EntityManager::Get()->GetComponent<PhysicsCMP>(heroKey);
     SoundMixer::Get()->Update(camera, heroPhysics->physics.pos, heroPhysics->physics.vel);

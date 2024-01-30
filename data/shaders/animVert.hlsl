@@ -24,6 +24,7 @@ struct PS_Input {
     float3 nor       : NORMAL;
     float2 uv        : TEXCOORD0;
     unsigned int tex : TEXCOORD1;
+    float3 fragPos   : TEXCOORD2;
 };
 
 PS_Input vs_main(VS_Input input) {
@@ -46,6 +47,7 @@ PS_Input vs_main(VS_Input input) {
     }
     
     float4 wPos =  mul(totalPosition, world);
+    float3 fragPos = float3(wPos.xyz);
     wPos = mul(wPos, view);
     wPos = mul(wPos, proj);
 
@@ -56,6 +58,7 @@ PS_Input vs_main(VS_Input input) {
     o.nor = wNor;
     o.uv = input.uv;
     o.tex = 0; 
+    o.fragPos = fragPos;
     
     return o;
 }

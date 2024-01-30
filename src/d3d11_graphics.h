@@ -182,6 +182,10 @@ struct D3D11Graphics : public Graphics {
     void SetViewMatrix(Mat4 view)   override; 
     void SetWorldMatrix(Mat4 world) override;
 
+    void SetMaterial(const Material& material) override;
+
+    void UpdateLights(Vec3 cameraP, Light *lights, i32 count) override;
+
     void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) override;
 
     VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) override;

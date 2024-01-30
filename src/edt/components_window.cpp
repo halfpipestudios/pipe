@@ -13,6 +13,7 @@
 #include "cmp/ai_cmp.h"
 #include "cmp/trigger_cmp.h"
 #include "cmp/gem_cmp.h"
+#include "cmp/light_cmp.h"
 
 #include "game.h"
 
@@ -52,6 +53,8 @@ void ComponentsWindow::Update(Editor *editor, f32 dt) {
                 UpdateTriggerComponent(editor, *editor->selectedEntity);
             } else if (id == GemCMP::GetID()){
                 UpdateGemComponent(editor, *editor->selectedEntity);
+            } else if (id == LightCMP::GetID()) {
+                UpdateLightComponent(editor, *editor->selectedEntity);
             } else {
                 char *compName = "Unknown Component";
                 _tgui_label(window, compName, 0x222222, current_x, current_y, compName);
@@ -260,6 +263,72 @@ void ComponentsWindow::UpdateGemComponent(Editor *editor, SlotmapKey entityKey) 
     u32 w = 72;
     u32 h = 28;
     if(_tgui_separator(window, "Gem Component", current_y, false, TGUI_ID)) {
+    }
+    current_y += h;
+}
+
+
+
+void ComponentsWindow::UpdateLightComponent(Editor *editor, SlotmapKey entityKey) {
+    LightCMP *lightComp = EntityManager::Get()->GetComponent<LightCMP>(entityKey);
+    ASSERT(lightComp);
+    u32 w = 72;
+    u32 h = 28;
+
+    u32 label_x = current_x + 10;
+    u32 x = label_x + 40;
+
+    if(_tgui_separator(window, "Light Component", current_y, true, TGUI_ID)) {
+
+        current_y += h + 10;
+
+        Vec3 *vec = &lightComp->dir;
+        _tgui_label(window, "dir =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &vec->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        vec = &lightComp->ambient;
+        _tgui_label(window, "amb =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &vec->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        vec = &lightComp->diffuse;
+        _tgui_label(window, "dif =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &vec->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        vec = &lightComp->specular;
+        _tgui_label(window, "spe =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, &vec->x, 0xffff00, x, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->y, 0x00ffff, x+1*w+10, current_y, w, TGUI_ID);
+        _tgui_float_input(window, &vec->z, 0xff00ff, x+2*w+20, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        f32 *scalar = &lightComp->constant; 
+        _tgui_label(window, "con =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, scalar, 0x00ff00, x + 40, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        scalar = &lightComp->linear; 
+        _tgui_label(window, "lin =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, scalar, 0x00ff00, x + 40, current_y, w, TGUI_ID);
+
+        current_y += h;
+        
+        scalar = &lightComp->quadratic; 
+        _tgui_label(window, "qua =", 0x222222, label_x, current_y, TGUI_ID);
+        _tgui_float_input(window, scalar, 0x00ff00, x + 40, current_y, w, TGUI_ID);
     }
     current_y += h;
 }

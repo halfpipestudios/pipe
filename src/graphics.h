@@ -34,6 +34,61 @@ enum SamplerState {
     SAMPLER_STATE_LINEAR
 };
 
+enum LightType {
+    LIGHT_TYPE_UNDEFINE,
+    LIGHT_TYPE_DIRECTIONAL,
+    LIGHT_TYPE_POINT,
+    LIGHT_TYPE_SPOT
+};
+
+struct Light {
+
+    Vec3 pos;
+    LightType type;
+
+    Vec3 dir;
+    f32 cutOff;
+
+    Vec3 ambient;
+    f32 constant;
+
+    Vec3 diffuse;
+    f32 linear;
+
+    Vec3 specular;
+    f32 quadratic;
+
+    f32 outerCutOff;
+    f32 pad0;
+    f32 pad1;
+    f32 pad2;
+
+};
+
+struct Material {
+    Vec3 ambient;
+    Vec3 diffuse;
+    Vec3 specular;
+    f32 shininess;
+};
+
+#define MAX_LIGHTS_COUNT 64
+
+struct CBLights {
+    i32 count;
+    Vec3 viewPos;
+    Light lights[MAX_LIGHTS_COUNT];
+};
+
+struct CBMaterial {
+    Vec3 ambient;
+    f32 pad0;
+    Vec3 diffuse;
+    f32 pad1;
+    Vec3 specular;
+    f32 shininess;
+};
+
 struct CBMatrix {
     Mat4 proj;
     Mat4 view;
@@ -177,6 +232,12 @@ struct Graphics {
     virtual void SetViewMatrix(Mat4 view) = 0;
     virtual void SetWorldMatrix(Mat4 world) = 0;
 
+    // TODO: see if this affect performance
+    virtual void SetMaterial(const Material& material) = 0;
+
+    virtual void UpdateLights(Vec3 cameraP, Light *lights, i32 count) = 0;
+
+
     virtual void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) = 0;
 
     virtual VertexBuffer CreateVertexBuffer(void *vertices, u32 count, size_t stride) = 0;
@@ -215,6 +276,12 @@ struct Graphics {
 
     virtual void DrawLine(Vec3 a, Vec3 b, u32 color) = 0;
     virtual void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) = 0;
+
+    ConstBuffer gpuLightsBuffer;
+    CBLights    cpuLightsBuffer;
+
+    ConstBuffer gpuMaterialBuffer;
+    CBMaterial  cpuMaterialBuffer;
 
     ConstBuffer gpuAnimMatrices;
     CBAnimation cpuAnimMatrices;

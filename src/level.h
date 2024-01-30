@@ -28,6 +28,7 @@
 #include "sys/levitation_spell_sys.inl"
 #include "sys/door_sys.inl"
 #include "sys/orc_sys.inl"
+#include "sys/light_sys.inl"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -82,6 +83,7 @@ struct Level : Serializable {
     LevitationSpellSys<EntityManager> levitationSpellSys;
     DoorSys<EntityManager> doorSys;
     OrcSys<EntityManager> orcSys;
+    LightSys<EntityManager> lightSys;
 
     Camera *camera;
     Map map;
