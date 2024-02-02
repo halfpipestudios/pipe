@@ -29,6 +29,7 @@
 #include "sys/door_sys.inl"
 #include "sys/orc_sys.inl"
 #include "sys/light_sys.inl"
+#include "sys/shadow_map_builder_sys.inl"
 
 struct Map {
     MapImporter::ConvexHullArray covexHulls;
@@ -41,7 +42,7 @@ struct Map {
 
     void Initialize(char *filename);
     void Terminate();
-    void Render();
+    void Render(bool buildShadows = false);
 };
 
 #define MAX_LEVEL_MAP_NAME_SIZE 32
@@ -84,6 +85,7 @@ struct Level : Serializable {
     DoorSys<EntityManager> doorSys;
     OrcSys<EntityManager> orcSys;
     LightSys<EntityManager> lightSys;
+    ShadowMapBuilderSys<EntityManager> shadowMapBuilderSys;
 
     Camera *camera;
     Map map;

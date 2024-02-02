@@ -45,10 +45,10 @@ void GraphicsSys<EM>::Update(EM& em) {
         GraphicsManager::Get()->SetWorldMatrix(renderTransform.GetWorldMatrix());
 
         Material defaultMat = {};
-        defaultMat.ambient = Vec3(0.1f, 0.1f, 0.1f);
+        defaultMat.ambient = Vec3(0.4f, 0.4f, 0.4f);
         defaultMat.diffuse = Vec3(0.5f, 0.5f, 0.5f);
         defaultMat.specular = Vec3(0.6f, 0.6f, 0.6f);
-        defaultMat.shininess = 2.0f;
+        defaultMat.shininess = 1.0f;
 
         GraphicsManager::Get()->SetMaterial(defaultMat);
 

@@ -36,12 +36,24 @@ void Map::Terminate() {
 }
 
 
-void Map::Render() {
+void Map::Render(bool buildShadows) {
     GraphicsManager::Get()->SetWorldMatrix(Mat4::Scale(scale, scale, scale));
     GraphicsManager::Get()->BindTextureBuffer(texture);
     
     VShader vShader = *VShaderManager::Get()->Dereference(VShaderManager::Get()->GetAsset("mapVert.hlsl"));
     FShader fShader = *FShaderManager::Get()->Dereference(FShaderManager::Get()->GetAsset("mapFrag.hlsl"));
+    if(buildShadows) {
+        vShader = *VShaderManager::Get()->Dereference(VShaderManager::Get()->GetAsset("shadowMapVert.hlsl"));
+        fShader = *FShaderManager::Get()->Dereference(FShaderManager::Get()->GetAsset("shadowMapFrag.hlsl")); 
+    }
+
+    Material mapMat = {};
+    mapMat.ambient = Vec3(0.4f, 0.4f, 0.4f);
+    mapMat.diffuse = Vec3(0.5f, 0.5f, 0.5f);
+    mapMat.specular = Vec3(0.6f, 0.6f, 0.6f);
+    mapMat.shininess = 2.0f;
+
+    GraphicsManager::Get()->SetMaterial(mapMat);
 
     GraphicsManager::Get()->DrawVertexBuffer(vertexBuffer, vShader, fShader);
 }
@@ -319,6 +331,7 @@ static SlotmapKey CreatePointLight(char *name, Vec3 pos) {
     transformCmp->Initialize(pos, Vec3(), Vec3(1.0f, 1.0f, 1.0f));
 
     LightCMP *lightCmp = EntityManager::Get()->AddComponent<LightCMP>(light);
+
     lightCmp->InitializePointLight(pos,
                                    Vec3(0.2f, 0.2f, 0.2f),
                                    Vec3(0.8f, 0.8f, 0.8f),
@@ -343,6 +356,7 @@ static SlotmapKey CreateDirLight(char *name, Vec3 pos) {
                                  Vec3(0.1f, 0.1f, 0.1f),
                                  Vec3(0.3f, 0.3f, 0.3f),
                                  Vec3(0.3f, 0.3f, 0.3f));
+
     return light;
 }
 
@@ -412,8 +426,9 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     TransformCMP *heroTransform = EntityManager::Get()->GetComponent<TransformCMP>(heroKey);
     gBlackBoard.target = &heroTransform->pos;
 
+
+    //entities.Push(CreatePointLight("point_light4", Vec3(0, 6, 18))); 
     /*
-    entities.Push(CreatePointLight("point_light0", Vec3(0, 6, 0))); 
     entities.Push(CreatePointLight("point_light1", Vec3(0, 6, 9))); 
     entities.Push(CreatePointLight("point_light2", Vec3(0, 6, 18))); 
     
@@ -553,13 +568,18 @@ void Level::Update(f32 dt) {
 
     PhysicsCMP *heroPhysics = EntityManager::Get()->GetComponent<PhysicsCMP>(heroKey);
     SoundMixer::Get()->Update(camera, heroPhysics->physics.pos, heroPhysics->physics.vel);
+
+#if 1
+    if(PlatformManager::Get()->GetInput()->KeyJustPress(KEY_9)) {
+        shadowMapBuilderSys.GenerateSahdowMaps(em, this);
+    }
+#endif
 }
 
 void Level::Render() {
-    map.Render();
-
     // TODO: Remove this pointer to EntityManager
     EntityManager em = *EntityManager::Get();
+    map.Render();
     graphicsSys.Update(em);
     particleSys.Render(em);
     fireSpellSys.Render(em);

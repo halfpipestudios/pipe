@@ -1,6 +1,10 @@
 #ifndef _LIGHT_CMP_H_
 #define _LIGHT_CMP_H_
 
+#include "mgr/shadowmap_manager.h"
+
+#define MAX_SHADOWMAP_NAME 32
+
 struct LightCMP : CMP<LightCMP> {
     
     LightType type;
@@ -18,6 +22,11 @@ struct LightCMP : CMP<LightCMP> {
     f32 cutOff;
     f32 outerCutOff;
 
+    bool haveSahdowMap { false };
+    Handle shadowMap {};
+    char shadowMapName[MAX_SHADOWMAP_NAME];
+
+
     void InitializeDirLight(Vec3 dir_, Vec3 ambient_, Vec3 diffuse_, Vec3 specular_) {
         type = LIGHT_TYPE_DIRECTIONAL;
         dir = dir_;
@@ -25,6 +34,24 @@ struct LightCMP : CMP<LightCMP> {
         diffuse = diffuse_;
         specular = specular_;
     }
+
+    void InitializePointLight(Vec3 pos_,
+                              Vec3 ambient_, Vec3 diffuse_, Vec3 specular_,
+                              f32 constant_, f32 linear_, f32 quadratic_,
+                              char *shadowMapName_) {
+        type = LIGHT_TYPE_POINT;
+        pos = pos_;
+        ambient = ambient_;
+        diffuse = diffuse_;
+        specular = specular_;
+        constant = constant_;
+        linear = linear_;
+        quadratic = quadratic_;
+        strcpy(shadowMapName, shadowMapName_);
+        shadowMap = ShadowMapManager::Get()->GetAsset(shadowMapName_);
+        haveSahdowMap = true;
+    }
+
 
     void InitializePointLight(Vec3 pos_,
                               Vec3 ambient_, Vec3 diffuse_, Vec3 specular_,
@@ -37,6 +64,13 @@ struct LightCMP : CMP<LightCMP> {
         constant = constant_;
         linear = linear_;
         quadratic = quadratic_;
+        haveSahdowMap = false;
+    }
+
+    void AddShadowMapToPointLight(char *shadowMapName_) {
+        strcpy(shadowMapName, shadowMapName_);
+        shadowMap = ShadowMapManager::Get()->GetAsset(shadowMapName_);
+        haveSahdowMap = true;
     }
 
     void InitializeSpotLight(Vec3 pos_, Vec3 dir_, f32 cutOff_, f32 outerCutOff_,
@@ -64,10 +98,15 @@ struct LightCMP : CMP<LightCMP> {
         Write(s, "quadratic", quadratic);
         Write(s, "cutOff", cutOff);
         Write(s, "outerCutOff", outerCutOff);
+        Write(s, "shadowMap", shadowMapName);
         WriteEndObject(s);
     }
 
     void Deserialize(Tokenizer *t) override {
+
+
+        char shadowMapName_[MAX_SHADOWMAP_NAME];
+
         ReadBeginObject(t, "light");
         Read(t, "type", &(i32)type);
         Read(t, "pos", &pos);
@@ -80,7 +119,12 @@ struct LightCMP : CMP<LightCMP> {
         Read(t, "quadratic", &quadratic);
         Read(t, "cutOff", &cutOff);
         Read(t, "outerCutOff", &outerCutOff);
+        Read(t, "shadowMap", shadowMapName_, MAX_SHADOWMAP_NAME);
         ReadEndObject(t);
+
+        if(type == LIGHT_TYPE_POINT) {
+            AddShadowMapToPointLight(shadowMapName_);
+        }
     }
 
 };

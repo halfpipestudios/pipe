@@ -577,6 +577,8 @@ Mat4 Mat4::Ortho(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
     if (l == r || t == b || n == f) {
         ASSERT(!"INVALID_CODE_PATH");
     }
+
+    // TODO: check this function ...
     
     return Mat4(
        2.0f / (r - l), 0, 0, -((r + l) / (r - l)),

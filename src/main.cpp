@@ -8,6 +8,7 @@
 #include "mgr/model_manager.h"
 #include "mgr/animation_manager.h"
 #include "mgr/shader_manager.h"
+#include "mgr/shadowmap_manager.h"
 
 #include "sound.h"
 
@@ -27,6 +28,8 @@ int main() {
     FShaderManager::Get()->Initialize(32);
     GShaderManager::Get()->Initialize(32);
     GSOShaderManager::Get()->Initialize(32);
+
+    ShadowMapManager::Get()->Initialize(MAX_LIGHTS_COUNT);
     
     SoundMixer::Get()->Initialize();
     Sound testSound;
@@ -63,6 +66,7 @@ int main() {
         i32 w = PlatformManager::Get()->GetWindow()->GetWidth(); 
         i32 h = PlatformManager::Get()->GetWindow()->GetHeight(); 
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)w/(f32)h, 0.01f, 1000.0f));
+        //GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(90, (f32)w/(f32)h, 1.0f, 25.0f));
         GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
         GraphicsManager::Get()->SetViewport(0, 0, w, h);
         GraphicsManager::Get()->BindFrameBuffer(nullptr);
@@ -88,6 +92,7 @@ int main() {
 
     SoundMixer::Get()->Terminate();
 
+    ShadowMapManager::Get()->Terminate();
     VShaderManager::Get()->Terminate();
     FShaderManager::Get()->Terminate();
     GShaderManager::Get()->Terminate();

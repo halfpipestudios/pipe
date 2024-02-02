@@ -210,6 +210,8 @@ void D3D11Graphics::Initialize() {
     deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
     deviceContext->RSSetState(fillRasterizerCullBack);
     deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
+    //deviceContext->PSSetSamplers(1, 1, &samplerStatePoint);
+    deviceContext->PSSetSamplers(1, 1, &samplerStateLinear);
     deviceContext->GSSetSamplers(0, 1, &samplerStateLinear);
 
     cpuMatrices.proj = Mat4();
@@ -238,6 +240,8 @@ void D3D11Graphics::Initialize() {
 
     lineRenderer.Initialize(200, device);
     batchRenderer.Initialize(200, device);
+    // TODO: use less resolution
+    shadowMappingBuilder.Initialize(device, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
 }
 
 void  D3D11Graphics::Terminate() {
@@ -271,6 +275,7 @@ void  D3D11Graphics::Terminate() {
 
     lineRenderer.Terminate();
     batchRenderer.Terminate();
+    shadowMappingBuilder.Terminate();
 }
 
 void D3D11Graphics::ResizeBuffers() {
@@ -789,12 +794,13 @@ void D3D11Graphics::SetMaterial(const Material& material) {
     UpdateConstBuffer(gpuMaterialBuffer, (void *)&cpuMaterialBuffer);
 }
 
-void D3D11Graphics::UpdateLights(Vec3 cameraP, Light *lights, i32 count) {
+void D3D11Graphics::UpdateLights(Vec3 cameraP, f32 farPlane, Light *lights, i32 count) {
     ASSERT(count <= MAX_LIGHTS_COUNT);
     
     memcpy(cpuLightsBuffer.lights, lights, sizeof(Light) * count);
     cpuLightsBuffer.count = count;
     cpuLightsBuffer.viewPos = cameraP;
+    cpuLightsBuffer.farPlane = farPlane;
     UpdateConstBuffer(gpuLightsBuffer, (void *)&cpuLightsBuffer);
 }
 
@@ -998,6 +1004,11 @@ void D3D11Graphics::BindTextureBuffer(TextureBuffer textureBufferHandle) {
     deviceContext->PSSetShaderResources(0, 1, &textureArray->srv);
 }
 
+void D3D11Graphics::BindTextureBufferToRegister(TextureBuffer textureBufferHandle, i32 reg) {
+    D3D11TextureArray *textureArray = (D3D11TextureArray *)textureBufferHandle;
+    deviceContext->PSSetShaderResources(reg, 1, &textureArray->srv);
+}
+
 void D3D11Graphics::FrameBufferMap(FrameBuffer frameBufferHandle, u32 *w, u32 *h, u32 *sizeInBytes, u8 **buffer) {
     D3D11_MAPPED_SUBRESOURCE bufferData;
     ZeroMemory(&bufferData, sizeof(bufferData));
@@ -1086,7 +1097,8 @@ FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height
         ASSERT(!"INVALID_CODE_PATH");
     }
     
-    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+    descDSV.Flags = 0;
     descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     descDSV.Texture2D.MipSlice = 0;
@@ -1095,7 +1107,7 @@ FrameBuffer D3D11Graphics::CreateFrameBuffer(u32 x, u32 y, u32 width, u32 height
         printf("Error creating FrameBuffer dsv\n");
         ASSERT(!"INVALID_CODE_PATH");
     }
-    
+
     if (depthStencilTexture) {
         depthStencilTexture->Release();
     }
@@ -1271,7 +1283,6 @@ TextureBuffer D3D11Graphics::FrameBufferGetTexture(FrameBuffer frameBufferHandle
     return (TextureBuffer *)&frameBuffer->textureBuffer; 
 }
 
-
 void D3D11Graphics::FlushFrameBuffer(FrameBuffer frameBufferHandle) {
     lineRenderer.Render(deviceContext);
 }
@@ -1337,6 +1348,91 @@ void D3D11Graphics::Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *i
     batchRenderer.Render(deviceContext);
 }
 
+void D3D11Graphics::BindDepthBufferAsRenderTarget() {
+    shadowMappingBuilder.BindDepthBufferAsRenderTarget(deviceContext);
+}
+
+
+void D3D11Graphics::ReadDepthBuffer(u8 **buffer, size_t &size) {
+    shadowMappingBuilder.ReadDepthBuffer(deviceContext, buffer, size);
+}
+
+ShadowMap D3D11Graphics::CreateShadowMap(char *path) {
+    D3D11ShadowMap shadowMap;
+    D3D11ShadowMap *shadowMapHandle = shadowMapStoraget.Alloc();
+    *shadowMapHandle = shadowMap;
+
+    D3D11_TEXTURE2D_DESC texDesc;
+    texDesc.Width = SHADOW_MAP_RESOLUTION;
+    texDesc.Height = SHADOW_MAP_RESOLUTION;
+    texDesc.MipLevels = 1;
+    texDesc.ArraySize = 6;
+    //texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    texDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.SampleDesc.Quality = 0;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+    // fill the cube map
+    MemoryManager::Get()->BeginTemporalMemory();
+    File file = PlatformManager::Get()->ReadFileToTemporalMemory(path);
+    size_t textureByteSize = file.size / 6;
+    u8 *texturePtr = (u8 *)file.data;
+
+    D3D11_SUBRESOURCE_DATA pData[6];
+    for(i32 i = 0; i < 6; i++) {
+        pData[i].pSysMem = (void *)texturePtr;
+        pData[i].SysMemPitch = SHADOW_MAP_RESOLUTION * sizeof(f32);
+        pData[i].SysMemSlicePitch = 0;
+        texturePtr += textureByteSize;
+
+    }
+    HRESULT result = device->CreateTexture2D(&texDesc, &pData[0], &shadowMapHandle->depthMap);
+    if(FAILED(result)) {
+        printf("Error creating depth texture for building Shadow maps\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+    MemoryManager::Get()->EndTemporalMemory();
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    //srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    result = device->CreateShaderResourceView(shadowMapHandle->depthMap, &srvDesc, &shadowMapHandle->depthMapSRV);
+    if(FAILED(result)) {
+        printf("Error creating shader resource view for building Shadow maps\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
+    return (ShadowMap)shadowMapHandle;
+}
+
+void D3D11Graphics::BindShadowMap(ShadowMap shadowMapHandle) {
+    D3D11ShadowMap *shadowMap = (D3D11ShadowMap *)shadowMapHandle;
+    deviceContext->PSSetShaderResources(1, 1, &shadowMap->depthMapSRV);
+}
+
+void D3D11Graphics::BindShadowMaps(ShadowMap *shadowMapHandles, i32 count) {
+    ID3D11ShaderResourceView *SRVs[1024];
+    for(i32 i = 0; i < count; i++) {
+        D3D11ShadowMap *shadowMap = (D3D11ShadowMap *)shadowMapHandles[i];
+        SRVs[i] = shadowMap->depthMapSRV;
+    }
+    deviceContext->PSSetShaderResources(1, count, SRVs);
+
+}
+
+void D3D11Graphics::DestroyShadowMap(ShadowMap shadowMapHandle) {
+    D3D11ShadowMap *shadowMap = (D3D11ShadowMap *)shadowMapHandle;
+    if(shadowMap->depthMap) shadowMap->depthMap->Release();
+    if(shadowMap->depthMapSRV) shadowMap->depthMapSRV->Release();
+    shadowMapStoraget.Free(shadowMap);
+}
 
 // LINE RENDERER 
 //------------------------------------------------------------------------------------------------------

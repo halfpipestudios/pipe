@@ -1,6 +1,7 @@
 #include "light_sys.h"
 #include "graphics_manager.h"
 #include "memory_manager.h"
+#include "mgr/shadowmap_manager.h"
 
 template <typename EM>
 void LightSys<EM>::Update(EM& em, Camera *camera) {
@@ -8,7 +9,7 @@ void LightSys<EM>::Update(EM& em, Camera *camera) {
     auto& lightComponents = em.GetComponents<LightCMP>();
 
     if(lightComponents.size <= 0){
-        GraphicsManager::Get()->UpdateLights(camera->pos, nullptr, 0);
+        GraphicsManager::Get()->UpdateLights(camera->pos, SHADOW_MAP_FAR_PLANE, nullptr, 0);
         return;
     }
 
@@ -18,6 +19,9 @@ void LightSys<EM>::Update(EM& em, Camera *camera) {
     MemoryManager::Get()->BeginTemporalMemory();
     Light *lightsToRender = (Light *)MemoryManager::Get()->AllocTemporalMemory(lightComponents.size * sizeof(Light), 8);
     i32 count = 0;
+    
+    ShadowMap *shadowMapsToRender = (ShadowMap *)MemoryManager::Get()->AllocTemporalMemory(lightComponents.size * sizeof(ShadowMap), 8);
+    i32 shadowMapCount = 0;
 
     for(i32 i = 0; i < lightComponents.size; i++) {
         LightCMP *lig = &lightComponents[i];
@@ -41,12 +45,20 @@ void LightSys<EM>::Update(EM& em, Camera *camera) {
         light->quadratic = lig->quadratic;
         light->cutOff = lig->cutOff;
         light->outerCutOff = lig->outerCutOff;
+ 
+        if(lig->type == LIGHT_TYPE_POINT && lig->haveSahdowMap) {
+            shadowMapsToRender[shadowMapCount] = *ShadowMapManager::Get()->Dereference(lig->shadowMap);
+            light->shadowMapIndex = shadowMapCount;
+            shadowMapCount++;
+        }
+
         count++;
         // TODO: only get the components closer to the player
         // for now we are going to get all 
     }
 
-    GraphicsManager::Get()->UpdateLights(camera->pos, lightsToRender, count);
+    GraphicsManager::Get()->BindShadowMaps(shadowMapsToRender, shadowMapCount);
+    GraphicsManager::Get()->UpdateLights(camera->pos, SHADOW_MAP_FAR_PLANE, lightsToRender, count);
 
     MemoryManager::Get()->EndTemporalMemory();
 

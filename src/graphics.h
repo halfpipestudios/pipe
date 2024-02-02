@@ -16,9 +16,13 @@ typedef void * IndexBuffer;
 typedef void * TextureBuffer;
 typedef void * FrameBuffer;
 typedef void * ParticleSystem;
+typedef void * ShadowMap;
 
 
 #include "asset_manager.h"
+
+#define SHADOW_MAP_RESOLUTION 1024
+#define SHADOW_MAP_FAR_PLANE 50.0f
 
 struct TexArray;
 
@@ -59,7 +63,7 @@ struct Light {
     f32 quadratic;
 
     f32 outerCutOff;
-    f32 pad0;
+    i32 shadowMapIndex;
     f32 pad1;
     f32 pad2;
 
@@ -78,6 +82,10 @@ struct CBLights {
     i32 count;
     Vec3 viewPos;
     Light lights[MAX_LIGHTS_COUNT];
+    f32 farPlane;
+    f32 pad0;
+    f32 pad1;
+    f32 pad2;
 };
 
 struct CBMaterial {
@@ -235,7 +243,7 @@ struct Graphics {
     // TODO: see if this affect performance
     virtual void SetMaterial(const Material& material) = 0;
 
-    virtual void UpdateLights(Vec3 cameraP, Light *lights, i32 count) = 0;
+    virtual void UpdateLights(Vec3 cameraP, f32 farPlane, Light *lights, i32 count) = 0;
 
 
     virtual void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) = 0;
@@ -251,6 +259,7 @@ struct Graphics {
     virtual TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) = 0;
     virtual void DestroyTextureBuffer(TextureBuffer textureBufferHandle) = 0;
     virtual void BindTextureBuffer(TextureBuffer textureBufferHandle) = 0;
+    virtual void BindTextureBufferToRegister(TextureBuffer textureBufferHandle, i32 reg) = 0;
 
     virtual void CopyFrameBuffer(FrameBuffer desHandle, FrameBuffer srcHandle) = 0;
     virtual FrameBuffer CreateWriteFrameBuffer(u32 x, u32 y, u32 width, u32 height) = 0;
@@ -276,6 +285,14 @@ struct Graphics {
 
     virtual void DrawLine(Vec3 a, Vec3 b, u32 color) = 0;
     virtual void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) = 0;
+
+    virtual void BindDepthBufferAsRenderTarget() = 0;
+    virtual void ReadDepthBuffer(u8 **buffer, size_t &size) = 0;
+
+    virtual ShadowMap CreateShadowMap(char *path) = 0;
+    virtual void BindShadowMap(ShadowMap shadowMapHandle) = 0;
+    virtual void BindShadowMaps(ShadowMap *shadowMapHandles, i32 count) = 0;
+    virtual void DestroyShadowMap(ShadowMap shadowMapHandle) = 0;
 
     ConstBuffer gpuLightsBuffer;
     CBLights    cpuLightsBuffer;

@@ -8,6 +8,7 @@
 #include "allocators.h"
 
 #include "d3d11_particle_sys.h"
+#include "d3d11_shadow_mapping.h"
 
 struct D3D11VertexBuffer {
     ID3D11Buffer *buffer;
@@ -38,8 +39,13 @@ struct D3D11FrameBuffer {
     ID3D11RenderTargetView   *renderTargetView;
     ID3D11ShaderResourceView *shaderResourceView;
     ID3D11DepthStencilView   *depthStencilView; 
-    
+
     D3D11TextureArray textureBuffer;
+};
+
+struct D3D11ShadowMap {
+    ID3D11Texture2D          *depthMap { nullptr };
+    ID3D11ShaderResourceView *depthMapSRV  { nullptr };
 };
 
 struct D3D11Shader {
@@ -184,7 +190,7 @@ struct D3D11Graphics : public Graphics {
 
     void SetMaterial(const Material& material) override;
 
-    void UpdateLights(Vec3 cameraP, Light *lights, i32 count) override;
+    void UpdateLights(Vec3 cameraP, f32 farPlane, Light *lights, i32 count) override;
 
     void SetAnimMatrices(Mat4 *finalTransformMatrices, u32 count) override;
 
@@ -199,6 +205,7 @@ struct D3D11Graphics : public Graphics {
     TextureBuffer CreateTextureBuffer(Texture *array, u32 textureCount) override;
     void DestroyTextureBuffer(TextureBuffer textureBufferHandle) override;
     void BindTextureBuffer(TextureBuffer textureBufferHandle) override;
+    void BindTextureBufferToRegister(TextureBuffer textureBufferHandle, i32 reg) override;
 
     void CopyFrameBuffer(FrameBuffer desHandle, FrameBuffer srcHandle) override;
     FrameBuffer CreateWriteFrameBuffer(u32 x, u32 y, u32 width, u32 height) override;
@@ -224,6 +231,15 @@ struct D3D11Graphics : public Graphics {
 
     void DrawLine(Vec3 a, Vec3 b, u32 color) override;
     void Draw2DBatch(D3D112DVertex *vertices, u32 vertexCount, u32 *indices, u32 indexCount) override;
+
+    void BindDepthBufferAsRenderTarget() override;
+    void ReadDepthBuffer(u8 **buffer, size_t &size) override;
+
+    ShadowMap CreateShadowMap(char *path) override;
+    void BindShadowMap(ShadowMap shadowMapHandle) override;
+    void BindShadowMaps(ShadowMap *shadowMapHandles, i32 count) override;
+    void DestroyShadowMap(ShadowMap shadowMapHandle) override;
+
 private:
 
     //ObjectAllocator<D3D11Shader> shadersStorage;
@@ -236,9 +252,11 @@ private:
     ObjectAllocator<D3D11IndexBuffer> indexBufferStorage;
     ObjectAllocator<D3D11FrameBuffer> frameBufferStorage;
     ObjectAllocator<D3D11ParticleSystem> particleSystemStoraget;
+    ObjectAllocator<D3D11ShadowMap> shadowMapStoraget;
 
     D3D11LineRenderer lineRenderer;
     D3D11BatchRenderer batchRenderer;
+    D3D11ShadowMappingBuilder shadowMappingBuilder;
 
 
 };

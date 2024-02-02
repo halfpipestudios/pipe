@@ -8,6 +8,11 @@
 #define MAX_MODEL_NAME 32
 #define MAX_SHADER_NAME 32
 
+enum GraphicsCMPType {
+    GRAPHIC_CMP_TYPE_STATIC,
+    GRAPHIC_CMP_TYPE_DYNAMIC
+};
+
 struct GraphicsCMP : CMP<GraphicsCMP> {
     
     void Initialize(char *name, char *vName, char *fName) {
@@ -29,15 +34,16 @@ struct GraphicsCMP : CMP<GraphicsCMP> {
     char vShaderName[MAX_SHADER_NAME];
     char fShaderName[MAX_SHADER_NAME];
 
-    bool active { true }; 
+    bool active { true };  
+    GraphicsCMPType type { GRAPHIC_CMP_TYPE_DYNAMIC };
 
     void Serialize(Serializer *s) override {
         WriteBeginObject(s, "graphics");
         Write(s, "model", modelName);
         Write(s, "vshader", vShaderName);
         Write(s, "fshader", fShaderName);
-        // TODO: ...
-        //Write(s, "active", (i32)active);
+        Write(s, "type", (i32)type);
+        Write(s, "active", (i32)active);
         WriteEndObject(s);
     };
     
@@ -50,8 +56,8 @@ struct GraphicsCMP : CMP<GraphicsCMP> {
         Read(t, "model", modelName_, MAX_MODEL_NAME);
         Read(t, "vshader", vShaderName_, MAX_SHADER_NAME);
         Read(t, "fshader", fShaderName_, MAX_SHADER_NAME);
-        // TODO: ...
-        //Read(t, "active", (i32 *)&active);
+        Read(t, "type", &(i32)type);
+        Read(t, "active", (i32 *)&active);
         ReadEndObject(t);
 
         Initialize(modelName_, vShaderName_, fShaderName_);
