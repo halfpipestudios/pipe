@@ -23,7 +23,7 @@ struct PhysicsCMP : CMP<PhysicsCMP> {
 
     PhysicsState physics     { };
     PhysicsState lastPhysics { };
-    Vec3 velXZ               { };
+    //Vec3 velXZ               { };
     Vec3 viewDir             { };
 
 

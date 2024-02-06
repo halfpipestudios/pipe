@@ -14,15 +14,12 @@ void AiSys<EM>::Update(EM& em, f32 dt) {
         
         if(phy == nullptr) continue;
 
-        if(ai->bhTree) {
-            BehaviorNodeContex contx;
-            contx.entityKey = ai->entityKey;
-            contx.phyComp = phy;
-            contx.aiComp = ai;
-            ai->bhTree->run(&contx);
-            continue;
-        }
-        
+        BehaviorNodeContex contx;
+        contx.entityKey = ai->entityKey;
+        contx.phyComp = phy;
+        contx.aiComp = ai;
+        ai->bhTree.run(&contx);
+#if 0 
         Steering steering = {};
 
         switch(ai->behavior) {
@@ -34,6 +31,7 @@ void AiSys<EM>::Update(EM& em, f32 dt) {
         
         phy->physics.acc += steering.linear;
         phy->physics.angularVel += steering.angular;
+#endif
         
     }
 

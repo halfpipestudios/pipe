@@ -50,7 +50,7 @@ void GS(point Particle gin[1],
     gin[0].age += timeStep;
     if(gin[0].type == PT_EMITTER) {
         // time to emit a new particle?
-        if(gin[0].age > 0.005f) { 
+        if(gin[0].age > 0.016f) { 
             float3 vRandom = RandomUnitVec3(0.0f);
             vRandom.x *= 0.25f;
             vRandom.y *= 0.25f;

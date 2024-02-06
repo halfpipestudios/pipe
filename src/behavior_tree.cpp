@@ -9,12 +9,8 @@
 #include <memory>
 
 // BehaviorTree -------------------------------------------------------------
-void BehaviorTree::Initialize(size_t bufferSize_) {
-    bufferSize = bufferSize_;
-    buffer = (u8 *)MemoryManager::Get()->AllocStaticMemory(bufferSize, 1);
+void BehaviorTree::Initialize() {
     current_ptr = buffer + bufferSize;
-
-    nodes = (BehaviorNode **)MemoryManager::Get()->AllocStaticMemory(BEHAVIOR_TREE_MAX_NODES * sizeof(BehaviorNode *), 1);
 }
 
 
@@ -29,7 +25,9 @@ BehaviorStatus BehaviorTree::run(BehaviorNodeContex *contx) {
 // BehaviorNodes -------------------------------------------------------------
 
 // BehaviorArrive
-BehaviorArrive::BehaviorArrive(Vec3 t) : target(t) {}
+BehaviorArrive::BehaviorArrive(Vec3 t) : target(t) {
+    type = BEHAVIOR_NODE_TYPE_ARRIVE;
+}
 
 
 BehaviorStatus BehaviorArrive::run(BehaviorNodeContex *contx) {
@@ -46,6 +44,7 @@ BehaviorStatus BehaviorArrive::run(BehaviorNodeContex *contx) {
 // BehaviorSequence
 BehaviorSequence::BehaviorSequence(std::initializer_list<BehaviorNode *> ls) {
     ASSERT(ls.size() <= BEHAVIOR_NODE_MAX_CHILDS);
+    type = BEHAVIOR_NODE_TYPE_SEQUENCE;
     nodesCount = ls.size();
     memcpy(nodes, ls.begin(), sizeof(BehaviorNode *) * ls.size());
 }
@@ -69,10 +68,10 @@ BehaviorStatus BehaviorSequence::run(BehaviorNodeContex *contx) {
     return BEHAVIOR_RUNNING;
 }
 
-
 // BehaviorSelector
 BehaviorSelector::BehaviorSelector(std::initializer_list<BehaviorNode *> ls) {
     ASSERT(ls.size() <= BEHAVIOR_NODE_MAX_CHILDS);
+    type = BEHAVIOR_NODE_TYPE_SELECTOR;
     nodesCount = ls.size();
     memcpy(nodes, ls.begin(), sizeof(BehaviorNode *) * ls.size());
 }
@@ -80,4 +79,50 @@ BehaviorSelector::BehaviorSelector(std::initializer_list<BehaviorNode *> ls) {
 BehaviorStatus BehaviorSelector::run(BehaviorNodeContex *contx) {
     // TODO: ....
     return {};
+}
+
+void BehaviorTree::Serialize(Serializer *s) {
+    WriteBeginObject(s, "behavorTree");
+    nodes[nodesCount - 1]->Serialize(s);
+    WriteEndObject(s);
+}
+
+void BehaviorTree::Deserialize(Tokenizer *t) {
+    ReadBeginObject(t, "behavorTree");
+    DeserializeNode(t);
+    ReadEndObject(t);
+}
+
+
+BehaviorNode *BehaviorTree::DeserializeNode(Tokenizer *t) {
+    BehaviorNode *node = nullptr;
+    BehaviorNodeType type;
+    ReadBeginObject(t, "node");
+    Read(t, "type", &(i32)type);
+    switch(type) {
+        case BEHAVIOR_NODE_TYPE_ARRIVE: {
+
+            Vec3 target;
+            Read(t, "target", &target);
+            node = AddNode<BehaviorArrive>(target);
+
+        } break;
+        case BEHAVIOR_NODE_TYPE_SEQUENCE: {
+
+            i32 nodeCount;
+            Read(t, "node_count", &nodeCount);
+            BehaviorNode *tmpNodes[BEHAVIOR_NODE_MAX_CHILDS];
+            for(i32 i = 0; i < nodeCount; i++) {
+                tmpNodes[i] = DeserializeNode(t);
+            }
+            node = AddNode<BehaviorSequence>(std::initializer_list(&tmpNodes[0], &tmpNodes[nodeCount]));
+
+        } break; 
+        case BEHAVIOR_NODE_TYPE_SELECTOR: {
+            // TODO: ...
+        } break;
+    }
+    ReadEndObject(t);
+    ASSERT(node != nullptr);
+    return node;
 }

@@ -95,8 +95,6 @@ struct Level : Serializable {
     Array<SlotmapKey> entities;
     FrameArray<SlotmapKey> entitiesToRemove;
  
-    BehaviorTree bhTree;
-
     f32 gameTime { 0 };
 
 private:

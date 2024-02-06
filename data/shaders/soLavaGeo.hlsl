@@ -50,7 +50,7 @@ void GS(point Particle gin[1],
     gin[0].age += timeStep;
     if(gin[0].type == PT_EMITTER) {
         // time to emit a new particle?
-        if(gin[0].age > 0.002f) {
+        if(gin[0].age > 0.016f) {
 
             for(int i = 0; i < 5; ++i) {
 

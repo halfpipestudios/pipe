@@ -361,9 +361,6 @@ static SlotmapKey CreateDirLight(char *name, Vec3 pos) {
 }
 
 
-
-
-
 bool Level::DeleteEntity(SlotmapKey entityKey) {
     entitiesToRemove.Push(entityKey);
     return true;
@@ -405,16 +402,7 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     entities.Initialize(ENTITY_ARRAY_MAX_SIZE);
     EntityManager::Get()->Initialize();
     AddTypesToEntityManager();
-
-    // Load the BehaviorTree
-    bhTree.Initialize();
-    bhTree.AddNode<BehaviorSequence>(
-        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0,  8)),
-        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0,  8)),
-        bhTree.AddNode<BehaviorArrive>(Vec3( -8, 0, -6)),
-        bhTree.AddNode<BehaviorArrive>(Vec3(  8, 0, -6))
-    );
-    
+ 
     printf("deserializing level!! ...\n");
 
     Tokenizer t;
@@ -427,12 +415,12 @@ void Level::Initialize(char *levelPath, Camera *camera) {
     gBlackBoard.target = &heroTransform->pos;
 
 
-    //entities.Push(CreatePointLight("point_light4", Vec3(0, 6, 18))); 
+    //entities.Push(CreateDirLight("dir_light", Vec3(0, 6, 3)));     
+    //entities.Push(CreateMovingPlatform("vert", Vec3(2, 0.5f, 2), Vec3(-3, 0, 150), Vec3(-3, 10, 150)));
     /*
     entities.Push(CreatePointLight("point_light1", Vec3(0, 6, 9))); 
     entities.Push(CreatePointLight("point_light2", Vec3(0, 6, 18))); 
     
-    entities.Push(CreateDirLight("dir_light", Vec3(0, 6, 3)));     
     */
 }
 

@@ -66,7 +66,6 @@ int main() {
         i32 w = PlatformManager::Get()->GetWindow()->GetWidth(); 
         i32 h = PlatformManager::Get()->GetWindow()->GetHeight(); 
         GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(60, (f32)w/(f32)h, 0.01f, 1000.0f));
-        //GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(90, (f32)w/(f32)h, 1.0f, 25.0f));
         GraphicsManager::Get()->SetSamplerState(SAMPLER_STATE_LINEAR);
         GraphicsManager::Get()->SetViewport(0, 0, w, h);
         GraphicsManager::Get()->BindFrameBuffer(nullptr);
@@ -83,7 +82,7 @@ int main() {
             game.Render();
         }
         GraphicsManager::Get()->FlushFrameBuffer(nullptr);
-        GraphicsManager::Get()->Present(1);
+        GraphicsManager::Get()->Present(0);
         game.EndFrame(deltaTime);
     }
 

@@ -210,8 +210,8 @@ void D3D11Graphics::Initialize() {
     deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
     deviceContext->RSSetState(fillRasterizerCullBack);
     deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
-    //deviceContext->PSSetSamplers(1, 1, &samplerStatePoint);
-    deviceContext->PSSetSamplers(1, 1, &samplerStateLinear);
+    deviceContext->PSSetSamplers(1, 1, &samplerStatePoint);
+    //deviceContext->PSSetSamplers(1, 1, &samplerStateLinear);
     deviceContext->GSSetSamplers(0, 1, &samplerStateLinear);
 
     cpuMatrices.proj = Mat4();

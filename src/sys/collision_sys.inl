@@ -39,16 +39,34 @@ void CollisionSys<EM>::ProcessCylinderMap(EM& em, CollisionCMP *collider, Physic
         }
     }
 
-    Segment groundSegment;
-    
+    Cylinder groundCylinder;
+    groundCylinder.c = collider->cylinder.c - Vec3(0, collider->cylinder.n, 0);
+    groundCylinder.u = Vec3(0, 1, 0);
+    groundCylinder.radii = 0.29f;
+    groundCylinder.n = 0.1f;
+    bool colliding = false;
+    for(u32 i = 0; i < map->covexHulls.count; ++i) {
+        ConvexHull *hull = &map->covexHulls.data[i];
+        CollisionData collisionData = gjk.IntersectFast(hull, &groundCylinder);
+        if(collisionData.hasCollision) {
+            colliding = true;
+            break;
+        }
+    }
+    if(colliding) {
+        entity->AddFlag(ENTITY_GROUNDED);
+    }
+
+#if 0
+    Segment groundSegment; 
     Vec3 lastVelXZ = Vec3(phy->physics.vel.x, 0.0f, phy->physics.vel.z);
-    
     if(lastVelXZ.LenSq() > 0.0f) {
         phy->velXZ = lastVelXZ.Normalized();
     }
 
     groundSegment.a = collider->cylinder.c - (phy->velXZ * (collider->cylinder.radii + 0.05f));
     groundSegment.b = groundSegment.a + Vec3(0, -(collider->cylinder.n + 0.01f), 0);
+
     for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -59,6 +77,8 @@ void CollisionSys<EM>::ProcessCylinderMap(EM& em, CollisionCMP *collider, Physic
 
     groundSegment.a = collider->cylinder.c;
     groundSegment.b = groundSegment.a + Vec3(0, -(collider->cylinder.n + 0.01f), 0);
+
+    GraphicsManager::Get()->DrawLine(groundSegment.a, groundSegment.b, 0xFFFF0000);
     for(u32 i = 0; i < map->entities.count; ++i) {
         MapImporter::Entity *mapEntity = &map->entities.data[i];
         f32 t = -1.0f;
@@ -66,6 +86,7 @@ void CollisionSys<EM>::ProcessCylinderMap(EM& em, CollisionCMP *collider, Physic
             entity->AddFlag(ENTITY_GROUNDED);
         }
     }
+#endif
 
 }
 
@@ -81,7 +102,53 @@ void CollisionSys<EM>::ProcessCylinderColliders(EM& em, CollisionCMP *collider, 
         // not collide with itself ...
         if(collider == otherCollider) continue;
         if(otherCollider->active == false) continue;
+ 
+        CollisionData collisionData = {};
+        switch(otherCollider->type) {
+            case COLLIDER_CYLINDER_: {
+                collisionData = gjk.Intersect(&otherCollider->cylinder, &collider->cylinder);
+            } break;
+            case COLLIDER_CONVEXHULL_: {
+                collisionData = gjk.Intersect(&otherCollider->poly3D.convexHull, &collider->cylinder);
+            } break;
+        }
 
+        if(collisionData.hasCollision) {
+            entity->AddFlag(ENTITY_COLLIDING);
+            f32 penetration = collisionData.penetration;
+            Vec3 normal = collisionData.normal;
+            phy->physics.pos += normal * penetration; 
+            phy->physics.vel -= phy->physics.vel.Dot(normal)*normal;
+            collider->cylinder.c = phy->physics.pos;
+        }
+
+        Cylinder groundCylinder;
+        groundCylinder.c = collider->cylinder.c - Vec3(0, collider->cylinder.n, 0);
+        groundCylinder.u = Vec3(0, 1, 0);
+        groundCylinder.radii = 0.29f;
+        groundCylinder.n = 0.1f;
+
+        switch(otherCollider->type) {
+            case COLLIDER_CYLINDER_: {
+                collisionData = gjk.IntersectFast(&otherCollider->cylinder, &groundCylinder);
+            } break;
+            case COLLIDER_CONVEXHULL_: {
+                collisionData = gjk.IntersectFast(&otherCollider->poly3D.convexHull, &groundCylinder);
+            } break;
+        }
+
+        if(collisionData.hasCollision) {
+            entity->AddFlag(ENTITY_GROUNDED);
+            // TODO: move this to other place
+            // move the player realtive to the platofrm position
+            MovingPlatformCMP *movPlatComp = em.GetComponent<MovingPlatformCMP>(otherCollider->entityKey);
+            if(movPlatComp != nullptr) {
+                phy->physics.pos  = phy->physics.pos + movPlatComp->movement;
+                collider->cylinder.c = phy->physics.pos;
+            }
+        }
+
+#if 0
 
         Vec3 lastVelXZ = Vec3(phy->physics.vel.x, 0.0f, phy->physics.vel.z);
         if(lastVelXZ.LenSq() > 0.0f) {
@@ -95,25 +162,6 @@ void CollisionSys<EM>::ProcessCylinderColliders(EM& em, CollisionCMP *collider, 
         Segment centerGroundSegment;
         centerGroundSegment.a = collider->cylinder.c;
         centerGroundSegment.b = centerGroundSegment.a + Vec3(0, -(collider->cylinder.n + 0.1f), 0);
- 
-        CollisionData collisionData = {};
-        switch(otherCollider->type) {
-            case COLLIDER_CYLINDER_: {
-                collisionData = gjk.Intersect(&otherCollider->cylinder, &collider->cylinder);
-            } break;
-            case COLLIDER_CONVEXHULL_: {
-                collisionData = gjk.Intersect(&otherCollider->poly3D.convexHull, &collider->cylinder);
-            }
-        }
-
-        if(collisionData.hasCollision) {
-            entity->AddFlag(ENTITY_COLLIDING);
-            f32 penetration = collisionData.penetration;
-            Vec3 normal = collisionData.normal;
-            phy->physics.pos += normal * penetration; 
-            phy->physics.vel -= phy->physics.vel.Dot(normal)*normal;
-            collider->cylinder.c = phy->physics.pos;
-        }
 
         f32 t = -1.0f;
         if(groundSegment.HitCollider(otherCollider, &t) ||
@@ -128,6 +176,7 @@ void CollisionSys<EM>::ProcessCylinderColliders(EM& em, CollisionCMP *collider, 
                 collider->cylinder.c = phy->physics.pos;
             }
         }
+#endif
     }
 
 }

@@ -142,8 +142,7 @@ float ShadowCalculation(Light light, float3 fragPos, float3 lightDir, float3 nor
 
     closestDepth *= farPlane;
     float currentDepth = length(fragToLight);
-    float bias = 0.05f;
-    //float bias = max(0.6f * (1.0 - dot(normal, lightDir)), 0.005);
+    float bias = max(0.8f * (1.0f - dot(normal, lightDir)), 0.15f);
     float shadow = currentDepth - bias > closestDepth ? 1.0f : 0.0f;
     return shadow;
 }
@@ -198,7 +197,6 @@ float4 fs_main(PS_Input i) : SV_TARGET {
 
     float3 result = float3(0.0f, 0.0f, 0.0f);
 
-    [loop]
     for(int index = 0; index < count; index++) {
         Light light = lights[index];
         switch(light.type) {
