@@ -21,7 +21,7 @@ typedef void * ShadowMap;
 
 #include "asset_manager.h"
 
-#define SHADOW_MAP_RESOLUTION 1024
+#define SHADOW_MAP_RESOLUTION 2048
 #define SHADOW_MAP_FAR_PLANE 50.0f
 
 struct TexArray;
@@ -204,6 +204,7 @@ struct Graphics {
     virtual void ResizeBuffers() = 0;
 
     virtual void SetRasterizerState(RasterizerState state) = 0;
+    virtual void SetShadowMappingRasterState() = 0;
     virtual void SetDepthStencilState(bool value) = 0;
     virtual void SetDepthStencilWriteZeroState(bool value) = 0;
     virtual void SetAlphaBlendState(bool value) = 0;

@@ -134,6 +134,7 @@ struct D3D11Graphics : public Graphics {
     ID3D11RasterizerState* fillRasterizerCullBack;
     ID3D11RasterizerState* fillRasterizerCullFront;
     ID3D11RasterizerState* fillRasterizerCullNone;
+    ID3D11RasterizerState* shadowMappingRasterState;
     ID3D11DepthStencilState* depthStencilOn;
     ID3D11DepthStencilState* depthStencilOff;
     ID3D11DepthStencilState* depthStencilOnWriteMaskZero;
@@ -142,6 +143,7 @@ struct D3D11Graphics : public Graphics {
     ID3D11BlendState* additiveBlending; 
     ID3D11SamplerState *samplerStateLinear;
     ID3D11SamplerState *samplerStatePoint;
+    ID3D11SamplerState *samplerShadowMap;
 
     void Initialize() override;
     void Terminate() override;
@@ -149,6 +151,7 @@ struct D3D11Graphics : public Graphics {
     void ResizeBuffers() override;
 
     void SetRasterizerState(RasterizerState state) override;
+    void SetShadowMappingRasterState() override;
     
     void SetDepthStencilState(bool value) override;
     void SetDepthStencilWriteZeroState(bool value) override;

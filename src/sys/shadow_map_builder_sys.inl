@@ -55,8 +55,8 @@ void ShadowMapBuilderSys<EM>::GenerateSahdowMaps(EM& em, Level *level) {
 
     i32 w = SHADOW_MAP_RESOLUTION; 
     i32 h = SHADOW_MAP_RESOLUTION;
-    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(90, (f32)w/(f32)h, 1.0f, SHADOW_MAP_FAR_PLANE));
-    GraphicsManager::Get()->SetRasterizerState(RASTERIZER_STATE_CULL_BACK);
+    GraphicsManager::Get()->SetProjMatrix(Mat4::Perspective(90, (f32)w/(f32)h, 0.5f, SHADOW_MAP_FAR_PLANE));
+    GraphicsManager::Get()->SetShadowMappingRasterState();
     ///////////////////////////////////////////////////////////////////////////////////////////
  
 

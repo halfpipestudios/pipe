@@ -142,8 +142,7 @@ float ShadowCalculation(Light light, float3 fragPos, float3 lightDir, float3 nor
 
     closestDepth *= farPlane;
     float currentDepth = length(fragToLight);
-    float bias = max(0.8f * (1.0f - dot(normal, lightDir)), 0.15f);
-    float shadow = currentDepth - bias > closestDepth ? 1.0f : 0.0f;
+    float shadow = currentDepth - 0.005f > closestDepth ? 1.0f : 0.0f;
     return shadow;
 }
 

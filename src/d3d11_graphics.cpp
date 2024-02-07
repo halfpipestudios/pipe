@@ -185,6 +185,22 @@ void D3D11Graphics::Initialize() {
     wireFrameRasterizerDesc.MultisampleEnable = true;
     device->CreateRasterizerState(&wireFrameRasterizerDesc, &wireFrameRasterizer);
 
+    D3D11_RASTERIZER_DESC shadowMappingRasterDesc;
+    shadowMappingRasterDesc.FillMode = D3D11_FILL_SOLID;;
+    shadowMappingRasterDesc.CullMode = D3D11_CULL_BACK;
+    shadowMappingRasterDesc.FrontCounterClockwise = false;
+    shadowMappingRasterDesc.DepthBias = 0; 
+    shadowMappingRasterDesc.DepthBiasClamp = 0.0f;
+    shadowMappingRasterDesc.SlopeScaledDepthBias = 0.0f;
+    shadowMappingRasterDesc.DepthClipEnable = true;
+    shadowMappingRasterDesc.ScissorEnable = false;
+    shadowMappingRasterDesc.MultisampleEnable = true;
+    shadowMappingRasterDesc.AntialiasedLineEnable = true;
+    result = device->CreateRasterizerState(&shadowMappingRasterDesc, &shadowMappingRasterState);
+    if(FAILED(result)) {
+        i32 StopHEre = 0;
+    }
+
    // Create Sampler State
     D3D11_SAMPLER_DESC colorMapDesc = {};
     // D3D11_TEXTURE_ADDRESS_CLAMP; D3D11_TEXTURE_ADDRESS_WRAP;
@@ -205,14 +221,33 @@ void D3D11Graphics::Initialize() {
         ASSERT(!"INVALID_CODE_PATH");
     }
 
+    D3D11_SAMPLER_DESC samplerShadowMapDesc;
+    // D3D11_TEXTURE_ADDRESS_CLAMP; D3D11_TEXTURE_ADDRESS_WRAP;
+    //samplerShadowMapDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    samplerShadowMapDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    samplerShadowMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER; 
+    samplerShadowMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER; 
+    samplerShadowMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER; 
+    samplerShadowMapDesc.BorderColor[0] = 0.0f;
+    samplerShadowMapDesc.BorderColor[1] = 0.0f;
+    samplerShadowMapDesc.BorderColor[2] = 0.0f;
+    samplerShadowMapDesc.BorderColor[3] = 0.0f;
+    samplerShadowMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    if(FAILED(device->CreateSamplerState(&samplerShadowMapDesc, &samplerShadowMap))) {
+        printf("Error: Failed Creating sampler shadow map\n");
+        ASSERT(!"INVALID_CODE_PATH");
+    }
+
     deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
     deviceContext->OMSetDepthStencilState(depthStencilOn, 1);
     deviceContext->OMSetBlendState(alphaBlendEnable, 0, 0xffffffff);
     deviceContext->RSSetState(fillRasterizerCullBack);
     deviceContext->PSSetSamplers(0, 1, &samplerStatePoint);
-    deviceContext->PSSetSamplers(1, 1, &samplerStatePoint);
-    //deviceContext->PSSetSamplers(1, 1, &samplerStateLinear);
     deviceContext->GSSetSamplers(0, 1, &samplerStateLinear);
+    
+    deviceContext->PSSetSamplers(1, 1, &samplerShadowMap);
+    //deviceContext->PSSetSamplers(1, 1, &samplerStatePoint);
+    //deviceContext->PSSetSamplers(1, 1, &samplerStateLinear);
 
     cpuMatrices.proj = Mat4();
     cpuMatrices.view = Mat4();
@@ -255,6 +290,7 @@ void  D3D11Graphics::Terminate() {
     if(fillRasterizerCullBack) fillRasterizerCullBack->Release();
     if(fillRasterizerCullFront) fillRasterizerCullFront->Release();
     if(fillRasterizerCullNone) fillRasterizerCullNone->Release();
+    if(shadowMappingRasterState) shadowMappingRasterState->Release();
     if(depthStencilOn) depthStencilOn->Release();
     if(depthStencilOff) depthStencilOff->Release();
     if(depthStencilOnWriteMaskZero) depthStencilOnWriteMaskZero->Release();
@@ -263,6 +299,7 @@ void  D3D11Graphics::Terminate() {
     if(additiveBlending) additiveBlending->Release();
     if(samplerStatePoint) samplerStatePoint->Release();
     if(samplerStateLinear) samplerStateLinear->Release();
+    if(samplerShadowMap) samplerShadowMap->Release();
 
     DestroyConstBuffer(gpuMatrices);
     DestroyConstBuffer(gpuAnimMatrices);
@@ -347,6 +384,10 @@ void  D3D11Graphics::SetRasterizerState(RasterizerState state) {
             deviceContext->RSSetState(wireFrameRasterizer);
         } break;
     }
+}
+
+void D3D11Graphics::SetShadowMappingRasterState() {
+    deviceContext->RSSetState(shadowMappingRasterState);
 }
 
 

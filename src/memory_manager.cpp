@@ -12,7 +12,7 @@ MemoryStorage *MemoryManager::Get() {
 /*----------------------------------*/
 
 void MemoryStorage::Initialize() {
-    memory.Initialize(MB(128));
+    memory.Initialize(GB(1));
     frame.Initialize(MB(10));
     lastMark = (u64)memory.bottom;
 }

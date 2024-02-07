@@ -82,7 +82,7 @@ int main() {
             game.Render();
         }
         GraphicsManager::Get()->FlushFrameBuffer(nullptr);
-        GraphicsManager::Get()->Present(0);
+        GraphicsManager::Get()->Present(1);
         game.EndFrame(deltaTime);
     }
 
